@@ -1,17 +1,17 @@
 {
   "author": "",
-  "name": "orangutan-chimpanzee",
+  "name": "phon",
+  "description": "Social sound synthesis",
   "version": "0.0.0",
   "repository": {
-    "url": ""
+    "type": "git",
+    "url": "git://github.com/nko2/orangutan-chimpanzee.git"
   },
   "engines": {
-    "node": "~0.4.11"
+    "node": "~v0.4.11"
   },
-  "dependencies": {},
-  "devDependencies": {},
-  "scripts": {
-    "start": "node server.js"
+  "dependencies": {
+    "nko": "~0.1.1"
   },
-  "description": "Node KO entry"
+  "devDependencies": {}
 }
