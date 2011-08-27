@@ -1,6 +1,11 @@
 
 #wrapper-start.coffee
 
+window.Phon = {}
+	
+Phon.Properties =
+	tick: 200
+
 #Constants
 NUM_ROWS	= 10
 NUM_COLS	= 10
@@ -16,4 +21,3 @@ particle_color = "#cc0000"
 
 log = (msg) ->
 	console.log msg
-

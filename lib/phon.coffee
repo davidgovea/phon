@@ -1,6 +1,11 @@
 
 #wrapper-start.coffee
 
+window.Phon ?= {}
+	
+Phon.Properties =
+	tick: 200
+
 #Constants
 NUM_ROWS	= 10
 NUM_COLS	= 10
@@ -16,8 +21,6 @@ particle_color = "#cc0000"
 
 log = (msg) ->
 	console.log msg
-
-
 # Vector.coffee - grid stuff
 
 Raphael.fn.octagon = (x, y, side, side_rad) ->
@@ -386,9 +389,7 @@ collide = (sums, particles) ->
 					dirs = [[2, 8], [1, 4]].shuffle().shift().shuffle()
 
 $ ->
-	
-	window.Phon ?= {}
-	
+		
 	Module = class extends Backbone.Model
 		
 		defaults:
@@ -396,14 +397,13 @@ $ ->
 		
 	Modules = {}
 
-	window.Phon.Properties =
-		tick: 200	
+		
 			
 	Modules.Global = class extends Module
 		
 		initialize: ->
 			@gui = new DAT.GUI
-			@gui.add(window.Phon.Properties, 'tick').min(0).max(300)
+			@gui.add(Phon.Properties, 'tick').min(0).max(300)
 	
 	window.Sidebar = class extends Backbone.View
 	
