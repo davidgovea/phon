@@ -24,6 +24,7 @@ Raphael.fn.octogrid = (x, y, rows, cols, width) ->
 		onClick: (evt) =>
 			#catshirt - hook in here
 			log cells["#{@row}_#{@col}_1"]
+			cells["#{@row}_#{@col}_1"].select()
 		onDblClick: (evt) =>
 			log "dblclick #{@row},#{@col}"
 

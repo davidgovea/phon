@@ -12,7 +12,8 @@ cell_colors	= {
 	1: "#d1d1d1"
 	2: "#00bb00"
 }
-particle_color = "#cc0000"
+particle_color	= "#cc0000"
+select_color	= "#0000ff"
 
 log = (msg) ->
 	console.log msg

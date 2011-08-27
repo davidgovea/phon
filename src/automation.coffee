@@ -70,6 +70,13 @@ class Cell
 	activate: ->
 	deactivate: ->
 	setInstrument: (parameters) ->
+	select: (state=true) ->
+		if state
+			if cells.selected? then cells.selected.select(false)
+			@shape.attr stroke: select_color, 'stroke-width': 3
+			cells.selected = @
+		else
+			@shape.attr stroke: "#000", 'stroke-width': 1
 	activate: ->
 		#phon.activate @row, @col
 		# show activation pending cell state (until server responds & sets)
@@ -139,7 +146,7 @@ iterate = ->
 		else
 			particle.move()
 			occupied.add(particle)
-			
+
 	if toKill.length > 0
 		toKill.forEach((p) ->
 			particles.splice(particles.indexOf(p), 1)

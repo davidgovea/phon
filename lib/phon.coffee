@@ -12,7 +12,8 @@ cell_colors	= {
 	1: "#d1d1d1"
 	2: "#00bb00"
 }
-particle_color = "#cc0000"
+particle_color	= "#cc0000"
+select_color	= "#0000ff"
 
 log = (msg) ->
 	console.log msg
@@ -43,6 +44,7 @@ Raphael.fn.octogrid = (x, y, rows, cols, width) ->
 		onClick: (evt) =>
 			#catshirt - hook in here
 			log cells["#{@row}_#{@col}_1"]
+			cells["#{@row}_#{@col}_1"].select()
 		onDblClick: (evt) =>
 			log "dblclick #{@row},#{@col}"
 
@@ -202,6 +204,13 @@ class Cell
 	activate: ->
 	deactivate: ->
 	setInstrument: (parameters) ->
+	select: (state=true) ->
+		if state
+			if cells.selected? then cells.selected.select(false)
+			@shape.attr stroke: select_color, 'stroke-width': 3
+			cells.selected = @
+		else
+			@shape.attr stroke: "#000", 'stroke-width': 1
 	activate: ->
 		#phon.activate @row, @col
 		# show activation pending cell state (until server responds & sets)
@@ -271,7 +280,7 @@ iterate = ->
 		else
 			particle.move()
 			occupied.add(particle)
-			
+
 	if toKill.length > 0
 		toKill.forEach((p) ->
 			particles.splice(particles.indexOf(p), 1)
