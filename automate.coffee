@@ -66,6 +66,22 @@ class Particle
 
 class Cell
 	constructor: (@row, @col, @state) ->
+	split: false
+	walls: 0
+	active: false
+
+class StateHash
+	@constructor: ->
+		@h = {}
+	add: (particle) ->
+		index = "#{particle.row}_#{particle.col}_#{particle.state}"
+		if not @h[index]
+			@h[index]			= cells[index]
+			@h[index].particles	= []
+			@h[index].sums		= [0,0]
+		@h[index].sums[particle.excited - 1] += particle.direction
+		@h[index].particles.push(particle)
+
 
 
 init = ->
@@ -74,3 +90,8 @@ init = ->
 			cells["#{row}_{col}_1"] = new Cell row, col, 1
 			unless row is NUM_ROWS or col is NUM_COLS
 				cells["#{row}_#{col}_2"] = new Cell row, col, 2
+
+iterate = ->
+
+
+collide = (sums, particles) ->
