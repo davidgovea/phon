@@ -12,8 +12,8 @@ doLoop = ->
 	o.this.forEach((index)->
 		cells[index].occupy true
 	)
-	setTimeout doLoop, 50
-	# console.timeEnd 'loop'
+	setTimeout doLoop, Phon.Properties.tick
+	console.timeEnd 'loop'
 
 
 

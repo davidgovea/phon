@@ -1,10 +1,17 @@
 $ ->
-	
+		
 	Module = class extends Backbone.Model
 		
 		defaults:
-			
 			closed: true
+		
+	Modules = {}
+
+	Modules.Global = class extends Module
+		
+		initialize: ->
+			@gui = new DAT.GUI
+			@gui.add(Phon.Properties, 'tick').min(0).max(300)
 	
 	window.Sidebar = class extends Backbone.View
 	
@@ -17,11 +24,9 @@ $ ->
 			_.bindAll this
 			$('.module', @el).each ->
 				$module = $(this)
-				$module.data 'model', new Module
-				test = x: 10
-				gui = new DAT.GUI()
-				gui.add(test, 'x').min(0).max(10)
-				$('.content', $module).append gui.domElement
+				module = new Modules[$module.attr 'data-module']
+				$module.data 'model', module
+				$('.content', $module).append module.gui.domElement
 				
 		
 		toggle_content: (e) ->

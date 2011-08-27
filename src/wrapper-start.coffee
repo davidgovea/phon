@@ -1,6 +1,11 @@
 
 #wrapper-start.coffee
 
+window.Phon = {}
+	
+Phon.Properties =
+	tick: 200
+
 #Constants
 NUM_ROWS	= 10
 NUM_COLS	= 10
@@ -17,4 +22,3 @@ select_color	= "#0000ff"
 
 log = (msg) ->
 	console.log msg
-

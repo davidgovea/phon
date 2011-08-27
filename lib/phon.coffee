@@ -1,6 +1,11 @@
 
 #wrapper-start.coffee
 
+window.Phon ?= {}
+	
+Phon.Properties =
+	tick: 200
+
 #Constants
 NUM_ROWS	= 10
 NUM_COLS	= 10
@@ -17,8 +22,6 @@ select_color	= "#0000ff"
 
 log = (msg) ->
 	console.log msg
-
-
 # Vector.coffee - grid stuff
 
 Raphael.fn.octagon = (x, y, side, side_rad) ->
@@ -399,12 +402,21 @@ collide = (sums, particles) ->
 					dirs = [[2, 8], [1, 4]].shuffle().shift().shuffle()
 
 $ ->
-	
+		
 	Module = class extends Backbone.Model
 		
 		defaults:
-			
 			closed: true
+		
+	Modules = {}
+
+		
+			
+	Modules.Global = class extends Module
+		
+		initialize: ->
+			@gui = new DAT.GUI
+			@gui.add(Phon.Properties, 'tick').min(0).max(300)
 	
 	window.Sidebar = class extends Backbone.View
 	
@@ -417,11 +429,9 @@ $ ->
 			_.bindAll this
 			$('.module', @el).each ->
 				$module = $(this)
-				$module.data 'model', new Module
-				test = x: 10
-				gui = new DAT.GUI()
-				gui.add(test, 'x').min(0).max(10)
-				$('.content', $module).append gui.domElement
+				module = new Modules[$module.attr 'data-module']
+				$module.data 'model', module
+				$('.content', $module).append module.gui.domElement
 				
 		
 		toggle_content: (e) ->
@@ -446,8 +456,8 @@ doLoop = ->
 	o.this.forEach((index)->
 		cells[index].occupy true
 	)
-	setTimeout doLoop, 50
-	# console.timeEnd 'loop'
+	setTimeout doLoop, Phon.Properties.tick
+	console.timeEnd 'loop'
 
 
 
