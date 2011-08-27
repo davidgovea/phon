@@ -1,6 +1,6 @@
 body {
 	background: rgb(32, 32, 32);
-	font-family: "Menlo";
+	font-family: Menlo;
 	color: rgb(70, 70, 70);
 }
 
@@ -53,6 +53,11 @@ body {
 				
 				#sidebar .module .content .guidat .guidat-controllers {
 					height: auto !important;
+					font-family: Menlo;
+				}
+				
+				#sidebar .module .content .guidat input {
+					font-family: Menlo;
 				}
 				
 				#sidebar .module .content .guidat .guidat-toggle {
