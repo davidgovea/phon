@@ -1,66 +1,148 @@
 (function() {
-  var Cell, Diamond, NUM_COLS, NUM_ROWS, Oct, Particle, StateHash, cells, collide, decays, devList, doLoop, init, iterate, log, particles;
+  var Cell, NUM_COLS, NUM_ROWS, Particle, StateHash, cells, collide, decays, devList, doLoop, init, iterate, log, particles;
+  var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
   Raphael.fn.octagon = function(x, y, side, side_rad) {
     var p;
     p = this.path("M" + (x + side_rad) + " " + y + "l" + side + " 0l" + side_rad + " " + side_rad + "l0 " + side + "l" + (-side_rad) + " " + side_rad + "l" + (-side) + " 0l" + (-side_rad) + " " + (-side_rad) + "l0 " + (-side) + "l" + side_rad + " " + (-side_rad) + "z");
     return p;
   };
-  Oct = (function() {
-    function Oct(x, y, side, side_rad, row, col, raph) {
-      this.row = row;
-      this.col = col;
-      return raph.octagon(x, y, side, side_rad);
-    }
-    Oct.prototype.active = false;
-    Oct.prototype.row = 0;
-    Oct.prototype.col = 0;
-    Oct.prototype.fill = function(color) {
-      return this.attr('fill', color);
-    };
-    Oct.prototype.activate = function() {
-      return this.active = true;
-    };
-    Oct.prototype.deactivate = function() {
-      return this.active = false;
-    };
-    return Oct;
-  })();
-  Diamond = (function() {
-    function Diamond(x, y, side, row, col, raph) {
-      var d;
-      this.row = row;
-      this.col = col;
-      d = raph.rect(x - side / 2, y - side / 2, side, side);
-      d.rotate(45);
-      d.drag(this.dragStart, this.dragMove, this.dragUp);
-      return d;
-    }
-    Diamond.prototype.row = 0;
-    Diamond.prototype.col = 0;
-    Diamond.prototype.dragStart = function() {
-      return alert("drag!!");
-    };
-    Diamond.prototype.dragMove = function() {};
-    Diamond.prototype.dragUp = function() {};
-    return Diamond;
-  })();
   Raphael.fn.octogrid = function(x, y, rows, cols, width, fill, diamondFill) {
-    var cell, cellHash, col, diamond, row, side, side_rad, startx, starty;
+    var Diamond, Oct, cell, cellHash, col, diamond, raph, row, side, side_rad, startx, starty;
     console.time('octogrid');
     cellHash = {};
     side = width / (1 + Math.SQRT2);
     side_rad = side / Math.SQRT2;
     startx = x;
     starty = y;
+    raph = this;
+    Oct = (function() {
+      function Oct(x, y, side, side_rad, row, col) {
+        this.row = row;
+        this.col = col;
+        this.shape = raph.octagon(x, y, side, side_rad);
+      }
+      Oct.prototype.active = false;
+      Oct.prototype.row = 0;
+      Oct.prototype.col = 0;
+      Oct.prototype.fill = function(color) {
+        return this.shape.attr('fill', color);
+      };
+      Oct.prototype.activate = function() {
+        return this.active = true;
+      };
+      Oct.prototype.deactivate = function() {
+        return this.active = false;
+      };
+      return Oct;
+    })();
+    Diamond = (function() {
+      function Diamond(x, y, side, row, col) {
+        this.row = row;
+        this.col = col;
+        this.dragUp = __bind(this.dragUp, this);
+        this.dragMove = __bind(this.dragMove, this);
+        this.dragStart = __bind(this.dragStart, this);
+        this.shape = raph.rect(x - side / 2, y - side / 2, side, side);
+        this.shape.rotate(45);
+        this.shape.drag(this.dragMove, this.dragStart, this.dragUp);
+      }
+      Diamond.prototype.row = 0;
+      Diamond.prototype.col = 0;
+      Diamond.prototype.dragLine = null;
+      Diamond.prototype.dragStart = function() {
+        return this.shape.attr({
+          opacity: 0.5
+        });
+      };
+      Diamond.prototype.dragMove = function(x, y) {
+        var line, pathString, target;
+        if (Math.abs(x) > width * .6 || Math.abs(y) > width * .6) {
+          target = this.getAngle(x, y);
+          if (this.row === 1 && (target === 5 || target === 6 || target === 7)) {
+            return false;
+          } else if (this.col === 1 && (target === 3 || target === 4 || target === 5)) {
+            return false;
+          } else if (this.row === (rows - 1) && (target === 1 || target === 2 || target === 3)) {
+            return false;
+          } else if (this.col === (cols - 1) && (target === 0 || target === 1 || target === 7)) {
+            return false;
+          } else {
+            line = this.neighbors[target];
+          }
+          pathString = "M" + (this.shape.attrs.x + this.shape.attrs.height / 2) + " " + (this.shape.attrs.y + this.shape.attrs.height / 2) + "l" + (line[0] * width) + " " + (line[1] * width);
+          if (this.dragLine != null) {
+            this.dragLine.animate({
+              path: pathString
+            }, 20);
+          } else {
+            this.dragLine = this.shape.paper.path(pathString);
+          }
+          this.dragLine.valid = true;
+        } else {
+          pathString = "M" + (this.shape.attrs.x + this.shape.attrs.height / 2) + " " + (this.shape.attrs.y + this.shape.attrs.height / 2) + "l" + x + " " + y;
+          log(pathString);
+          if (this.dragLine != null) {
+            this.dragLine.animate({
+              path: pathString
+            }, 20);
+          } else {
+            this.dragLine = this.shape.paper.path(pathString);
+          }
+          this.dragLine.valid = false;
+        }
+        return this.dragLine.attr('stroke-width', 5);
+      };
+      Diamond.prototype.dragUp = function() {
+        if (!this.dragLine.valid) {
+          this.dragLine.remove();
+        }
+        this.dragLine = null;
+        return this.shape.attr({
+          opacity: 1
+        });
+      };
+      Diamond.prototype.getAngle = function(x, y) {
+        var atan, i, inc, target;
+        i = 1;
+        target = 0;
+        atan = Math.atan(y / x) / (Math.PI / 180);
+        inc = 22.5;
+        if (x < 0) {
+          atan += 180;
+        } else if (y < 0) {
+          atan += 360;
+        }
+        while (i * inc < atan) {
+          target += 1;
+          i += 2;
+        }
+        if (target > 7) {
+          return target % 8;
+        } else {
+          return target;
+        }
+      };
+      Diamond.prototype.neighbors = {
+        0: [1, 0],
+        1: [1, 1],
+        2: [0, 1],
+        3: [-1, 1],
+        4: [-1, 0],
+        5: [-1, -1],
+        6: [0, -1],
+        7: [1, -1]
+      };
+      return Diamond;
+    })();
     for (row = 0; 0 <= rows ? row < rows : row > rows; 0 <= rows ? row++ : row--) {
       x = startx;
       for (col = 0; 0 <= cols ? col < cols : col > cols; 0 <= cols ? col++ : col--) {
-        cell = new Oct(x, y, side, side_rad, row, col, this);
-        cell.attr('fill', fill);
+        cell = new Oct(x, y, side, side_rad, row, col);
+        cell.shape.attr('fill', fill);
         cellHash["" + (row + 1) + "_" + (col + 1) + "_1"] = cell;
         if (!(row === 0 || col === 0)) {
-          diamond = new Diamond(x, y, side, row, col, this);
-          diamond.attr('fill', diamondFill);
+          diamond = new Diamond(x, y, side, row, col);
+          diamond.shape.attr('fill', diamondFill);
           cellHash["" + row + "_" + col + "_2"] = diamond;
         }
         x += width;
@@ -255,7 +337,6 @@
       if (cell.state === 1) {
         if (cell.split) {} else {
           if (cell.sums[1] || cell.particles.length > 1) {
-            log(cell.sums);
             collide(cell.sums, cell.particles);
           }
           cell.particles.forEach(function(p) {
@@ -266,7 +347,7 @@
           log("TODO / record note playback info");
         }
       } else {
-        log("I'm a diamond!");
+
       }
     }
     return occupied;
@@ -356,7 +437,6 @@
               }
             }[nSum];
             return particles.forEach(function(p) {
-              log(p);
               p.excite();
               if (p.direction === result.kill) {
                 return p.kill();
@@ -423,14 +503,14 @@
   doLoop = function() {
     var cell, ind, o, _ref;
     devList.forEach(function(cell) {
-      return raphGrid[cell].attr("fill", "#ccc");
+      return raphGrid[cell].shape.attr("fill", "#ccc");
     });
     devList = [];
     o = iterate();
     _ref = o.h;
     for (ind in _ref) {
       cell = _ref[ind];
-      raphGrid["" + cell.row + "_" + cell.col + "_" + cell.state].attr('fill', '#0f0');
+      raphGrid["" + cell.row + "_" + cell.col + "_" + cell.state].shape.attr('fill', '#0f0');
       devList.push("" + cell.row + "_" + cell.col + "_" + cell.state);
     }
     return setTimeout(doLoop, 500);
@@ -441,7 +521,7 @@
   setTimeout(function() {
     var paper;
     paper = Raphael("paper", 800, 800);
-    window.raphGrid = paper.octogrid(10, 10, 10, 10, 32, '#d1d1d1');
+    window.raphGrid = paper.octogrid(10, 10, 10, 10, 32, '#d1d1d1', '#0f0');
     init();
     particles.push(new Particle(3, 2, 1, 1), new Particle(5, 4, 1, 8), new Particle(3, 6, 1, 4), new Particle(9, 10, 1, 4), new Particle(6, 6, 1, 8), new Particle(7, 2, 1, 1), new Particle(4, 5, 1, 2));
     return doLoop();
