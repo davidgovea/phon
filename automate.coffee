@@ -14,10 +14,10 @@ log = (msg) ->
 
 class Particle
 	constructor: (@row, @col, @state, @direction, lifetime) ->
-		@lifetime = lifetime ? 16
-	excited: false
-	excite:	-> @excited	= true
-	decay: -> @excited	= false
+		@lifetime = lifetime ? 200
+	excited: 0
+	excite:	-> @excited	= 1
+	decay: -> @excited	= 0
 	kill: -> @lifetime	= 0
 	move: ->
 		if @state is 1							# On a standard cell
@@ -79,7 +79,7 @@ class Cell
 	active: false
 
 class StateHash
-	@constructor: ->
+	constructor: ->
 		@h = {}
 	add: (particle) ->
 		index = "#{particle.row}_#{particle.col}_#{particle.state}"
@@ -87,7 +87,7 @@ class StateHash
 			@h[index]			= cells[index]
 			@h[index].particles	= []
 			@h[index].sums		= [0,0]
-		@h[index].sums[particle.excited - 1] += particle.direction
+		@h[index].sums[particle.excited] += particle.direction
 		@h[index].particles.push(particle)
 
 
@@ -104,7 +104,7 @@ decays = {
 init = ->
 	for row in [1..NUM_ROWS]
 		for col in [1..NUM_COLS]
-			cells["#{row}_{col}_1"] = new Cell row, col, 1
+			cells["#{row}_#{col}_1"] = new Cell row, col, 1
 			unless row is NUM_ROWS or col is NUM_COLS
 				cells["#{row}_#{col}_2"] = new Cell row, col, 2
 
@@ -123,17 +123,20 @@ iterate = ->
 		if cell.state is 1						# Normal cell
 			if cell.split
 				# TODO / process split cells
-			else if cell.sums[1] or cell.particles.length > 1	# It's a collision! DUCK!!!!
-				log "TODO / process collisions"
-				# TODO / check boundaries
-			else			# No collision
-				log "TODO / check boundaries"
+			else 
+				if cell.sums[1] or cell.particles.length > 1	# It's a collision! DUCK!!!!
+					log cell.sums
+					collide(cell.sums, cell.particles)
+				cell.particles.forEach((p) ->
+					p.checkObstacles()
+				)
 			
 			if cell.active
 				log "TODO / record note playback info"
 		
 		else	# Diamond, no processing
 			log "I'm a diamond!"
+	return occupied
 
 
 collide = (sums, particles) ->
@@ -209,3 +212,33 @@ collide = (sums, particles) ->
 						)
 				when 17, 64					# 2 Excited: Head-On 
 					dirs = [[2, 8], [1, 4]].shuffle().shift().shuffle()
+
+devList = []
+doLoop = ->
+	devList.forEach((cell) ->
+		raphGrid[cell].attr("fill", "#ccc")
+	)
+	devList = []
+
+	o = iterate()
+
+	for ind,cell of o.h
+		#log cell
+		raphGrid["#{cell.row}_#{cell.col}_#{cell.state}"].attr('fill', '#0f0')
+		devList.push("#{cell.row}_#{cell.col}_#{cell.state}")
+	
+	setTimeout doLoop, 750
+
+
+
+#####TESTING#####TESTING#####
+
+window.doLoop = doLoop
+setTimeout(->
+	paper = Raphael("paper", 800, 800)
+	window.raphGrid = paper.octogrid(10,10,10,10,32,'#d1d1d1');
+	init()
+	particles.push(new Particle(3,2,1,1), new Particle(5, 4, 1, 8))
+	doLoop()
+
+, 2000)
