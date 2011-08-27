@@ -49,7 +49,15 @@ body {
 				float: none;
 				margin: 0 0 10px;
 				width: 100% !important;
-			}
+			}	
+				
+				#sidebar .module .content .guidat .guidat-controllers {
+					height: auto !important;
+				}
+				
+				#sidebar .module .content .guidat .guidat-toggle {
+					display: none;
+				}
 
 #paper {
 	margin-left: 280px;
