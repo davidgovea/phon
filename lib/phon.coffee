@@ -6,6 +6,13 @@ NUM_ROWS	= 10
 NUM_COLS	= 10
 cells		= {}
 particles	= []
+occupied	= null
+
+cell_colors	= {
+	1: "#d1d1d1"
+	2: "#00bb00"
+}
+particle_color = "#cc0000"
 
 log = (msg) ->
 	console.log msg
@@ -17,9 +24,8 @@ Raphael.fn.octagon = (x, y, side, side_rad) ->
 	p = this.path "M#{x+side_rad} #{y}l#{side} 0l#{side_rad} #{side_rad}l0 #{side}l#{-side_rad} #{side_rad}l#{-side} 0l#{-side_rad} #{-side_rad}l0 #{-side}l#{side_rad} #{-side_rad}z"
 	return p
 
-Raphael.fn.octogrid = (x, y, rows, cols, width, fill, diamondFill) ->
+Raphael.fn.octogrid = (x, y, rows, cols, width) ->
 	console.time('octogrid')
-	cellHash	= {}
 	side		= width / (1+Math.SQRT2)
 	side_rad	= side / Math.SQRT2
 	startx		= x
@@ -34,8 +40,6 @@ Raphael.fn.octogrid = (x, y, rows, cols, width, fill, diamondFill) ->
 			@shape.dblclick @onDblClick
 		row: 0
 		col: 0
-		fill: (color) ->
-			@shape.attr('fill', color)
 		onClick: (evt) =>
 			#catshirt - hook in here
 			log cells["#{@row}_#{@col}_1"]
@@ -75,12 +79,14 @@ Raphael.fn.octogrid = (x, y, rows, cols, width, fill, diamondFill) ->
 			@dragLine.attr 'stroke-width', 5
 
 		dragUp: =>
-			unless @dragLine.valid then @dragLine.remove()
-			else
-				# TODO - handle this
-				#phon.addLink @row, @col, @row+@dragLine.line[1], @col+@dragLine.line[0], @dragLine
-				@dragLine.click
-			@dragLine = null
+			if @dragLine? 
+				log @dragLine.valid
+				unless @dragLine.valid then @dragLine.remove()
+				else
+					# TODO - handle this
+					#phon.addLink @row, @col, @row+@dragLine.line[1], @col+@dragLine.line[0], @dragLine
+					#@dragLine.click
+				@dragLine = null
 			@shape.attr opacity: 1
 		getAngle: (x, y)->
 			i		= 1
@@ -111,21 +117,20 @@ Raphael.fn.octogrid = (x, y, rows, cols, width, fill, diamondFill) ->
 		x = startx
 		for col in [0...cols]
 			cell = new Oct x, y, side, side_rad, row+1, col+1
-			cell.shape.attr('fill', fill)
+			cell.shape.attr fill: cell_colors[1]
 
-			cellHash["#{row+1}_#{col+1}_1"] = cell
+			cells["#{row+1}_#{col+1}_1"].shape = cell.shape
 
 			unless row is 0 or col is 0
 				diamond = new Diamond x, y, side, row, col
-				diamond.shape.attr('fill', diamondFill)
+				diamond.shape.attr('fill', cell_colors[2])
 
-				cellHash["#{row}_#{col}_2"] = diamond
+				cells["#{row}_#{col}_2"].shape = diamond.shape
 			
 			x += width
 		y += width
 
 	console.timeEnd('octogrid')
-	return cellHash
 #automation.coffee
 
 class Particle
@@ -193,6 +198,7 @@ class Cell
 	split: false
 	walls: 0
 	active: false
+	shape: null
 	activate: ->
 	deactivate: ->
 	setInstrument: (parameters) ->
@@ -205,19 +211,36 @@ class Cell
 	setInstrument: (parameters) ->
 		#phon.setInstrument @row, @col, parameters
 		# show instrument settings pending state (until server responds & sets)
+	occupy: (state) ->
+		if state is true
+			@shape.attr fill: particle_color
+		else
+			@shape.attr fill: cell_colors[@state]
+			
+
 	
 
 class StateHash
 	constructor: ->
-		@h = {}
+		@h			= {}
+		@lastBeat	= []
+		@thisBeat	= []
 	add: (particle) ->
 		index = "#{particle.row}_#{particle.col}_#{particle.state}"
 		if not @h[index]
 			@h[index]			= cells[index]
 			@h[index].particles	= []
 			@h[index].sums		= [0,0]
+			@thisBeat.push index
 		@h[index].sums[particle.excited] += particle.direction
-		@h[index].particles.push(particle)
+		@h[index].particles.push particle
+	reset: ->
+		@h			= {}
+		@lastBeat	= @thisBeat
+		@thisBeat	= []
+
+
+
 
 
 #### Probability Tools ####
@@ -231,6 +254,7 @@ decays = {
 #### Looping Functions ####
 
 init = ->
+	occupied = new StateHash
 	for row in [1..NUM_ROWS]
 		for col in [1..NUM_COLS]
 			cells["#{row}_#{col}_1"] = new Cell row, col, 1
@@ -238,8 +262,8 @@ init = ->
 				cells["#{row}_#{col}_2"] = new Cell row, col, 2
 
 iterate = ->
-	occupied	= new StateHash
-	toKill		= []
+	occupied.reset()
+	toKill = []
 
 	for particle, index in particles
 		if particle.lifetime is 0
@@ -267,7 +291,7 @@ iterate = ->
 		
 		else	# Diamond, no processing
 			#log "I'm a diamond!"
-	return occupied
+	return this:occupied.thisBeat, last:occupied.lastBeat
 
 
 collide = (sums, particles) ->
@@ -335,7 +359,7 @@ collide = (sums, particles) ->
 			switch eSum
 				when 1, 4, 16, 64			# 1 Excited particle
 					if decays.single()
-						log eSum
+						#log eSum
 						dirs = {
 							1:		[1,	2]
 							4:		[2,	4]
@@ -398,21 +422,19 @@ $ ->
 	new Sidebar
 #wrapper-end.coffee
 
-devList = []
 doLoop = ->
-	devList.forEach((cell) ->
-		raphGrid[cell].shape.attr("fill", "#ccc")
-	)
-	devList = []
+	console.time 'loop'
 
 	o = iterate()
 
-	for ind,cell of o.h
-		#log cell
-		raphGrid["#{cell.row}_#{cell.col}_#{cell.state}"].shape.attr('fill', '#0f0')
-		devList.push("#{cell.row}_#{cell.col}_#{cell.state}")
-	
-	setTimeout doLoop, 500
+	o.last.forEach((index)->
+		cells[index].occupy false
+	)
+	o.this.forEach((index)->
+		cells[index].occupy true
+	)
+	setTimeout doLoop, 50
+	console.timeEnd 'loop'
 
 
 
@@ -422,9 +444,9 @@ window.doLoop = doLoop
 window.particles = particles
 window.cells = cells
 setTimeout(->
-	paper = Raphael("paper", 800, 800)
-	window.raphGrid = paper.octogrid(10,10,10,10,32,'#d1d1d1', '#d1d1d1');
 	init()
+	paper = Raphael("paper", 1200, 800)
+	paper.octogrid(1,1,NUM_ROWS,NUM_COLS,32);
 	particles.push(
 		new Particle(3,2,1,1), 
 		new Particle(5,4,1,8), 

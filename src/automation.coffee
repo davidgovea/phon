@@ -66,6 +66,7 @@ class Cell
 	split: false
 	walls: 0
 	active: false
+	shape: null
 	activate: ->
 	deactivate: ->
 	setInstrument: (parameters) ->
@@ -78,19 +79,36 @@ class Cell
 	setInstrument: (parameters) ->
 		#phon.setInstrument @row, @col, parameters
 		# show instrument settings pending state (until server responds & sets)
+	occupy: (state) ->
+		if state is true
+			@shape.attr fill: particle_color
+		else
+			@shape.attr fill: cell_colors[@state]
+			
+
 	
 
 class StateHash
 	constructor: ->
-		@h = {}
+		@h			= {}
+		@lastBeat	= []
+		@thisBeat	= []
 	add: (particle) ->
 		index = "#{particle.row}_#{particle.col}_#{particle.state}"
 		if not @h[index]
 			@h[index]			= cells[index]
 			@h[index].particles	= []
 			@h[index].sums		= [0,0]
+			@thisBeat.push index
 		@h[index].sums[particle.excited] += particle.direction
-		@h[index].particles.push(particle)
+		@h[index].particles.push particle
+	reset: ->
+		@h			= {}
+		@lastBeat	= @thisBeat
+		@thisBeat	= []
+
+
+
 
 
 #### Probability Tools ####
@@ -104,6 +122,7 @@ decays = {
 #### Looping Functions ####
 
 init = ->
+	occupied = new StateHash
 	for row in [1..NUM_ROWS]
 		for col in [1..NUM_COLS]
 			cells["#{row}_#{col}_1"] = new Cell row, col, 1
@@ -111,8 +130,8 @@ init = ->
 				cells["#{row}_#{col}_2"] = new Cell row, col, 2
 
 iterate = ->
-	occupied	= new StateHash
-	toKill		= []
+	occupied.reset()
+	toKill = []
 
 	for particle, index in particles
 		if particle.lifetime is 0
@@ -140,7 +159,7 @@ iterate = ->
 		
 		else	# Diamond, no processing
 			#log "I'm a diamond!"
-	return occupied
+	return this:occupied.thisBeat, last:occupied.lastBeat
 
 
 collide = (sums, particles) ->
@@ -208,7 +227,7 @@ collide = (sums, particles) ->
 			switch eSum
 				when 1, 4, 16, 64			# 1 Excited particle
 					if decays.single()
-						log eSum
+						#log eSum
 						dirs = {
 							1:		[1,	2]
 							4:		[2,	4]

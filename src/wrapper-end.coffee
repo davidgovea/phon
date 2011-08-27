@@ -1,21 +1,19 @@
 
 #wrapper-end.coffee
 
-devList = []
 doLoop = ->
-	devList.forEach((cell) ->
-		raphGrid[cell].shape.attr("fill", "#ccc")
-	)
-	devList = []
+	console.time 'loop'
 
 	o = iterate()
 
-	for ind,cell of o.h
-		#log cell
-		raphGrid["#{cell.row}_#{cell.col}_#{cell.state}"].shape.attr('fill', '#0f0')
-		devList.push("#{cell.row}_#{cell.col}_#{cell.state}")
-	
-	setTimeout doLoop, 500
+	o.last.forEach((index)->
+		cells[index].occupy false
+	)
+	o.this.forEach((index)->
+		cells[index].occupy true
+	)
+	setTimeout doLoop, 50
+	console.timeEnd 'loop'
 
 
 
@@ -25,9 +23,9 @@ window.doLoop = doLoop
 window.particles = particles
 window.cells = cells
 setTimeout(->
-	paper = Raphael("paper", 800, 800)
-	window.raphGrid = paper.octogrid(10,10,10,10,32,'#d1d1d1', '#d1d1d1');
 	init()
+	paper = Raphael("paper", 1200, 800)
+	paper.octogrid(1,1,NUM_ROWS,NUM_COLS,32);
 	particles.push(
 		new Particle(3,2,1,1), 
 		new Particle(5,4,1,8), 

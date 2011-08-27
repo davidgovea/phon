@@ -5,9 +5,8 @@ Raphael.fn.octagon = (x, y, side, side_rad) ->
 	p = this.path "M#{x+side_rad} #{y}l#{side} 0l#{side_rad} #{side_rad}l0 #{side}l#{-side_rad} #{side_rad}l#{-side} 0l#{-side_rad} #{-side_rad}l0 #{-side}l#{side_rad} #{-side_rad}z"
 	return p
 
-Raphael.fn.octogrid = (x, y, rows, cols, width, fill, diamondFill) ->
+Raphael.fn.octogrid = (x, y, rows, cols, width) ->
 	console.time('octogrid')
-	cellHash	= {}
 	side		= width / (1+Math.SQRT2)
 	side_rad	= side / Math.SQRT2
 	startx		= x
@@ -22,8 +21,6 @@ Raphael.fn.octogrid = (x, y, rows, cols, width, fill, diamondFill) ->
 			@shape.dblclick @onDblClick
 		row: 0
 		col: 0
-		fill: (color) ->
-			@shape.attr('fill', color)
 		onClick: (evt) =>
 			#catshirt - hook in here
 			log cells["#{@row}_#{@col}_1"]
@@ -63,12 +60,14 @@ Raphael.fn.octogrid = (x, y, rows, cols, width, fill, diamondFill) ->
 			@dragLine.attr 'stroke-width', 5
 
 		dragUp: =>
-			unless @dragLine.valid then @dragLine.remove()
-			else
-				# TODO - handle this
-				#phon.addLink @row, @col, @row+@dragLine.line[1], @col+@dragLine.line[0], @dragLine
-				@dragLine.click
-			@dragLine = null
+			if @dragLine? 
+				log @dragLine.valid
+				unless @dragLine.valid then @dragLine.remove()
+				else
+					# TODO - handle this
+					#phon.addLink @row, @col, @row+@dragLine.line[1], @col+@dragLine.line[0], @dragLine
+					#@dragLine.click
+				@dragLine = null
 			@shape.attr opacity: 1
 		getAngle: (x, y)->
 			i		= 1
@@ -99,18 +98,17 @@ Raphael.fn.octogrid = (x, y, rows, cols, width, fill, diamondFill) ->
 		x = startx
 		for col in [0...cols]
 			cell = new Oct x, y, side, side_rad, row+1, col+1
-			cell.shape.attr('fill', fill)
+			cell.shape.attr fill: cell_colors[1]
 
-			cellHash["#{row+1}_#{col+1}_1"] = cell
+			cells["#{row+1}_#{col+1}_1"].shape = cell.shape
 
 			unless row is 0 or col is 0
 				diamond = new Diamond x, y, side, row, col
-				diamond.shape.attr('fill', diamondFill)
+				diamond.shape.attr('fill', cell_colors[2])
 
-				cellHash["#{row}_#{col}_2"] = diamond
+				cells["#{row}_#{col}_2"].shape = diamond.shape
 			
 			x += width
 		y += width
 
 	console.timeEnd('octogrid')
-	return cellHash
