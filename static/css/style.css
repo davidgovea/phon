@@ -63,6 +63,30 @@ body {
 				#sidebar .module .content .guidat .guidat-toggle {
 					display: none;
 				}
+	
+	#sidebar .module.persistent .content {
+		
+	}
+
+		#sidebar .module.persistent .content {
+			display: block;
+		}
+
+		#sidebar .module.persistent h2 .icon {
+			display: none;
+		}
+
+	#sidebar .module.open {
+
+	}
+
+		#sidebar .module.open .content {
+			display: block;
+		}
+		
+		#sidebar .module.open h2 .icon {
+			content: "-";
+		}
 
 #paper {
 	margin-left: 280px;
