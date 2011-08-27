@@ -1,3 +1,84 @@
+
+#Raphael = window.Raphael
+
+
+Raphael.fn.octagon = (x, y, side, side_rad) ->
+	p = this.path "M#{x+side_rad} #{y}l#{side} 0l#{side_rad} #{side_rad}l0 #{side}l#{-side_rad} #{side_rad}l#{-side} 0l#{-side_rad} #{-side_rad}l0 #{-side}l#{side_rad} #{-side_rad}z"
+	return p
+
+
+class Oct
+	constructor: (x, y, side, side_rad, @row, @col, raph) ->
+		return raph.octagon x, y, side, side_rad
+	active: false
+	row: 0
+	col: 0
+	fill: (color) ->
+		@attr('fill', color)
+	activate: ->
+		@active = true
+	deactivate: ->
+		@active = false
+
+class Diamond
+	constructor: (x, y, side, @row, @col, raph)->
+		d = raph.rect x-side/2, y-side/2, side, side
+		d.rotate 45
+		d.drag @dragStart, @dragMove, @dragUp
+		return d
+	row: 0
+	col: 0
+	dragStart: ->
+		alert "drag!!"
+	dragMove: ->
+	dragUp: ->
+	
+	
+
+Raphael.fn.octogrid = (x, y, rows, cols, width, fill, diamondFill) ->
+	console.time('octogrid')
+	cellHash	= {}
+	side		= width / (1+Math.SQRT2)
+	side_rad	= side / Math.SQRT2
+	startx		= x
+	starty		= y
+
+	for row in [0...rows]
+		x = startx
+		for col in [0...cols]
+			cell = new Oct x, y, side, side_rad, row, col, this
+			cell.attr('fill', fill)
+
+			cellHash["#{row+1}_#{col+1}_1"] = cell
+
+			unless row is 0 or col is 0
+				diamond = new Diamond x, y, side, row, col, this
+				diamond.attr('fill', diamondFill)
+
+				cellHash["#{row}_#{col}_2"] = diamond
+			
+			x += width
+		y += width
+
+	console.timeEnd('octogrid')
+	return cellHash
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #Constants
 NUM_ROWS	= 10
 NUM_COLS	= 10
@@ -119,6 +200,7 @@ iterate = ->
 			particle.move()
 			occupied.add(particle)
 	
+	
 	for cellIndex, cell of occupied.h
 		if cell.state is 1						# Normal cell
 			if cell.split
@@ -129,7 +211,7 @@ iterate = ->
 					collide(cell.sums, cell.particles)
 
 				cell.particles.forEach((p) ->
-					p.checkObstacles()
+					p.checkObstacles()		#just tack this on the end of collide()
 				)
 			
 			if cell.active
@@ -145,6 +227,20 @@ collide = (sums, particles) ->
 	eSum	= sums[1]
 
 	switch nSum
+		when 1, 4, 8, 16				# 1 Normal
+			switch eSum
+				when 1, 4, 16, 64 then		# 1 Excited particle
+					# result = {
+					# 	1: {
+					# 		4: 
+					# 		16: 
+					# 	},
+					# 	4: {
+							
+					# 	}
+					# }
+				when 2, 8, 32, 128 then			# 2 Excited: Pair
+					
 		when 5, 10						# 2 Normal, Head-On
 			switch eSum
 				when 0						# 0 Excited
@@ -183,7 +279,7 @@ collide = (sums, particles) ->
 				when 0						# 0 Excited
 					dirs = [1, 4, 16, 64].shuffle()
 					particles.forEach((p) ->
-						p.excite()
+						p.econsoxcite()
 						p.direction = dirs.shift()
 					)
 
@@ -256,3 +352,4 @@ setTimeout(->
 	doLoop()
 
 , 2000)
+

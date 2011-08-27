@@ -1,5 +1,75 @@
 (function() {
-  var Cell, NUM_COLS, NUM_ROWS, Particle, StateHash, cells, collide, decays, devList, doLoop, init, iterate, log, particles;
+  var Cell, Diamond, NUM_COLS, NUM_ROWS, Oct, Particle, StateHash, cells, collide, decays, devList, doLoop, init, iterate, log, particles;
+  Raphael.fn.octagon = function(x, y, side, side_rad) {
+    var p;
+    p = this.path("M" + (x + side_rad) + " " + y + "l" + side + " 0l" + side_rad + " " + side_rad + "l0 " + side + "l" + (-side_rad) + " " + side_rad + "l" + (-side) + " 0l" + (-side_rad) + " " + (-side_rad) + "l0 " + (-side) + "l" + side_rad + " " + (-side_rad) + "z");
+    return p;
+  };
+  Oct = (function() {
+    function Oct(x, y, side, side_rad, row, col, raph) {
+      this.row = row;
+      this.col = col;
+      return raph.octagon(x, y, side, side_rad);
+    }
+    Oct.prototype.active = false;
+    Oct.prototype.row = 0;
+    Oct.prototype.col = 0;
+    Oct.prototype.fill = function(color) {
+      return this.attr('fill', color);
+    };
+    Oct.prototype.activate = function() {
+      return this.active = true;
+    };
+    Oct.prototype.deactivate = function() {
+      return this.active = false;
+    };
+    return Oct;
+  })();
+  Diamond = (function() {
+    function Diamond(x, y, side, row, col, raph) {
+      var d;
+      this.row = row;
+      this.col = col;
+      d = raph.rect(x - side / 2, y - side / 2, side, side);
+      d.rotate(45);
+      d.drag(this.dragStart, this.dragMove, this.dragUp);
+      return d;
+    }
+    Diamond.prototype.row = 0;
+    Diamond.prototype.col = 0;
+    Diamond.prototype.dragStart = function() {
+      return alert("drag!!");
+    };
+    Diamond.prototype.dragMove = function() {};
+    Diamond.prototype.dragUp = function() {};
+    return Diamond;
+  })();
+  Raphael.fn.octogrid = function(x, y, rows, cols, width, fill, diamondFill) {
+    var cell, cellHash, col, diamond, row, side, side_rad, startx, starty;
+    console.time('octogrid');
+    cellHash = {};
+    side = width / (1 + Math.SQRT2);
+    side_rad = side / Math.SQRT2;
+    startx = x;
+    starty = y;
+    for (row = 0; 0 <= rows ? row < rows : row > rows; 0 <= rows ? row++ : row--) {
+      x = startx;
+      for (col = 0; 0 <= cols ? col < cols : col > cols; 0 <= cols ? col++ : col--) {
+        cell = new Oct(x, y, side, side_rad, row, col, this);
+        cell.attr('fill', fill);
+        cellHash["" + (row + 1) + "_" + (col + 1) + "_1"] = cell;
+        if (!(row === 0 || col === 0)) {
+          diamond = new Diamond(x, y, side, row, col, this);
+          diamond.attr('fill', diamondFill);
+          cellHash["" + row + "_" + col + "_2"] = diamond;
+        }
+        x += width;
+      }
+      y += width;
+    }
+    console.timeEnd('octogrid');
+    return cellHash;
+  };
   NUM_ROWS = 10;
   NUM_COLS = 10;
   cells = {};
@@ -206,6 +276,22 @@
     nSum = sums[0];
     eSum = sums[1];
     switch (nSum) {
+      case 1:
+      case 4:
+      case 8:
+      case 16:
+        switch (eSum) {
+          case 1:
+          case 4:
+          case 16:
+          case 64:
+            break;
+          case 2:
+          case 8:
+          case 32:
+          case 128:
+        }
+        break;
       case 5:
       case 10:
         switch (eSum) {
@@ -285,7 +371,7 @@
           case 0:
             dirs = [1, 4, 16, 64].shuffle();
             return particles.forEach(function(p) {
-              p.excite();
+              p.econsoxcite();
               return p.direction = dirs.shift();
             });
         }
