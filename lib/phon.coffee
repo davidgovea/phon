@@ -1,7 +1,7 @@
 
 #wrapper-start.coffee
 
-window.Phon ?= {}
+window.Phon = {}
 	
 Phon.Properties =
 	tick: 200
@@ -22,6 +22,7 @@ select_color	= "#0000ff"
 
 log = (msg) ->
 	console.log msg
+
 # Vector.coffee - grid stuff
 
 Raphael.fn.octagon = (x, y, side, side_rad) ->
@@ -410,8 +411,6 @@ $ ->
 		
 	Modules = {}
 
-		
-			
 	Modules.Global = class extends Module
 		
 		initialize: ->
