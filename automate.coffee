@@ -1,5 +1,4 @@
 
-#Raphael = window.Raphael
 
 
 Raphael.fn.octagon = (x, y, side, side_rad) ->
@@ -24,6 +23,8 @@ Raphael.fn.octogrid = (x, y, rows, cols, width, fill, diamondFill) ->
 	class Oct
 		constructor: (x, y, side, side_rad, @row, @col) ->
 			@shape = raph.octagon x, y, side, side_rad
+			@shape.click @onClick
+			@shape.dblclick @onDblClick
 		active: false
 		row: 0
 		col: 0
@@ -33,6 +34,12 @@ Raphael.fn.octogrid = (x, y, rows, cols, width, fill, diamondFill) ->
 			@active = true
 		deactivate: ->
 			@active = false
+		onClick: (evt) =>
+			#catshirt - hook in here
+			log "click #{@row},#{@col}"
+		onDblClick: (evt) =>
+			log "dblclick #{@row},#{@col}"
+
 
 	class Diamond
 		constructor: (x, y, side, @row, @col)->
@@ -56,17 +63,21 @@ Raphael.fn.octogrid = (x, y, rows, cols, width, fill, diamondFill) ->
 				pathString = "M#{@shape.attrs.x+@shape.attrs.height/2} #{@shape.attrs.y+@shape.attrs.height/2}l#{line[0]*width} #{line[1]*width}"
 				if @dragLine? then @dragLine.animate path: pathString, 20
 				else @dragLine = @shape.paper.path pathString
-				@dragLine.valid = true;
+				@dragLine.valid = true
+				@dragLine.line = line
 			else
 				pathString = "M#{@shape.attrs.x+@shape.attrs.height/2} #{@shape.attrs.y+@shape.attrs.height/2}l#{x} #{y}"
-				log pathString
 				if @dragLine? then @dragLine.animate path: pathString, 20
 				else @dragLine = @shape.paper.path pathString
 				@dragLine.valid = false
 			@dragLine.attr 'stroke-width', 5
 
 		dragUp: =>
-			if not @dragLine.valid then @dragLine.remove()
+			unless @dragLine.valid then @dragLine.remove()
+			else
+				# TODO - handle this
+				#phon.addLink @row, @col, @row+@dragLine.line[1], @col+@dragLine.line[0], @dragLine
+				@dragLine.click
 			@dragLine = null
 			@shape.attr opacity: 1
 		getAngle: (x, y)->
@@ -97,7 +108,7 @@ Raphael.fn.octogrid = (x, y, rows, cols, width, fill, diamondFill) ->
 	for row in [0...rows]
 		x = startx
 		for col in [0...cols]
-			cell = new Oct x, y, side, side_rad, row, col
+			cell = new Oct x, y, side, side_rad, row+1, col+1
 			cell.shape.attr('fill', fill)
 
 			cellHash["#{row+1}_#{col+1}_1"] = cell
@@ -389,7 +400,7 @@ window.particles = particles
 window.cells = cells
 setTimeout(->
 	paper = Raphael("paper", 800, 800)
-	window.raphGrid = paper.octogrid(10,10,10,10,32,'#d1d1d1', '#0f0');
+	window.raphGrid = paper.octogrid(10,10,10,10,32,'#d1d1d1', '#d1d1d1');
 	init()
 	particles.push(
 		new Particle(3,2,1,1), 

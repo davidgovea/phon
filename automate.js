@@ -19,7 +19,11 @@
       function Oct(x, y, side, side_rad, row, col) {
         this.row = row;
         this.col = col;
+        this.onDblClick = __bind(this.onDblClick, this);
+        this.onClick = __bind(this.onClick, this);
         this.shape = raph.octagon(x, y, side, side_rad);
+        this.shape.click(this.onClick);
+        this.shape.dblclick(this.onDblClick);
       }
       Oct.prototype.active = false;
       Oct.prototype.row = 0;
@@ -32,6 +36,12 @@
       };
       Oct.prototype.deactivate = function() {
         return this.active = false;
+      };
+      Oct.prototype.onClick = function(evt) {
+        return log("click " + this.row + "," + this.col);
+      };
+      Oct.prototype.onDblClick = function(evt) {
+        return log("dblclick " + this.row + "," + this.col);
       };
       return Oct;
     })();
@@ -78,9 +88,9 @@
             this.dragLine = this.shape.paper.path(pathString);
           }
           this.dragLine.valid = true;
+          this.dragLine.line = line;
         } else {
           pathString = "M" + (this.shape.attrs.x + this.shape.attrs.height / 2) + " " + (this.shape.attrs.y + this.shape.attrs.height / 2) + "l" + x + " " + y;
-          log(pathString);
           if (this.dragLine != null) {
             this.dragLine.animate({
               path: pathString
@@ -95,6 +105,8 @@
       Diamond.prototype.dragUp = function() {
         if (!this.dragLine.valid) {
           this.dragLine.remove();
+        } else {
+          this.dragLine.click;
         }
         this.dragLine = null;
         return this.shape.attr({
@@ -137,7 +149,7 @@
     for (row = 0; 0 <= rows ? row < rows : row > rows; 0 <= rows ? row++ : row--) {
       x = startx;
       for (col = 0; 0 <= cols ? col < cols : col > cols; 0 <= cols ? col++ : col--) {
-        cell = new Oct(x, y, side, side_rad, row, col);
+        cell = new Oct(x, y, side, side_rad, row + 1, col + 1);
         cell.shape.attr('fill', fill);
         cellHash["" + (row + 1) + "_" + (col + 1) + "_1"] = cell;
         if (!(row === 0 || col === 0)) {
@@ -521,7 +533,7 @@
   setTimeout(function() {
     var paper;
     paper = Raphael("paper", 800, 800);
-    window.raphGrid = paper.octogrid(10, 10, 10, 10, 32, '#d1d1d1', '#0f0');
+    window.raphGrid = paper.octogrid(10, 10, 10, 10, 32, '#d1d1d1', '#d1d1d1');
     init();
     particles.push(new Particle(3, 2, 1, 1), new Particle(5, 4, 1, 8), new Particle(3, 6, 1, 4), new Particle(9, 10, 1, 4), new Particle(6, 6, 1, 8), new Particle(7, 2, 1, 1), new Particle(4, 5, 1, 2));
     return doLoop();
