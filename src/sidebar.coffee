@@ -7,8 +7,6 @@ $ ->
 		
 	Modules = {}
 
-		
-			
 	Modules.Global = class extends Module
 		
 		initialize: ->
