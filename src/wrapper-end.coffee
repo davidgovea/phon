@@ -2,7 +2,7 @@
 #wrapper-end.coffee
 
 doLoop = ->
-	console.time 'loop'
+	# console.time 'loop'
 
 	o = iterate()
 
@@ -13,7 +13,7 @@ doLoop = ->
 		cells[index].occupy true
 	)
 	setTimeout doLoop, 50
-	console.timeEnd 'loop'
+	# console.timeEnd 'loop'
 
 
 

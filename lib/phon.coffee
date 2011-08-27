@@ -265,13 +265,17 @@ iterate = ->
 	occupied.reset()
 	toKill = []
 
-	for particle, index in particles
+	for particle in particles
 		if particle.lifetime is 0
-			toKill.push(index)
+			toKill.push(particle)
 		else
 			particle.move()
 			occupied.add(particle)
-	
+			
+	if toKill.length > 0
+		toKill.forEach((p) ->
+			particles.splice(particles.indexOf(p), 1)
+		)
 	
 	for cellIndex, cell of occupied.h
 		if cell.state is 1						# Normal cell
@@ -423,7 +427,7 @@ $ ->
 #wrapper-end.coffee
 
 doLoop = ->
-	console.time 'loop'
+	# console.time 'loop'
 
 	o = iterate()
 
@@ -434,7 +438,7 @@ doLoop = ->
 		cells[index].occupy true
 	)
 	setTimeout doLoop, 50
-	console.timeEnd 'loop'
+	# console.timeEnd 'loop'
 
 
 
