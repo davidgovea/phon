@@ -1,20 +1,54 @@
 <!DOCTYPE html>
 <html>
+
 	<head>
+		
 	    <title>Grid test Test</title>
+	
 		<script src="lib/raphael-min.js"></script>
+		<script src="lib/jquery.js"></script>
+		<script src="lib/underscore.js"></script>
+		<script src="lib/backbone.js"></script>
+		<script src="lib/DAT.GUI.js"></script>
+		
 		<script src="lib/phon.js"></script>
 		
-		<script>
-		// Delayed for page load
-		setTimeout(function(){
-            //paper = Raphael("paper",1200,1000);
-            //o = paper.octogrid(10,10,10,10,32,'#d1d1d1');
-        }, 1500);
-		</script>
+		<link rel="stylesheet" type="text/css" href="./static/css/style.css" />
+		
 	</head>
+	
 	<body>
-		<div id="paper"></div>
-		Testing...
+		
+		<div id="sidebar">
+			
+			<div class="instruments module">
+				<h2 class="clearfix">Global <span class="icon">+</span></h2>
+				<div class="content">
+				</div>
+			</div>
+			
+			<div class="instruments module">
+				<h2 class="clearfix">Instruments <span class="icon">+</span></h2>
+				<div class="content">
+				</div>
+			</div>
+
+			<div class="samples module">
+				<h2 class="clearfix">Samples <span class="icon">+</span></h2>
+				<div class="content">
+				</div>
+			</div>
+			
+			<div class="properties module">
+				<h2 class="clearfix">Properties <span class="icon">+</span></h2>
+				<div class="content">
+				</div>
+			</div>
+			
+		</div>
+		
+		<div id="paper">
+		</div>
+		
 	</body>
 </html>

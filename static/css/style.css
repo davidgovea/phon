@@ -1,0 +1,60 @@
+body {
+	background: rgb(32, 32, 32);
+	font-family: "Menlo";
+	color: rgb(70, 70, 70);
+}
+
+#sidebar {
+	background: rgb(237, 238, 240);
+	position: absolute;
+	top: 0;
+	left: 0;
+	border: 2px solid rgb(239, 239, 239);
+	width: 228px;
+	padding: 0 10px;
+	height: 100%;
+}
+	
+	#sidebar .module {
+		border-bottom: 1px solid rgb(214, 217, 222);
+		border-top: 1px solid rgb(255, 255, 255);
+	}
+	
+		#sidebar .module h2 {
+			padding-bottom: 10px;
+			padding-top: 10px;
+			margin: 0;
+			font-size: 15px;
+		}
+
+			#sidebar .module h2 .icon {
+				float: right;
+			}
+	
+	#sidebar .module:first-child {
+		margin-top: 0;
+		border-top: 0;
+	}
+	
+	#sidebar .module:last-child {
+		padding-bottom: 0;
+		border-bottom: 0;
+	}
+	
+		#sidebar .module .content {
+			display: none;
+		}
+		
+			#sidebar .module .content .guidat {
+				float: none;
+				margin: 0 0 10px;
+				width: 100% !important;
+			}
+
+#paper {
+	margin-left: 280px;
+}	
+
+.clearfix:before, .clearfix:after { content: "\0020"; display: block; height: 0; overflow: hidden; }
+.clearfix:after { clear: both; }
+.clearfix { zoom: 1; }
