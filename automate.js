@@ -42,7 +42,7 @@
               this.row--;
               break;
             default:
-              throw new Error("Don't know where to go! Normal particle: [" + this.row + "," + this.col + "], direction " + direction);
+              throw new Error("Don't know where to go! Normal particle: [" + this.row + "," + this.col + "], direction " + this.direction);
           }
         } else {
           switch (this.direction) {
@@ -59,7 +59,7 @@
               this.row--;
               break;
             default:
-              throw new Error("Don't know where to go! Energetic particle, normal space: [" + this.row + "," + this.col + "], direction " + direction);
+              throw new Error("Don't know where to go! Energetic particle, normal space: [" + this.row + "," + this.col + "], direction " + this.direction);
           }
           this.state = 2;
         }
@@ -255,7 +255,7 @@
                 }
               },
               13: {
-                kill: 2,
+                kill: 8,
                 dir: {
                   1: 64,
                   4: 16
@@ -270,8 +270,9 @@
               }
             }[nSum];
             return particles.forEach(function(p) {
+              log(p);
               p.excite();
-              if (p.lifetime === result.kill) {
+              if (p.direction === result.kill) {
                 return p.kill();
               } else {
                 return p.direction = result.dir[p.direction];
@@ -296,11 +297,12 @@
           case 16:
           case 64:
             if (decays.single()) {
+              log(eSum);
               dirs = {
                 1: [1, 2],
-                8: [2, 4],
-                32: [4, 8],
-                128: [8, 1]
+                4: [2, 4],
+                16: [4, 8],
+                64: [8, 1]
               }[eSum].shuffle();
               return particles.forEach(function(p) {
                 p.decay();
@@ -345,15 +347,17 @@
       raphGrid["" + cell.row + "_" + cell.col + "_" + cell.state].attr('fill', '#0f0');
       devList.push("" + cell.row + "_" + cell.col + "_" + cell.state);
     }
-    return setTimeout(doLoop, 750);
+    return setTimeout(doLoop, 500);
   };
   window.doLoop = doLoop;
+  window.particles = particles;
+  window.cells = cells;
   setTimeout(function() {
     var paper;
     paper = Raphael("paper", 800, 800);
     window.raphGrid = paper.octogrid(10, 10, 10, 10, 32, '#d1d1d1');
     init();
-    particles.push(new Particle(3, 2, 1, 1), new Particle(5, 4, 1, 8));
+    particles.push(new Particle(3, 2, 1, 1), new Particle(5, 4, 1, 8), new Particle(3, 6, 1, 4), new Particle(9, 10, 1, 4), new Particle(6, 6, 1, 8), new Particle(7, 2, 1, 1), new Particle(4, 5, 1, 2));
     return doLoop();
   }, 2000);
 }).call(this);

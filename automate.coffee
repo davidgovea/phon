@@ -27,7 +27,7 @@ class Particle
 					when 2 then @row++
 					when 4 then @col--
 					when 8 then @row--
-					else throw new Error "Don't know where to go! Normal particle: [#{@row},#{@col}], direction #{direction}"
+					else throw new Error "Don't know where to go! Normal particle: [#{@row},#{@col}], direction #{@direction}"
 			else								# Energetic particle
 				switch @direction	
 					when 1 then
@@ -36,7 +36,7 @@ class Particle
 						@row--
 						@col--
 					when 64 then @row--
-					else throw new Error "Don't know where to go! Energetic particle, normal space: [#{@row},#{@col}], direction #{direction}"
+					else throw new Error "Don't know where to go! Energetic particle, normal space: [#{@row},#{@col}], direction #{@direction}"
 				@state = 2						# Move into high-energy
 		else 									# On a high-energy cell
 			switch @direction
@@ -127,6 +127,7 @@ iterate = ->
 				if cell.sums[1] or cell.particles.length > 1	# It's a collision! DUCK!!!!
 					log cell.sums
 					collide(cell.sums, cell.particles)
+
 				cell.particles.forEach((p) ->
 					p.checkObstacles()
 				)
@@ -167,12 +168,14 @@ collide = (sums, particles) ->
 					result = {
 						7:	{kill: 2, dir: {4:4,	1:1}}
 						11:	{kill: 1, dir: {2:1,	8:64}}
-						13:	{kill: 2, dir: {1:64,	4:16}}
+						13:	{kill: 8, dir: {1:64,	4:16}}
 						14:	{kill: 4, dir: {8:16,	2:4}}
 					}[nSum]
 					particles.forEach((p) ->
+						log p
 						p.excite()
-						if p.lifetime is result.kill then p.kill()
+						if p.direction is result.kill
+							p.kill()
 						else p.direction = result.dir[p.direction]
 					)
 		when 15							# 4 Normal, Plus-collide
@@ -188,11 +191,12 @@ collide = (sums, particles) ->
 			switch eSum
 				when 1, 4, 16, 64			# 1 Excited particle
 					if decays.single()
+						log eSum
 						dirs = {
 							1:		[1,	2]
-							8:		[2,	4]
-							32:		[4,	8]
-							128:	[8,	1]
+							4:		[2,	4]
+							16:		[4,	8]
+							64:		[8,	1]
 						}[eSum].shuffle()
 						particles.forEach((p) ->
 							p.decay()
@@ -227,18 +231,28 @@ doLoop = ->
 		raphGrid["#{cell.row}_#{cell.col}_#{cell.state}"].attr('fill', '#0f0')
 		devList.push("#{cell.row}_#{cell.col}_#{cell.state}")
 	
-	setTimeout doLoop, 750
+	setTimeout doLoop, 500
 
 
 
 #####TESTING#####TESTING#####
 
 window.doLoop = doLoop
+window.particles = particles
+window.cells = cells
 setTimeout(->
 	paper = Raphael("paper", 800, 800)
 	window.raphGrid = paper.octogrid(10,10,10,10,32,'#d1d1d1');
 	init()
-	particles.push(new Particle(3,2,1,1), new Particle(5, 4, 1, 8))
+	particles.push(
+		new Particle(3,2,1,1), 
+		new Particle(5,4,1,8), 
+		new Particle(3,6,1,4),
+		new Particle(9,10,1,4),
+		new Particle(6,6,1,8),
+		new Particle(7,2,1,1),
+		new Particle(4,5,1,2)
+	)
 	doLoop()
 
 , 2000)
