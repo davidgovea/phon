@@ -108,6 +108,8 @@ body {
 				#sidebar .module .content .guidat .guidat-controllers {
 					height: auto !important;
 					font-family: Menlo;
+					-webkit-border-radius: 3px;
+					-moz-border-radius: 3px;
 				}
 				
 				#sidebar .module .content .guidat input {
