@@ -64,7 +64,7 @@ $ ->
 	# Sidebar Model #
 	#################
 	
-	Sidebar = class extends Backbone.Model
+	SidebarModel = class extends Backbone.Model
 
 		defaults:
 			active: false
@@ -87,19 +87,22 @@ $ ->
 			# views store options as properties anyway
 			# but for some reason they arent accessible in constructor?
 			model = options.model
+				
+			# paper can trigger events that sidebar responds to
+			Phon.Elements.$paper.bind 'cell-selected', @select_cell
 			
 			$('.module', @el).each ->
 				
 				$module = $ this
-				props = if $module.attr('data-sound') then sound: new Phon.Sounds[$module.attr 'data-sound']  else {}
+				props = if $module.attr('data-sound') then sound: new Phon.Sounds[$module.attr 'data-sound'] else {}
 				module = new Modules[$module.attr 'data-module'] props
 				
 				# store reference to the model in DOM to be easily accessed from events
 				$module.data 'model', module
 				
 				# move DAT.GUI into container
-				$('.content', $module).append module.gui.domElement
-				
+				$('.content', $module).prepend module.gui.domElement
+
 				# setting the closed property on the module
 				# shows it and sets it as active
 				module.bind 'change:closed', (module, closed) =>
@@ -125,10 +128,13 @@ $ ->
 			
 			# set property/display on new module
 			model.set 'closed': !(model.get 'closed')
+
+		select_cell: (e, row, col, sound) ->
+			console.log 'got', row, col, sound
 	
 	#####################
 	# Make Thing Happen #
 	#####################
 	
-	new SidebarView
-	 	model: new Sidebar
+	window.Sidebar = new SidebarView
+	 	model: new SidebarModel

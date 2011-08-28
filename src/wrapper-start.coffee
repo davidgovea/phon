@@ -6,6 +6,10 @@ window.Phon = {}
 Phon.Properties =
 	tick: 200
 
+Phon.Elements = {}
+$ ->
+	Phon.Elements.$paper = $ '#paper'
+
 #Constants
 NUM_ROWS	= 10
 NUM_COLS	= 10

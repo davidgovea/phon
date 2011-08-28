@@ -21,9 +21,10 @@ Raphael.fn.octogrid = (x, y, rows, cols, width) ->
 			@shape.dblclick @onDblClick
 		row: 0
 		col: 0
+		sound: false
 		onClick: (evt) =>
-			#catshirt - hook in here
-			log cells["#{@row}_#{@col}_1"]
+			# this should probably go inside cell.select()
+			Phon.Elements.$paper.trigger 'cell-selected', [@row, @col, @sound]
 			cells["#{@row}_#{@col}_1"].select()
 		onDblClick: (evt) =>
 			log "dblclick #{@row},#{@col}"
