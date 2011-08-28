@@ -29,14 +29,15 @@ app.get '/', (req, res) ->
 
 io.sockets.on 'connection', (socket) ->
 
-	socket.emit 'state', data: 'phon state'
+	#socket.emit 'state', data: 'phon state'
 
 	socket.on 'cell', (data) ->
 		#process cell
 		console.log data
 	
 	socket.on 'wall', (data) ->
-		console.log data
+		log data
+		io.sockets.emit 'wall', data
 	
 	socket.on 'chat', (msg) ->
 		io.sockets.emit 'chat', msg

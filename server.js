@@ -33,14 +33,12 @@
     });
   });
   io.sockets.on('connection', function(socket) {
-    socket.emit('state', {
-      data: 'phon state'
-    });
     socket.on('cell', function(data) {
       return console.log(data);
     });
     socket.on('wall', function(data) {
-      return console.log(data);
+      log(data);
+      return io.sockets.emit('wall', data);
     });
     return socket.on('chat', function(msg) {
       return io.sockets.emit('chat', msg);

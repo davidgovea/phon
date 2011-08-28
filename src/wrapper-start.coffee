@@ -29,6 +29,10 @@ cell_colors	= {
 }
 particle_color	= "#52C8FF"
 select_color	= "#00AEFF"
+wall_colors ={
+	1: '#204B60'
+	2: '#304650'
+}
 
 log = (msg) ->
 	console.log msg

@@ -72,11 +72,12 @@ Raphael.fn.octogrid = (x, y, rows, cols, width) ->
 
 		dragUp: =>
 			if @dragLine? 
-				unless @dragLine.valid then @dragLine.remove()
-				else
-					server.newWall @row, @col, @row+@dragLine.line[1], @col+@dragLine.line[0]
-					vector.addWall @row, @col, @row+@dragLine.line[1], @col+@dragLine.line[0], true
-					@dragLine.remove()
+				if @dragLine.valid
+					if @dragLine.line[0] is @dragLine.line[1] or @dragLine.line[0] is @dragLine.line[1]
+						server.newSplit @row, @col, @row+@dragLine.line[1], @col+@dragLine.line[0]
+					else
+						server.newWall @row, @col, @row+@dragLine.line[1], @col+@dragLine.line[0]
+				@dragLine.remove()
 				@dragLine = null
 			@shape.attr opacity: 1
 		getAngle: (x, y)->
@@ -155,28 +156,34 @@ vector = {
 		cell2.shape.toFront()
 
 		index = "#{order[0]}_#{order[1]}_#{order[2]}_#{order[3]}"
+		#if walls[index].remove? then walls.index.remove()
+		line.index = index
 		walls[index] = line
-
-		if rowdiff is coldiff
-			toSplit = [upperRow, upperCol, 1]
-		else if rowdiff is -coldiff
-			toSplit = [upperRow, upperCol, 2]
-		else if rowdiff is 0
-			walls = [[upperRow, upperCol, 2], [upperRow+1, upperCol, 8]]
-		else
-			walls = [[upperRow, upperCol, 1], [upperRow, upperCol, 4]]
-		
 		if pending
+			line.attr 'stroke-width': '2', 'stroke-dasharray': "-..", stroke: wall_colors[2]
 			setTimeout ->
 				line.remove()
 				walls[index] = null
 			, 3000
 		else
+			line.attr 'stroke-width': '4', stroke: wall_colors[1]
+
+			if rowdiff is coldiff
+				toSplit = [upperRow, upperCol, 1]
+			else if rowdiff is -coldiff
+				toSplit = [upperRow, upperCol, 2]
+			else if rowdiff is 0
+				walls = [[upperRow, upperCol, 2], [upperRow+1, upperCol, 8]]
+			else
+				walls = [[upperRow, upperCol, 1], [upperRow, upperCol, 4]]
+			
+
 			if toSplit? 
 				cells["#{toSplit[0]}_#{toSplit[1]}_1"].split = toSplit[2]
 			else if walls?
 				walls.forEach((cell) ->
 					cells["#{cell[0]}_#{cell[1]}_1"].walls += cell[2]
 				)
+			
 }
 
