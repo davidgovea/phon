@@ -1,15 +1,10 @@
 $ ->
 		
 	Modules = {}
-
-	Modules.Global = class extends Backbone.Model
-		
-		defaults:
-			closed: false
-		
-		initialize: ->
-			@gui = new DAT.GUI
-			@gui.add(Phon.Properties, 'tick').min(0).max(300)
+	
+	#############################
+	# Instrument Sidebar Module #
+	#############################
 	
 	Modules.Instrument = class extends Backbone.Model
 
@@ -33,7 +28,11 @@ $ ->
 				'f': 349.23
 				'f#': 369.99
 				'g': 392.00
-			
+	
+	#########################
+	# Sample Sidebar Module #
+	#########################
+	
 	Modules.Sample = class extends Backbone.Model
 
 		defaults:
@@ -47,11 +46,32 @@ $ ->
 			@gui.add(@attributes, 'sample').options('kick', 'snare')
 			@gui.add(@attributes, 'pitch').min(0).max(440)
 			@gui.add(@attributes, 'offset').min(0).max(100)
-			
+	
+	#########################
+	# Global Sidebar Module #
+	#########################
+
+	Modules.Global = class extends Backbone.Model
+
+		defaults:
+			closed: false
+
+		initialize: ->
+			@gui = new DAT.GUI
+			@gui.add(Phon.Properties, 'tick').min(0).max(300)
+	
+	#################
+	# Sidebar Model #
+	#################
+	
 	Sidebar = class extends Backbone.Model
 
 		defaults:
 			active: false
+	
+	################
+	# Sidebar View #
+	################
 			
 	SidebarView = class extends Backbone.View
 	
@@ -105,6 +125,9 @@ $ ->
 			# set property/display on new module
 			model.set 'closed': !(model.get 'closed')
 	
-	# init sidebar
+	#####################
+	# Make Thing Happen #
+	#####################
+	
 	new SidebarView
 	 	model: new Sidebar
