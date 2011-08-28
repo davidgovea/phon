@@ -73,7 +73,7 @@ class Cell
 	select: (state=true) ->
 		if state
 			if cells.selected? then cells.selected.select(false)
-			@shape.attr stroke: select_color, 'stroke-width': 3
+			@shape.attr stroke: select_color, 'stroke-width': 4
 			cells.selected = @
 		else
 			@shape.attr stroke: "#000", 'stroke-width': 1
@@ -92,8 +92,10 @@ class Cell
 		else
 			@shape.attr fill: cell_colors[@state]
 			
+class Emitter
 
-	
+
+
 
 class StateHash
 	constructor: ->

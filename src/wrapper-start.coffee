@@ -11,18 +11,19 @@ $ ->
 	Phon.Elements.$paper = $ '#paper'
 
 #Constants
-NUM_ROWS	= 10
-NUM_COLS	= 10
+NUM_ROWS	= 20
+NUM_COLS	= 28
+CELL_SIZE	= 28
 cells		= {}
 particles	= []
 occupied	= null
 
 cell_colors	= {
-	1: "#d1d1d1"
-	2: "#00bb00"
+	1: "#8A8A8A"
+	2: "#616161"
 }
-particle_color	= "#cc0000"
-select_color	= "#0000ff"
+particle_color	= "#52C8FF"
+select_color	= "#00AEFF"
 
 log = (msg) ->
 	console.log msg

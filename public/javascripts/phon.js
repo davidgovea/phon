@@ -1,5 +1,5 @@
 (function() {
-  var Cell, NUM_COLS, NUM_ROWS, Particle, StateHash, cell_colors, cells, collide, decays, doLoop, init, initSockets, iterate, log, occupied, particle_color, particles, select_color, socket;
+  var CELL_SIZE, Cell, Emitter, NUM_COLS, NUM_ROWS, Particle, StateHash, cell_colors, cells, collide, decays, doLoop, init, initSockets, iterate, log, occupied, particle_color, particles, select_color, socket;
   var __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) {
     for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; }
     function ctor() { this.constructor = child; }
@@ -12,17 +12,18 @@
   Phon.Properties = {
     tick: 200
   };
-  NUM_ROWS = 10;
-  NUM_COLS = 10;
+  NUM_ROWS = 20;
+  NUM_COLS = 28;
+  CELL_SIZE = 28;
   cells = {};
   particles = [];
   occupied = null;
   cell_colors = {
-    1: "#d1d1d1",
-    2: "#00bb00"
+    1: "#8A8A8A",
+    2: "#616161"
   };
-  particle_color = "#cc0000";
-  select_color = "#0000ff";
+  particle_color = "#52C8FF";
+  select_color = "#00AEFF";
   log = function(msg) {
     return console.log(msg);
   };
@@ -224,13 +225,13 @@
         });
         cells["" + (row + 1) + "_" + (col + 1) + "_1"].shape = cell.shape;
         if (!(row === 0 || col === 0)) {
-          diamond = new Diamond(x, y, side, row, col);
+          diamond = new Diamond(x - 1.5, y - 1.5, side, row, col);
           diamond.shape.attr('fill', cell_colors[2]);
           cells["" + row + "_" + col + "_2"].shape = diamond.shape;
         }
-        x += width;
+        x += width + 3;
       }
-      y += width;
+      y += width + 3;
     }
     return console.timeEnd('octogrid');
   };
@@ -359,7 +360,7 @@
         }
         this.shape.attr({
           stroke: select_color,
-          'stroke-width': 3
+          'stroke-width': 4
         });
         return cells.selected = this;
       } else {
@@ -384,6 +385,10 @@
       }
     };
     return Cell;
+  })();
+  Emitter = (function() {
+    function Emitter() {}
+    return Emitter;
   })();
   StateHash = (function() {
     function StateHash() {
@@ -836,8 +841,8 @@
   setTimeout(function() {
     var paper;
     init();
-    paper = Raphael("paper", 1200, 800);
-    paper.octogrid(1, 1, NUM_ROWS, NUM_COLS, 32);
+    paper = Raphael("paper", (NUM_COLS + 2) * (CELL_SIZE + 3), (NUM_ROWS + 2) * (CELL_SIZE + 3));
+    paper.octogrid(1, 1, NUM_ROWS, NUM_COLS, CELL_SIZE);
     particles.push(new Particle(3, 2, 1, 1), new Particle(5, 4, 1, 8), new Particle(3, 6, 1, 4), new Particle(9, 10, 1, 4), new Particle(6, 6, 1, 8), new Particle(7, 2, 1, 1), new Particle(4, 5, 1, 2));
     return doLoop();
   }, 2000);

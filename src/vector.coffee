@@ -105,12 +105,12 @@ Raphael.fn.octogrid = (x, y, rows, cols, width) ->
 			cells["#{row+1}_#{col+1}_1"].shape = cell.shape
 
 			unless row is 0 or col is 0
-				diamond = new Diamond x, y, side, row, col
+				diamond = new Diamond x-1.5, y-1.5, side, row, col
 				diamond.shape.attr('fill', cell_colors[2])
 
 				cells["#{row}_#{col}_2"].shape = diamond.shape
 			
-			x += width
-		y += width
+			x += width+3
+		y += width+3
 
 	console.timeEnd('octogrid')
