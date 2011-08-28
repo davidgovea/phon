@@ -1,7 +1,7 @@
 $ ->
 		
 	Modules = {}
-	
+		
 	#############################
 	# Instrument Sidebar Module #
 	#############################
@@ -9,12 +9,10 @@ $ ->
 	Modules.Instrument = class extends Backbone.Model
 
 		defaults:
-			type: ''
 			closed: true
-			note: 'a'
-			length: 25
+			sound: false
 
-		initialize: ->
+		initialize: (options) ->
 			notes =
 				'a': 220
 				'a#': 233.08
@@ -27,9 +25,10 @@ $ ->
 				'f': 349.23
 				'f#': 369.99
 				'g': 392.00
+			sound = @get 'sound'
 			@gui = new DAT.GUI
-			@gui.add(@attributes, 'note').options(notes)
-			@gui.add(@attributes, 'length').min(0).max(100)
+			@gui.add(sound.attributes, 'pitch').options(notes)
+			@gui.add(sound.attributes, 'length').min(0).max(100)
 	
 	#########################
 	# Sample Sidebar Module #
@@ -39,15 +38,14 @@ $ ->
 
 		defaults:
 			closed: true
-			sample: 'kick'
-			pitch: 440
-			offset: 0
+			sound: false
 
 		initialize: ->
+			sound = @get 'sound'
 			@gui = new DAT.GUI
-			@gui.add(@attributes, 'sample').options('kick', 'snare')
-			@gui.add(@attributes, 'pitch').min(0).max(440)
-			@gui.add(@attributes, 'offset').min(0).max(100)
+			@gui.add(sound.attributes, 'sample').options('kick', 'snare')
+			@gui.add(sound.attributes, 'pitch').min(0).max(440)
+			@gui.add(sound.attributes, 'offset').min(0).max(100)
 	
 	#########################
 	# Global Sidebar Module #
@@ -90,11 +88,11 @@ $ ->
 			# but for some reason they arent accessible in constructor?
 			model = options.model
 			
-			$('.module', @el).each ->
+			$('.module[data-sound]', @el).each ->
 				
 				$module = $ this
 				module = new Modules[$module.attr 'data-module']
-					type: $module.attr 'data-type'
+					sound: new Phon.Sounds[$module.attr 'data-sound']
 				
 				# store reference to the model in DOM to be easily accessed from events
 				$module.data 'model', module
