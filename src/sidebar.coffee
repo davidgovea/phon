@@ -27,9 +27,10 @@ $ ->
 				'f#': 369.99
 				'g': 392.00
 			sound = @get 'sound'
-			@gui = new DAT.GUI
-			@gui.add(sound.attributes, 'pitch').options(notes)
-			@gui.add(sound.attributes, 'length').min(0).max(100)
+			gui = new DAT.GUI
+			gui.add(sound.attributes, 'pitch').options(notes)
+			gui.add(sound.attributes, 'length').min(0).max(100)
+			@gui_elements = [gui.domElement]
 	
 	#########################
 	# Sample Sidebar Module #
@@ -39,10 +40,11 @@ $ ->
 
 		initialize: ->
 			sound = @get 'sound'
-			@gui = new DAT.GUI
-			@gui.add(sound.attributes, 'sample').options('kick', 'snare')
-			@gui.add(sound.attributes, 'pitch').min(0).max(440)
-			@gui.add(sound.attributes, 'offset').min(0).max(100)
+			gui = new DAT.GUI
+			gui.add(sound.attributes, 'sample').options('kick', 'snare')
+			gui.add(sound.attributes, 'pitch').min(0).max(440)
+			gui.add(sound.attributes, 'offset').min(0).max(100)
+			@gui_elements = [gui.domElement]
 	
 	#########################
 	# Global Sidebar Module #
@@ -54,8 +56,31 @@ $ ->
 			closed: false
 
 		initialize: ->
-			@gui = new DAT.GUI
-			@gui.add(Phon.Properties, 'tick').min(0).max(300)
+
+			notify_grid = (event_name, increment) ->
+				Phon.Socket.emit event_name, increment
+
+			reverb =
+				more: ->
+					notify_grid 'reverb-changed', 1
+				less: ->
+					notify_grid 'reverb-changed', -1
+
+			bitcrusher =
+				more: ->
+					notify_grid 'reverb-changed', 1
+				less: ->
+					notify_grid 'reverb-changed', -1
+
+			gui1 = new DAT.GUI
+			gui1.add(reverb, 'more')
+			gui1.add(reverb, 'less')
+
+			gui2 = new DAT.GUI
+			gui2.add(bitcrusher, 'more')
+			gui2.add(bitcrusher, 'less')
+
+			@gui_elements = [$('<h3>Reverb</h3>'), gui1.domElement, $('<h3>Bitcrusher</h3>'), gui2.domElement]
 	
 	#################
 	# Sidebar Model #
@@ -115,7 +140,8 @@ $ ->
 				$module.data 'model', module
 				
 				# move DAT.GUI into container
-				$content.append module.gui.domElement
+				for el in module.gui_elements
+					$content.append el 
 
 				# setting the closed property on the module
 				# shows it and sets it as active
