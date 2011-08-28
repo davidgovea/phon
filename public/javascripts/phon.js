@@ -17,9 +17,6 @@
       return $('#disclaimer').remove();
     }
   });
-  if (!window.Phon.enabled) {
-    return false;
-  }
   Phon.Properties = {
     tick: 200,
     roomId: document.location.pathname.substring(1)
