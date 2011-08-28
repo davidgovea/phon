@@ -404,7 +404,3 @@ collide = (sums, particles) ->
 					)
 					return true
 				else alert 'unhandled 4'
-			
-		
-
-	

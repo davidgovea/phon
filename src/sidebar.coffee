@@ -104,7 +104,6 @@ $ ->
 			# save action buttons
 			@$assign_btn = $assign_btn
 			@$deactivate_btn = $deactivate_btn
-
 			$('.module', @el).each ->
 				
 				$module = $ this
@@ -138,7 +137,6 @@ $ ->
 
 		# shows / hides the current sidebar module
 		toggle_content: (e) ->
-			
 			$module = $(e.target).closest('.module')
 			model = $module.data('model')
 			
@@ -181,6 +179,5 @@ $ ->
 	#####################
 	# Make Thing Happen #
 	#####################
-	
 	window.Sidebar = new SidebarView
 	 	model: new SidebarModel

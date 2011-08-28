@@ -819,7 +819,7 @@
     }
   };
   collide = function(sums, particles) {
-    var Module, Modules, SidebarModel, SidebarView, dir, dirs, eSum, nSum, result;
+    var dir, dirs, eSum, nSum, result;
     nSum = sums[0];
     eSum = sums[1];
     console.time('find');
@@ -895,7 +895,7 @@
             });
             return true;
           default:
-            alert('unhandled 1');
+            return alert('unhandled 1');
         }
         break;
       case 3:
@@ -916,7 +916,7 @@
             });
             return true;
           default:
-            alert('unhandled 2');
+            return alert('unhandled 2');
         }
         break;
       case 7:
@@ -965,7 +965,7 @@
             });
             return true;
           default:
-            alert('unhandled 3');
+            return alert('unhandled 3');
         }
         break;
       case 15:
@@ -978,10 +978,12 @@
             });
             return true;
           default:
-            alert('unhandled 4');
+            return alert('unhandled 4');
         }
     }
-    $(function() {});
+  };
+  $(function() {
+    var Module, Modules, SidebarModel, SidebarView;
     Modules = {};
     Module = (function() {
       __extends(_Class, Backbone.Model);
@@ -1157,7 +1159,7 @@
     return window.Sidebar = new SidebarView({
       model: new SidebarModel
     });
-  };
+  });
   $(function() {
     var ChatModel, ChatView, MessageCollection, MessageModel;
     MessageModel = (function() {
