@@ -336,7 +336,9 @@ collide = (sums, particles) ->
 					dirs = [[2, 8], [1, 4]].shuffle().shift().shuffle()
 					return true
 				else
-					alert 'unhandled 5'
+					particles.forEach((p) ->
+						#p.decay()
+					)
 					return false
 		when 1, 4, 8, 16				# 1 Normal
 			switch eSum

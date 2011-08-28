@@ -2,7 +2,7 @@
 #wrapper-end.coffee
 
 doLoop = ->
-	console.time 'loop'
+	# console.time 'loop'
 
 	o = iterate()
 

@@ -865,7 +865,7 @@
             dirs = [[2, 8], [1, 4]].shuffle().shift().shuffle();
             return true;
           default:
-            alert('unhandled 5');
+            particles.forEach(function(p) {});
             return false;
         }
         break;
@@ -1319,10 +1319,7 @@
   };
   doLoop = function() {
     var o;
-    console.time('loop');
-    console.time('it');
     o = iterate();
-    console.timeEnd('it');
     o.last.forEach(function(index) {
       return cells[index].occupy(false);
     });
