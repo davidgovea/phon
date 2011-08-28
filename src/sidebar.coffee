@@ -1,16 +1,17 @@
 $ ->
 		
 	Modules = {}
+
+	Module = class extends Backbone.Model
+		defaults:
+			closed: true
+			sound: false
 		
 	#############################
 	# Instrument Sidebar Module #
 	#############################
 	
-	Modules.Instrument = class extends Backbone.Model
-
-		defaults:
-			closed: true
-			sound: false
+	Modules.Instrument = class extends Module
 
 		initialize: (options) ->
 			notes =
@@ -34,16 +35,11 @@ $ ->
 	# Sample Sidebar Module #
 	#########################
 	
-	Modules.Sample = class extends Backbone.Model
-
-		defaults:
-			closed: true
-			sound: false
+	Modules.Sample = class extends Module
 
 		initialize: ->
 			sound = @get 'sound'
 			@gui = new DAT.GUI
-			console.log sound
 			@gui.add(sound.attributes, 'sample').options('kick', 'snare')
 			@gui.add(sound.attributes, 'pitch').min(0).max(440)
 			@gui.add(sound.attributes, 'offset').min(0).max(100)

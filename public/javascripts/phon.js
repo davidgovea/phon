@@ -666,9 +666,9 @@
     }
   };
   $(function() {
-    var Modules, SidebarModel, SidebarView;
+    var Module, Modules, SidebarModel, SidebarView;
     Modules = {};
-    Modules.Instrument = (function() {
+    Module = (function() {
       __extends(_Class, Backbone.Model);
       function _Class() {
         _Class.__super__.constructor.apply(this, arguments);
@@ -677,6 +677,13 @@
         closed: true,
         sound: false
       };
+      return _Class;
+    })();
+    Modules.Instrument = (function() {
+      __extends(_Class, Module);
+      function _Class() {
+        _Class.__super__.constructor.apply(this, arguments);
+      }
       _Class.prototype.initialize = function(options) {
         var notes, sound;
         notes = {
@@ -700,19 +707,14 @@
       return _Class;
     })();
     Modules.Sample = (function() {
-      __extends(_Class, Backbone.Model);
+      __extends(_Class, Module);
       function _Class() {
         _Class.__super__.constructor.apply(this, arguments);
       }
-      _Class.prototype.defaults = {
-        closed: true,
-        sound: false
-      };
       _Class.prototype.initialize = function() {
         var sound;
         sound = this.get('sound');
         this.gui = new DAT.GUI;
-        console.log(sound);
         this.gui.add(sound.attributes, 'sample').options('kick', 'snare');
         this.gui.add(sound.attributes, 'pitch').min(0).max(440);
         return this.gui.add(sound.attributes, 'offset').min(0).max(100);
