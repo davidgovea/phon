@@ -188,6 +188,13 @@ input.text:focus {
 			#sidebar .module h2 .icon:after {
 				content: "+";
 			}
+
+		#sidebar .module h3 {
+			padding-bottom: 3px;
+			padding-top: 3px;
+			margin: 0;
+			font-size: 12px;
+		}
 	
 	#sidebar .module:first-child {
 		margin-top: 0;
@@ -231,6 +238,20 @@ input.text:focus {
 				#sidebar .module .content .buttons a.assign {
 					margin-right: 12px;	
 				}
+	
+	#sidebar .module.global .content {
+		
+	}
+
+		#sidebar .module.global .content .guidat-controller.function {
+			width: 99px;
+			display: inline-block;
+			margin-right: 10px;
+		}
+
+		#sidebar .module.global .content .guidat-controller.function:last-child {
+			margin-right: 0;
+		}
 	
 	#sidebar .module.persistent .content {
 		

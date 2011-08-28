@@ -1002,7 +1002,7 @@
         _Class.__super__.constructor.apply(this, arguments);
       }
       _Class.prototype.initialize = function(options) {
-        var notes, sound;
+        var gui, notes, sound;
         notes = {
           'a': 220,
           'a#': 233.08,
@@ -1017,9 +1017,10 @@
           'g': 392.00
         };
         sound = this.get('sound');
-        this.gui = new DAT.GUI;
-        this.gui.add(sound.attributes, 'pitch').options(notes);
-        return this.gui.add(sound.attributes, 'length').min(0).max(100);
+        gui = new DAT.GUI;
+        gui.add(sound.attributes, 'pitch').options(notes);
+        gui.add(sound.attributes, 'length').min(0).max(100);
+        return this.gui_elements = [gui.domElement];
       };
       return _Class;
     })();
@@ -1029,12 +1030,13 @@
         _Class.__super__.constructor.apply(this, arguments);
       }
       _Class.prototype.initialize = function() {
-        var sound;
+        var gui, sound;
         sound = this.get('sound');
-        this.gui = new DAT.GUI;
-        this.gui.add(sound.attributes, 'sample').options('kick', 'snare');
-        this.gui.add(sound.attributes, 'pitch').min(0).max(440);
-        return this.gui.add(sound.attributes, 'offset').min(0).max(100);
+        gui = new DAT.GUI;
+        gui.add(sound.attributes, 'sample').options('kick', 'snare');
+        gui.add(sound.attributes, 'pitch').min(0).max(440);
+        gui.add(sound.attributes, 'offset').min(0).max(100);
+        return this.gui_elements = [gui.domElement];
       };
       return _Class;
     })();
@@ -1047,8 +1049,33 @@
         closed: false
       };
       _Class.prototype.initialize = function() {
-        this.gui = new DAT.GUI;
-        return this.gui.add(Phon.Properties, 'tick').min(0).max(300);
+        var bitcrusher, gui1, gui2, notify_grid, reverb;
+        notify_grid = function(event_name, increment) {
+          return Phon.Socket.emit(event_name, increment);
+        };
+        reverb = {
+          more: function() {
+            return notify_grid('reverb-changed', 1);
+          },
+          less: function() {
+            return notify_grid('reverb-changed', -1);
+          }
+        };
+        bitcrusher = {
+          more: function() {
+            return notify_grid('reverb-changed', 1);
+          },
+          less: function() {
+            return notify_grid('reverb-changed', -1);
+          }
+        };
+        gui1 = new DAT.GUI;
+        gui1.add(reverb, 'more');
+        gui1.add(reverb, 'less');
+        gui2 = new DAT.GUI;
+        gui2.add(bitcrusher, 'more');
+        gui2.add(bitcrusher, 'less');
+        return this.gui_elements = [$('<h3>Reverb</h3>'), gui1.domElement, $('<h3>Bitcrusher</h3>'), gui2.domElement];
       };
       return _Class;
     })();
@@ -1089,7 +1116,7 @@
         this.$assign_btn = $assign_btn;
         this.$deactivate_btn = $deactivate_btn;
         return $('.module', this.el).each(function() {
-          var $content, $module, module, props;
+          var $content, $module, el, module, props, _i, _len, _ref;
           $module = $(this);
           $content = $('.content', $module);
           props = $module.attr('data-sound') ? {
@@ -1097,7 +1124,11 @@
           } : {};
           module = new Modules[$module.attr('data-module')](props);
           $module.data('model', module);
-          $content.append(module.gui.domElement);
+          _ref = module.gui_elements;
+          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+            el = _ref[_i];
+            $content.append(el);
+          }
           module.bind('change:closed', __bind(function(module, closed) {
             if (closed) {
               return $module.removeClass('open');
