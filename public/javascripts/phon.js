@@ -11,12 +11,15 @@
   window.Phon = {};
   window.Phon.enabled = (typeof AudioContext !== "undefined" && AudioContext !== null) || (typeof webkitAudioContext !== "undefined" && webkitAudioContext !== null) || ((new Audio()).mozSetup != null);
   $(function() {
-    if (window.Phon.enabled) {
+    if (!window.Phon.enabled) {
       return $('#disclaimer').fadeIn();
     } else {
       return $('#disclaimer').remove();
     }
   });
+  if (!window.Phon.enabled) {
+    return false;
+  }
   Phon.Properties = {
     tick: 200,
     roomId: document.location.pathname.substring(1)
@@ -531,7 +534,7 @@
       if (this.excited) {
         return this.direction = results.excited[this.direction];
       } else {
-        ;
+
       }
     };
     Particle.prototype.checkObstacles = function(repeat, split) {
@@ -828,11 +831,11 @@
     bCount = 0;
     enabled = setNotes();
     fillBuffer = function(buf, channelCount) {
-      var i, l, lead, n, smpl, _ref, _results, _step;
+      var i, l, lead, n, smpl, _ref, _results;
       l = buf.length;
       smpl = 0;
       _results = [];
-      for (i = 0, _step = channelCount; 0 <= l ? i < l : i > l; i += _step) {
+      for (i = 0; 0 <= l ? i < l : i > l; i += channelCount) {
         bCount++;
         if (bCount === noteLength) {
           enabled = setNotes();
