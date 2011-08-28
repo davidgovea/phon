@@ -14,9 +14,7 @@ $ ->
 			length: 25
 
 		initialize: ->
-			@gui = new DAT.GUI
-			@gui.add(@attributes, 'length').min(0).max(100)
-			@gui.add(@attributes, 'note').options
+			notes =
 				'a': 220
 				'a#': 233.08
 				'b': 246.94
@@ -28,6 +26,9 @@ $ ->
 				'f': 349.23
 				'f#': 369.99
 				'g': 392.00
+			@gui = new DAT.GUI
+			@gui.add(@attributes, 'note').options(notes)
+			@gui.add(@attributes, 'length').min(0).max(100)
 	
 	#########################
 	# Sample Sidebar Module #
