@@ -16,7 +16,6 @@ Phon.Socket.on 'wall', (data) ->
 					cells["#{line.info.cell[0]}_#{line.info.cell[1]}_1"].split = 0
 			line.remove()
 			wallList[data.index] = null
-			log 'del nulling'
 		else
 			xys = data.points
 			vector.addWall xys[0][0], xys[0][1], xys[1][0], xys[1][1]

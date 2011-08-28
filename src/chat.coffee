@@ -53,7 +53,7 @@ $ ->
 				@$content.append $ "<li>#{content}</li>"
 				@$scroller.scrollTop @$content.height()
 
-			Phon.Socket.on 'connection', =>
+			Phon.Socket.on 'connect', =>
 				add_chat_content "<strong><em>*you are now connected to phon*</em></strong>"
 			
 			# new messages rerenders ui

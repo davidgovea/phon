@@ -86,7 +86,7 @@ iterateEmitters = ->
 
 io.sockets.on 'connection', (socket) ->
 
-	socket.emit 'connection'
+	socket.once 'connect'
 
 	socket.on 'room', (id, callback) ->
 		if id is ""	then id = "main"

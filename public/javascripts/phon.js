@@ -18,7 +18,7 @@
     return Phon.Elements.$paper = $('#paper');
   });
   Phon.Socket = io.connect(document.location.protocol + '//' + document.location.host);
-  Phon.Socket.on('connection', function() {
+  Phon.Socket.on('connect', function() {
     if (paper === null) {
       init();
       vector.init();
@@ -372,10 +372,11 @@
           stroke: wall_color
         });
         line.dblclick(function() {
-          return Phon.Socket.emit('wall', {
+          Phon.Socket.emit('wall', {
             action: 'del',
             index: line.index
           });
+          return log(line.index);
         });
         if (rowdiff === coldiff) {
           toSplit = [upperRow, upperCol, 1];
@@ -403,9 +404,11 @@
             cells: []
           };
           walls.forEach(function(c) {
-            var myCell;
-            myCell = cells["" + c[0] + "_" + c[1] + "_1"].walls += c[2];
-            return info.cells.push(myCell);
+            var _ref3;
+            if ((_ref3 = cells["" + c[0] + "_" + c[1] + "_1"]) != null) {
+              _ref3.walls += c[2];
+            }
+            return info.cells.push(c);
           });
           return line.info = info;
         }
@@ -1369,7 +1372,7 @@
           this.$content.append($("<li>" + content + "</li>"));
           return this.$scroller.scrollTop(this.$content.height());
         }, this);
-        Phon.Socket.on('connection', __bind(function() {
+        Phon.Socket.on('connect', __bind(function() {
           return add_chat_content("<strong><em>*you are now connected to phon*</em></strong>");
         }, this));
         return this.model.messages.bind('add', __bind(function(message) {
@@ -1429,8 +1432,7 @@
             cells["" + line.info.cell[0] + "_" + line.info.cell[1] + "_1"].split = 0;
         }
         line.remove();
-        wallList[data.index] = null;
-        return log('del nulling');
+        return wallList[data.index] = null;
       default:
         xys = data.points;
         return vector.addWall(xys[0][0], xys[0][1], xys[1][0], xys[1][1]);

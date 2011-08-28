@@ -12,10 +12,11 @@ $ ->
 	Phon.Elements.$paper = $ '#paper'
 
 Phon.Socket = io.connect(document.location.protocol + '//' + document.location.host)
-Phon.Socket.on 'connection', ->
+Phon.Socket.on 'connect', ->
 	if paper is null
 		init()
 		vector.init()
+	
 	Phon.Socket.emit "room", Phon.Properties.roomId
 
 Phon.Socket.on 'init', (data) ->

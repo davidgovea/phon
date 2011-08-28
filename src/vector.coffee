@@ -156,6 +156,7 @@ vector = {
 			line.attr 'stroke-width': '6', stroke: wall_color
 			line.dblclick ->
 				Phon.Socket.emit 'wall', action: 'del', index: line.index
+				log line.index
 				#wallList[line.index] = null
 				#line.remove()
 
@@ -184,8 +185,8 @@ vector = {
 					cells: []
 				}
 				walls.forEach((c) ->
-					myCell = cells["#{c[0]}_#{c[1]}_1"].walls += c[2]
-					info.cells.push(myCell)
+					cells["#{c[0]}_#{c[1]}_1"]?.walls += c[2]
+					info.cells.push(c)
 				)
 				line.info = info
 			
