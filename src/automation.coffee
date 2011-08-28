@@ -425,7 +425,7 @@ collide = (sums, particles) ->
 					# else
 					particles.forEach((p) -> p.reverse())
 					return true
-				else alert 'unhandled 1'
+				#else alert 'unhandled 1'
 		when 3, 6, 9, 12				# 2 Normal, 90 degree
 			switch eSum
 				when 0						# 0 Excited
@@ -440,7 +440,7 @@ collide = (sums, particles) ->
 						p.direction	= dir
 					)
 					return true
-				else alert 'unhandled 2'
+				#else alert 'unhandled 2'
 		when 7, 11, 13, 14				# 3 Normal, T-collide
 			switch eSum
 				when 0						# 0 Excited
@@ -458,7 +458,7 @@ collide = (sums, particles) ->
 						else p.direction = result.dir[p.direction]
 					)
 					return true
-				else alert 'unhandled 3'
+				#else alert 'unhandled 3'
 		when 15							# 4 Normal, Plus-collide
 			switch eSum
 				when 0						# 0 Excited
@@ -468,4 +468,4 @@ collide = (sums, particles) ->
 						p.direction = dirs.shift()
 					)
 					return true
-				else alert 'unhandled 4'
+				#else alert 'unhandled 4'

@@ -31,7 +31,7 @@ Phon.Socket.on('init', (data) ->
 		cells[cell.index].active = true
 		cells[cell.index].sound	= cell.sound
 
-	doLoop()
+	#doLoop()
 	
 
 

@@ -131,6 +131,7 @@
           }
         };
         states[id] = state;
+        console.log(state.cells);
       }
       socket.join(id);
       return socket.set('roomId', id, function() {
@@ -155,8 +156,12 @@
         index = "" + cell_properties.row + "_" + cell_properties.col;
         cell = states[id].cells[index];
         if (cell_properties.sound !== null) {
-          cell.active = true;
-          cell.sound = cell_properties.sound;
+          if (cell != null) {
+            cell.active = true;
+          }
+          if (cell != null) {
+            cell.sound = cell_properties.sound;
+          }
         } else {
           cell.active = false;
         }

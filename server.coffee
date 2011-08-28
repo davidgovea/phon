@@ -104,6 +104,7 @@ io.sockets.on 'connection', (socket) ->
 					'bitcrusher': 0
 			} 
 			states[id] = state
+			console.log state.cells
 		socket.join(id)
 		socket.set('roomId', id, ->
 			socket.emit 'init', cells: getActiveCells(id), walls: getWalls(id), emitters: state.emitters, effects: state.effects
@@ -121,8 +122,8 @@ io.sockets.on 'connection', (socket) ->
 			index = "#{cell_properties.row}_#{cell_properties.col}"
 			cell = states[id].cells[index]
 			if cell_properties.sound isnt null
-				cell.active = true
-				cell.sound = cell_properties.sound
+				cell?.active = true
+				cell?.sound = cell_properties.sound
 			else
 				cell.active = false
 

@@ -24,7 +24,7 @@
     return Phon.Socket.emit("room", Phon.Properties.roomId);
   });
   Phon.Socket.on('init', function(data) {
-    var cell, emit, key, rc, wallIndex, walls, _i, _j, _len, _len2, _len3, _ref, _ref2;
+    var cell, emit, key, rc, wallIndex, walls, _i, _j, _len, _len2, _len3, _ref, _ref2, _results;
     console.log(data);
     walls = data.walls;
     for (_i = 0, _len = walls.length; _i < _len; _i++) {
@@ -38,12 +38,13 @@
       emitterHash[key].setIndex(emitter.index);
     }
     _ref2 = data.cells;
+    _results = [];
     for (_j = 0, _len3 = _ref2.length; _j < _len3; _j++) {
       cell = _ref2[_j];
       cells[cell.index].active = true;
-      cells[cell.index].sound = cell.sound;
+      _results.push(cells[cell.index].sound = cell.sound);
     }
-    return doLoop();
+    return _results;
   });
   NUM_ROWS = 18;
   NUM_COLS = 24;
@@ -954,8 +955,6 @@
               return p.reverse();
             });
             return true;
-          default:
-            return alert('unhandled 1');
         }
         break;
       case 3:
@@ -975,8 +974,6 @@
               return p.direction = dir;
             });
             return true;
-          default:
-            return alert('unhandled 2');
         }
         break;
       case 7:
@@ -1024,8 +1021,6 @@
               }
             });
             return true;
-          default:
-            return alert('unhandled 3');
         }
         break;
       case 15:
@@ -1037,8 +1032,6 @@
               return p.direction = dirs.shift();
             });
             return true;
-          default:
-            return alert('unhandled 4');
         }
     }
   };
@@ -1447,10 +1440,4 @@
     setTimeout(doLoop, Phon.Properties.tick);
     return console.timeEnd('loop');
   };
-  window.doLoop = doLoop;
-  window.particles = particles;
-  window.cells = cells;
-  setTimeout(function() {
-    return doLoop();
-  }, 2000);
 }).call(this);
