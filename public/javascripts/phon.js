@@ -1069,7 +1069,7 @@
             return $notify.fadeOut(function() {
               return $notify.remove();
             });
-          }, 1000);
+          }, 1500);
         });
         reverb = {
           more: function() {

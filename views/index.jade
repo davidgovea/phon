@@ -19,18 +19,21 @@
 		h2.clearfix Samples
 			span.icon
 		.content
+	
+	.footer
 
-	.global.persistent.module(data-module='Global')
-		h2.clearfix Global
-			span.icon
-		.content
+		.global.persistent.module(data-module='Global')
+			h2.clearfix Global
+				span.icon
+			.content
+
+		#chat
+			h2 Chat
+			.scroller
+				ul.content
+			.name.clearfix
+				label pick a name
+				input.text.username(type='text')		
+			input.text.msg(type='text', placeholder='chat here')
 
 #paper
-
-#chat
-	.scroller
-		ul.content
-	.name.clearfix
-		label pick a name
-		input.text.username(type='text')		
-	input.text.msg(type='text', placeholder='chat here')

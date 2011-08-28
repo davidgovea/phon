@@ -74,7 +74,7 @@ $ ->
 				setTimeout(->
 					$notify.fadeOut ->
 						$notify.remove()
-				, 1000)
+				, 1500)
 
 			reverb =
 				more: -> notify_grid 'reverb', 1
