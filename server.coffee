@@ -1,3 +1,4 @@
+beatLength = 200
 
 
 express	= require 'express'
@@ -5,7 +6,7 @@ nko		= require('nko')('Z6+o2A6kn7+tCofT')
 coffee	= require 'coffee-script'
 app		= module.exports = express.createServer()
 io		= require('socket.io').listen app
-#state	= require './statemachine'
+state	= require './statemachine'
 
 
 app.configure ->
@@ -32,9 +33,53 @@ app.get '/:id?', (req, res) ->
 ## State ##
 
 states = {
- 	main: "main state"
- 	default: "default state"
+ 	main:
+ 		cells: state.init()
+ 		walls: {}
+ 		emitters: state.emitters()
+ 		effects:
+ 			'reverb': 0
+ 			'bitcrusher': 0
 }
+
+getActiveCells = (stateid) ->
+	active = []
+	state = states[stateid]
+	for index, cell of state.cells
+		if cell.active
+			active.push index: index, sound: cell.sound
+	
+	return active
+
+getWallIndex = (row1, col1, row2, col2) ->
+	rowdiff		= row1-row2
+	coldiff		= col1-col2
+	if col1 >= col2
+		upperCol = col1
+		order	= [row1, col1, row2, col2]
+	else
+		upperCol = col2
+		order = [row2, col2, row1, col1]
+	if row1 >= row2 
+		upperRow = row1
+		if row1 isnt row2 then order = [row1, col1, row2, col2]
+	else
+		upperRow = row2
+		order = [row2, col2, row1, col1]
+	return "#{order[0]}_#{order[1]}_#{order[2]}_#{order[3]}"
+
+getWalls = (stateid) ->
+	walls = []
+	state = states[stateid]
+	for index, wall of state.walls
+		if wall then walls.push index
+	return walls
+
+iterateEmitters = ->
+	for name, state in states
+		for key, emitter in state.emitters
+			emitter.index = (emitter.index + 1) % emitter.life
+	setTimeout iterateEmitters, beatLength
 
 
 ## socket.IO ##
@@ -49,24 +94,49 @@ io.sockets.on 'connection', (socket) ->
 		if states[id]?
 			state = states[id]
 		else
-			state = 'empty!' #TODO - handle
+			walls = {}
+			state = {
+				cells: state.init()
+				walls: walls
+		 		emitters: state.emitters()
+				effects:
+					'reverb': 0
+					'bitcrusher': 0
+			} 
+			states[id] = state
 		socket.join(id)
 		socket.set('roomId', id, ->
-			socket.emit 'init', state
+			socket.emit 'init', cells: getActiveCells(id), walls: getWalls(id), emitters: state.emitters, effects: state.effects
 		)
 	
 	socket.on 'effect', (params) ->
 		socket.get('roomId', (err, id) ->
+			state = states[id]
+			state.effects[params.type] += params.amount
 			io.sockets.in(id).emit 'effect', params
 		)
 
 	socket.on 'cell', (cell_properties) ->
 		socket.get('roomId', (err, id) ->
+			index = "#{cell_properties.row}_#{cell_properties.col}"
+			cell = states[id].cells[index]
+			if cell_properties.sound isnt null
+				cell.active = true
+				cell.sound = cell_properties.sound
+			else
+				cell.active = false
+
 			io.sockets.in(id).emit 'cell', cell_properties
 		)
 	
 	socket.on 'wall', (data) ->
 		socket.get('roomId', (err, id) ->
+			switch data.action
+				when 'del'
+					states[id].walls[data.index] = null
+				when 'split', 'add'
+					pts = data.points
+					states[id].walls[getWallIndex pts[0][0], pts[0][1], pts[1][0], pts[1][1]] = true
 			io.sockets.in(id).emit 'wall', data
 		)
 	

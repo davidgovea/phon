@@ -2,7 +2,7 @@
 #wrapper-end.coffee
 
 doLoop = ->
-	console.time 'loop'
+	#console.time 'loop'
 
 	o = iterate()
 
@@ -23,8 +23,7 @@ window.doLoop = doLoop
 window.particles = particles
 window.cells = cells
 setTimeout(->
-	init()
-	vector.init()
+
 	
 	# particles.push(
 	# 	new Particle(3,2,1,1), 

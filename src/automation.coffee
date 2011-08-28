@@ -146,6 +146,8 @@ emitterHash = {}
 emitter_every = 7
 emitter_periods = [8, 16, 32, 16]
 emitter_counter = 0
+emitter_counter2 = 0
+emitter_counter3 = Math.floor(emitter_every/2)
 
 class Emitter
 	constructor: (@row, @col, @period, @direction) ->
@@ -172,7 +174,7 @@ class StateHash
 	add: (particle) ->
 		index = "#{particle.row}_#{particle.col}_#{particle.state}"
 		if not @h[index]
-			log index
+		#	log index
 			@h[index]			= cells[index]
 			@h[index].particles	= []
 			@h[index].sums		= [0,0]
@@ -210,6 +212,7 @@ Array::shuffle = -> @sort -> 0.5 - Math.random()
 decays = {
 	single: -> return Math.random()*100 < 50
 	pair: -> return Math.random()*100 < 50
+	headon: -> return Math.random()*100 < 15
 }
 
 
@@ -238,11 +241,22 @@ init = ->
 				if emitter_counter is emitter_every
 					emitter_counter = 0
 					period = emitter_periods.shift()
-					emitterHash["#{row}_#{col}"] = new Emitter row, col, period, 2
+					emitterHash["#{row}_#{col}"] = new Emitter row, col, period, 8
 					emitter_periods.push period
-	log emitterHash
-	log cells
-
+			else if col is 1
+				emitter_counter2++
+				if emitter_counter2 is emitter_every
+					emitter_counter2 = 0
+					period = emitter_periods.shift()
+					emitterHash["#{row}_#{col}"] = new Emitter row, col, period, 1
+					emitter_periods.push period	
+			else if col is NUM_COLS
+				emitter_counter3++
+				if emitter_counter3 is emitter_every
+					emitter_counter3 = 0
+					period = emitter_periods.shift()
+					emitterHash["#{row}_#{col}"] = new Emitter row, col, period, 4
+					emitter_periods.push period	
 				
 
 iterate = ->
@@ -402,6 +416,13 @@ collide = (sums, particles) ->
 		when 5, 10						# 2 Normal, Head-On
 			switch eSum
 				when 0						# 0 Excited
+					# if decays.headon()
+					# 	out = [[1,16],[4,64]].shuffle()
+					# 	particles.forEach((p) ->
+					# 		p.excite()
+					# 		p.direction = out.pop()
+					# 	)
+					# else
 					particles.forEach((p) -> p.reverse())
 					return true
 				else alert 'unhandled 1'

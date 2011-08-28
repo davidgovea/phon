@@ -19,7 +19,7 @@ Raphael.fn.octogrid = (x, y, rows, cols, width) ->
 	Phon.Socket.on 'cell', (cell_properties) ->
 		cell = cells["#{cell_properties.row}_#{cell_properties.col}_1"]
 		cell.addSound new Phon.Sounds[cell_properties.sound.type] cell_properties.sound
-		console.log cell
+#		console.log cell
 
 	class Oct
 		constructor: (x, y, side, side_rad, @row, @col) ->
@@ -31,7 +31,7 @@ Raphael.fn.octogrid = (x, y, rows, cols, width) ->
 		onClick: (evt) =>
 			cells["#{@row}_#{@col}_1"].select()
 		onDblClick: (evt) =>
-			log "dblclick #{@row},#{@col}"
+			##log "dblclick #{@row},#{@col}"
 
 
 	class Diamond

@@ -13,11 +13,27 @@ $ ->
 
 Phon.Socket = io.connect(document.location.protocol + '//' + document.location.host)
 Phon.Socket.on('connection', ->
+	init()
+	vector.init()
 	Phon.Socket.emit "room", Phon.Properties.roomId
 )
 Phon.Socket.on('init', (data) ->
-	console.log 'init'
 	console.log data
+	walls = data.walls
+	for wallIndex in walls
+		rc = wallIndex.split("_")
+		vector.addWall rc[0], rc[1], rc[2], rc[3]
+	
+	for key, emit in data.emitters
+		emitterHash[key].setIndex emitter.index
+
+	for cell in data.cells
+		cells[cell.index].active = true
+		cells[cell.index].sound	= cell.sound
+
+	doLoop()
+	
+
 
 )
 

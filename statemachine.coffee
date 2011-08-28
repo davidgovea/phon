@@ -136,21 +136,75 @@
 			@lastBeat	= @thisBeat
 			@thisBeat	= []
 	
-	class ReflectorHash
-		constructor: ->
-			@h		= {}
-		add: (index, value) ->
-			if not @h[index]
-
-
-
 	exports.init = ->
+		cells = {}
 		for row in [1..NUM_ROWS]
 			for col in [1..NUM_COLS]
 				cells["#{row}_#{col}_1"] = new Cell row, col, 1
-				unless row is NUM_ROWS or col is NUM_COLS
-					cells["#{row}_#{col}_2"] = new Cell row, col, 2
 
+		return cells
+
+	exports.emitters = ->
+		emitters = [
+			name: "1_7"
+			life: 8
+			index: 0
+			active: true
+		,
+			name: "1_14"
+			life: 16
+			index: 0
+			active: true
+		,
+			name: "1_21"
+			life: 32
+			index: 0
+			active: true
+		,
+			name: "5_24"
+			life: 16
+			index: 0
+			active: true
+		,
+			name: "8_1"
+			life: 8
+			index: 0
+			active: true
+		,
+			name: "12_24"
+			life: 16
+			index: 0
+			active: true
+		,
+			name: "15_1"
+			life: 32
+			index: 0
+			active: true
+		,
+			name: "18_4"
+			life: 16
+			index: 0
+			active: true
+		,
+			name: "18_11"
+			life: 8
+			index: 0
+			active: true
+		,
+			name: "18_18"
+			life: 16
+			index: 0
+			active: true
+		]
+
+		emitList = {}
+		for cell in emitters
+			emitList[cell.name] = {
+				life: cell.life
+				index: cell.index
+				active: true
+			}
+		return emitList
 
 
 
