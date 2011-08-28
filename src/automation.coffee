@@ -110,13 +110,20 @@ class Cell
 	# ckpcw: this addSound method should get called when the client receives a message a new sound has been added
 	# the audio stuff should bind to the @sound model property changes
 	addSound: (sound) ->
+		@activate()
 		@sound = sound
 	# ckpcw: this method gets called on "deactivate" click
 	# it should somehow notify the audio code to clean up the sound
 	removeSound: ->
-		@sound = false
-	activate: ->
+		@setActive false
+		@sound = null
+	activate: (sound) ->
+		@active = true
+		@sound = sound
+		@shape.attr fill: "#0f0"
 	deactivate: ->
+		@active = false
+		@shape.attr fill: cell_colors[@state]
 	setInstrument: (parameters) ->
 	select: (state=true) ->
 		if state
@@ -135,6 +142,13 @@ class Cell
 	setInstrument: (parameters) ->
 		#phon.setInstrument @row, @col, parameters
 		# show instrument settings pending state (until server responds & sets)
+	setActive: (state=true) ->
+		if state is true
+			@shape.attr fill: note_color
+		else
+			@shape.attr fill: cell_colors[@state]
+		@active = state
+		log this
 	occupy: (state) ->
 		if state is true
 			@shape.attr fill: particle_color

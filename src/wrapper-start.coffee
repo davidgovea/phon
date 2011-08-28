@@ -12,12 +12,12 @@ $ ->
 	Phon.Elements.$paper = $ '#paper'
 
 Phon.Socket = io.connect(document.location.protocol + '//' + document.location.host)
-Phon.Socket.on('connection', ->
+Phon.Socket.on 'connection', ->
 	init()
 	vector.init()
 	Phon.Socket.emit "room", Phon.Properties.roomId
-)
-Phon.Socket.on('init', (data) ->
+
+Phon.Socket.on 'init', (data) ->
 	console.log data
 	walls = data.walls
 	for wallIndex in walls
@@ -31,13 +31,17 @@ Phon.Socket.on('init', (data) ->
 		cells[cell.index].active = true
 		cells[cell.index].sound	= cell.sound
 
-	#doLoop()
+	doLoop()
 	
 
 
-)
 
-# Phon.Socket.emit 'lol'
+Phon.Socket.on 'cell', (cell_properties) ->
+	console.log cell_properties
+	cell = cells["#{cell_properties.row}_#{cell_properties.col}_1"]
+	cell.setActive true
+	cell.addSound cell_properties.sound
+
 
 #Constants
 NUM_ROWS	= 18
@@ -55,6 +59,8 @@ cell_colors	= {
 particle_color	= "#52C8FF"
 select_color	= "#00AEFF"
 wall_color		= '#1ED233'
+
+note_color		= "#E61D5F"
 
 log = (msg) ->
 	console.log msg

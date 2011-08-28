@@ -13,14 +13,6 @@ Raphael.fn.octogrid = (x, y, rows, cols, width) ->
 	starty		= y
 	raph		= this
 
-	# when the socket receives a broadcast message about a cell
-	# we create a sound object from those properties
-	# expects something like: { row: 0, col: 0, sound: { type: 'Lead', pitch: 0 } }
-	Phon.Socket.on 'cell', (cell_properties) ->
-		cell = cells["#{cell_properties.row}_#{cell_properties.col}_1"]
-		cell.addSound new Phon.Sounds[cell_properties.sound.type] cell_properties.sound
-#		console.log cell
-
 	class Oct
 		constructor: (x, y, side, side_rad, @row, @col) ->
 			@shape = raph.octagon x, y, side, side_rad

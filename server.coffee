@@ -111,6 +111,7 @@ io.sockets.on 'connection', (socket) ->
 		)
 	
 	socket.on 'effect', (params) ->
+		console.log params
 		socket.get('roomId', (err, id) ->
 			state = states[id]
 			state.effects[params.type] += params.amount
@@ -118,7 +119,9 @@ io.sockets.on 'connection', (socket) ->
 		)
 
 	socket.on 'cell', (cell_properties) ->
+		console.log cell_properties
 		socket.get('roomId', (err, id) ->
+			io.sockets.in(id).emit 'cell', cell_properties
 			index = "#{cell_properties.row}_#{cell_properties.col}"
 			cell = states[id].cells[index]
 			if cell_properties.sound isnt null
@@ -127,7 +130,7 @@ io.sockets.on 'connection', (socket) ->
 			else
 				cell.active = false
 
-			io.sockets.in(id).emit 'cell', cell_properties
+			
 		)
 	
 	socket.on 'wall', (data) ->
