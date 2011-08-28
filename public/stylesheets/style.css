@@ -29,7 +29,6 @@ body {
 
 			#sidebar .module h2 .icon {
 				float: right;
-				content: "+";
 			}
 			
 			#sidebar .module h2 .icon:after {
@@ -94,7 +93,7 @@ body {
 		}
 
 #paper {
-	margin-left: 280px;
+	margin: 35px 0 0 280px;
 }	
 
 .clearfix:before, .clearfix:after { content: "\0020"; display: block; height: 0; overflow: hidden; }

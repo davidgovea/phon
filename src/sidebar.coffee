@@ -10,63 +10,43 @@ $ ->
 		initialize: ->
 			@gui = new DAT.GUI
 			@gui.add(Phon.Properties, 'tick').min(0).max(300)
-			
-	Options = {}
-	
-	Options.Instrument =
-	
-		Note: ['A', 'B', 'C', 'D', 'E', 'F', 'G']
-		
-		Length:
-			default: 100
-			min: 0
-			max: 100
-			
-	Options.Sample =
-
-		Sample: ['kick', 'snare']
-
-		Pitch:
-			default: 440
-			min: 0
-			max: 1000
-
-		Offset:
-			default: 0
-			min: 0
-			max: 99
 	
 	Modules.Instrument = class extends Backbone.Model
 
 		defaults:
-			
 			closed: true
-			note: Options.Instrument.Note[0]
-			length: Options.Instrument.Length.default
+			note: 'a'
+			length: 25
 
 		initialize: ->
-			
 			@gui = new DAT.GUI
-			controller = @gui.add(@attributes, 'note')
-			controller.options.apply(controller, Options.Instrument.Note)
-			@gui.add(@attributes, 'length').min(Options.Instrument.Length.min).max(Options.Instrument.Length.max)
+			@gui.add(@attributes, 'length').min(0).max(100)
+			@gui.add(@attributes, 'note').options
+				'a': 220
+				'a#': 233.08
+				'b': 246.94
+				'c': 261.63
+				'c#': 277.18
+				'd': 293.66
+				'd#': 311.13
+				'e': 329.63
+				'f': 349.23
+				'f#': 369.99
+				'g': 392.00
 			
 	Modules.Sample = class extends Backbone.Model
 
 		defaults:
-			
 			closed: true
-			sample: Options.Sample.Sample[0]
-			pitch: Options.Sample.Pitch.default
-			offset: Options.Sample.Offset.default
+			sample: 'kick'
+			pitch: 440
+			offset: 0
 
 		initialize: ->
-			
 			@gui = new DAT.GUI
-			controller = @gui.add(@attributes, 'sample')
-			controller.options.apply(controller, Options.Sample.Sample)
-			@gui.add(@attributes, 'pitch').min(Options.Sample.Pitch.min).max(Options.Sample.Pitch.max)
-			@gui.add(@attributes, 'offset').min(Options.Sample.Offset.min).max(Options.Sample.Offset.max)
+			@gui.add(@attributes, 'sample').options('kick', 'snare')
+			@gui.add(@attributes, 'pitch').min(0).max(440)
+			@gui.add(@attributes, 'offset').min(0).max(100)
 			
 	Sidebar = class extends Backbone.Model
 
@@ -80,9 +60,13 @@ $ ->
 		events:
 			'click h2': 'toggle_content'
 			
-		initialize: ->
+		initialize: (options) ->
 			
 			_.bindAll this
+			
+			# views store options as properties anyway
+			# but for some reason they arent accessible in constructor?
+			model = options.model
 			
 			$('.module', @el).each ->
 				
@@ -95,16 +79,24 @@ $ ->
 				# move DAT.GUI into container
 				$('.content', $module).append module.gui.domElement
 				
-				# show/hide the panels when the module's "closed" property changes
-				module.bind 'change:closed', (module, closed) ->
-					$module[if !closed then 'addClass' else 'removeClass']('open')
+				# setting the closed property on the module
+				# shows it and sets it as active
+				module.bind 'change:closed', (module, closed) =>
+					$module[if closed then 'removeClass' else 'addClass']('open')
+					if not closed
+						model.set active: module
+				
+				# setting a new active module closes old active module
+				model.bind 'change:active', (sidebar, active) ->
+					prev = sidebar.previous('active')
+					if prev
+						prev.set closed: true
 				
 		# shows / hides the current sidebar module
 		toggle_content: (e) ->
 			
 			$module = $(e.target).closest('.module')
 			model = $module.data('model')
-			active = @model.get 'active'
 			
 			# module can have a "persistent" class to refuse closing
 			if $module.hasClass('persistent')
@@ -112,13 +104,6 @@ $ ->
 			
 			# set property/display on new module
 			model.set 'closed': !(model.get 'closed')
-			
-			# set property/display on previous module
-			if active
-				active.set closed: true
-				
-			# update "current" module
-			@model.set active: model
 	
 	# init sidebar
 	new SidebarView
