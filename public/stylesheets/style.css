@@ -5,6 +5,7 @@ body {
 }
 
 .btn {
+	cursor: pointer;
 	display: inline-block;
 	background-color: #e6e6e6;
 	background-repeat: no-repeat;
