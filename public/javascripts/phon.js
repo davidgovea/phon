@@ -751,32 +751,111 @@
     }
   };
   init = function() {
-    var col, period, row, _results;
+    var bCount, bass, col, dev, drum1, drum2, enabled, fillBuffer, leads, noteLength, period, reverb, row, sampleRate, setNotes;
     occupied = new StateHash;
-    _results = [];
     for (row = 1; 1 <= NUM_ROWS ? row <= NUM_ROWS : row >= NUM_ROWS; 1 <= NUM_ROWS ? row++ : row--) {
       if (row === 1) {
         emitter_counter = 0;
       } else if (row === NUM_ROWS) {
         emitter_counter = Math.floor(emitter_every / 2);
       }
-      _results.push((function() {
-        var _results2;
-        _results2 = [];
-        for (col = 1; 1 <= NUM_COLS ? col <= NUM_COLS : col >= NUM_COLS; 1 <= NUM_COLS ? col++ : col--) {
-          cells["" + row + "_" + col + "_1"] = new Cell(row, col, 1);
-          if (!(row === NUM_ROWS || col === NUM_COLS)) {
-            cells["" + row + "_" + col + "_2"] = new Cell(row, col, 2);
-          }
-          _results2.push(row === 1 ? (emitter_counter++, emitter_counter === emitter_every ? (emitter_counter = 0, period = emitter_periods.shift(), emitterHash["" + row + "_" + col] = new Emitter(row, col, period, 2), emitter_periods.push(period)) : void 0) : row === NUM_ROWS ? (emitter_counter++, emitter_counter === emitter_every ? (emitter_counter = 0, period = emitter_periods.shift(), emitterHash["" + row + "_" + col] = new Emitter(row, col, period, 8), emitter_periods.push(period)) : void 0) : col === 1 ? (emitter_counter2++, emitter_counter2 === emitter_every ? (emitter_counter2 = 0, period = emitter_periods.shift(), emitterHash["" + row + "_" + col] = new Emitter(row, col, period, 1), emitter_periods.push(period)) : void 0) : col === NUM_COLS ? (emitter_counter3++, emitter_counter3 === emitter_every ? (emitter_counter3 = 0, period = emitter_periods.shift(), emitterHash["" + row + "_" + col] = new Emitter(row, col, period, 4), emitter_periods.push(period)) : void 0) : void 0);
+      for (col = 1; 1 <= NUM_COLS ? col <= NUM_COLS : col >= NUM_COLS; 1 <= NUM_COLS ? col++ : col--) {
+        cells["" + row + "_" + col + "_1"] = new Cell(row, col, 1);
+        if (!(row === NUM_ROWS || col === NUM_COLS)) {
+          cells["" + row + "_" + col + "_2"] = new Cell(row, col, 2);
         }
-        return _results2;
-      })());
+        if (row === 1) {
+          emitter_counter++;
+          if (emitter_counter === emitter_every) {
+            emitter_counter = 0;
+            period = emitter_periods.shift();
+            emitterHash["" + row + "_" + col] = new Emitter(row, col, period, 2);
+            emitter_periods.push(period);
+          }
+        } else if (row === NUM_ROWS) {
+          emitter_counter++;
+          if (emitter_counter === emitter_every) {
+            emitter_counter = 0;
+            period = emitter_periods.shift();
+            emitterHash["" + row + "_" + col] = new Emitter(row, col, period, 8);
+            emitter_periods.push(period);
+          }
+        } else if (col === 1) {
+          emitter_counter2++;
+          if (emitter_counter2 === emitter_every) {
+            emitter_counter2 = 0;
+            period = emitter_periods.shift();
+            emitterHash["" + row + "_" + col] = new Emitter(row, col, period, 1);
+            emitter_periods.push(period);
+          }
+        } else if (col === NUM_COLS) {
+          emitter_counter3++;
+          if (emitter_counter3 === emitter_every) {
+            emitter_counter3 = 0;
+            period = emitter_periods.shift();
+            emitterHash["" + row + "_" + col] = new Emitter(row, col, period, 4);
+            emitter_periods.push(period);
+          }
+        }
+      }
     }
-    return _results;
+    setNotes = function() {
+      var bassCount, leadCount, note, notes, _i, _len;
+      leadCount = 0;
+      bassCount = 0;
+      notes = doLoop();
+      log(notes);
+      for (_i = 0, _len = notes.length; _i < _len; _i++) {
+        note = notes[_i];
+        if (note.type = "Lead" && leadCount < 4) {
+          leads[leadCount].freq = 300 * leadCount;
+          leadCount++;
+        }
+      }
+      return {
+        leads: leadCount,
+        bass: bassCount
+      };
+    };
+    bCount = 0;
+    enabled = setNotes();
+    fillBuffer = function(buf, channelCount) {
+      var i, l, lead, n, smpl, _ref, _results, _step;
+      l = buf.length;
+      smpl = 0;
+      _results = [];
+      for (i = 0, _step = channelCount; 0 <= l ? i < l : i > l; i += _step) {
+        bCount++;
+        if (bCount === noteLength) {
+          enabled = setNotes();
+          bCount = 0;
+        }
+        for (lead = 0, _ref = enabled.leads; 0 <= _ref ? lead < _ref : lead > _ref; 0 <= _ref ? lead++ : lead--) {
+          leads[lead].generate();
+          smpl += leads[lead].getMix() / enabled.leads;
+        }
+        _results.push((function() {
+          var _results2;
+          _results2 = [];
+          for (n = 0; 0 <= channelCount ? n < channelCount : n > channelCount; 0 <= channelCount ? n++ : n--) {
+            _results2.push(buf[i + n] = smpl);
+          }
+          return _results2;
+        })());
+      }
+      return _results;
+    };
+    dev = audioLib.AudioDevice(fillBuffer, 2);
+    sampleRate = dev.sampleRate;
+    noteLength = sampleRate * 0.001 * 200;
+    reverb = new audioLib.Reverb(sampleRate, 2);
+    drum1 = new audioLib.Sampler(sampleRate);
+    drum2 = new audioLib.Sampler(sampleRate);
+    leads = [new audioLib.Oscillator(sampleRate, 440), new audioLib.Oscillator(sampleRate, 440), new audioLib.Oscillator(sampleRate, 440), new audioLib.Oscillator(sampleRate, 440)];
+    return bass = [new audioLib.Oscillator(sampleRate, 440), new audioLib.Oscillator(sampleRate, 440), new audioLib.Oscillator(sampleRate, 440)];
   };
   iterate = function() {
-    var cell, cellIndex, emit, emitIndex, particle, toKill, _i, _len, _ref;
+    var cell, cellIndex, emit, emitIndex, particle, toKill, toPlay, _i, _len, _ref;
     occupied.reset();
     toKill = [];
     for (_i = 0, _len = particles.length; _i < _len; _i++) {
@@ -797,6 +876,7 @@
       emit = emitterHash[emitIndex];
       emit.step();
     }
+    toPlay = [];
     _ref = occupied.h;
     for (cellIndex in _ref) {
       cell = _ref[cellIndex];
@@ -815,14 +895,14 @@
           });
         }
         if (cell.active) {
-          log(cell);
-          log("TODO / record note playback info");
+          toPlay.push(cell.sound);
         }
       }
     }
     return {
       "this": occupied.thisBeat,
-      last: occupied.lastBeat
+      last: occupied.lastBeat,
+      sounds: toPlay
     };
   };
   processSplit = function(split, sums, particles) {
@@ -1508,6 +1588,6 @@
     o["this"].forEach(function(index) {
       return cells[index].occupy(true);
     });
-    return setTimeout(doLoop, Phon.Properties.tick);
+    return o.sounds;
   };
 }).call(this);

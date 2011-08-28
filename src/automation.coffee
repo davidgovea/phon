@@ -277,8 +277,9 @@ init = ->
 		leadCount = 0
 		bassCount = 0
 		notes = doLoop()
+		log notes
 		for note in notes
-			if note.type = "Lead" && leadCount > 4
+			if note.type = "Lead" && leadCount < 4
 				leads[leadCount].freq = 300* leadCount
 				leadCount++
 		
@@ -296,12 +297,19 @@ init = ->
 		smpl = 0
 
 		for i in [0...l] by channelCount
+			bCount++
+			if bCount is noteLength
+				enabled = setNotes()
+				bCount = 0
+
 			for lead in [0...enabled.leads]
 				leads[lead].generate()
-				smpl += leads / enabled.leads
-			
+				smpl += leads[lead].getMix() / enabled.leads
+
 			for n in [0...channelCount]
 				buf[i+n] = smpl
+		
+		
 			
 
 

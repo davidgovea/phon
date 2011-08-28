@@ -164,7 +164,7 @@
           }
           return cell != null ? cell.sound = cell_properties.sound : void 0;
         } else {
-          return cell.active = false;
+          return cell != null ? cell.active = false : void 0;
         }
       });
     });
