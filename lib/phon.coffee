@@ -494,9 +494,13 @@ $ ->
 		events:
 			'click h2': 'toggle_content'
 			
-		initialize: ->
+		initialize: (options) ->
 			
 			_.bindAll this
+			
+			# views store options as properties anyway
+			# but for some reason they arent accessible in constructor?
+			model = options.model
 			
 			$('.module', @el).each ->
 				
@@ -509,9 +513,18 @@ $ ->
 				# move DAT.GUI into container
 				$('.content', $module).append module.gui.domElement
 				
-				# show/hide the panels when the module's "closed" property changes
-				module.bind 'change:closed', (module, closed) ->
-					$module[if !closed then 'addClass' else 'removeClass']('open')
+				# setting the closed property on the module
+				# shows it and sets it as active
+				module.bind 'change:closed', (module, closed) =>
+					$module[if closed then 'removeClass' else 'addClass']('open')
+					if not closed
+						model.set active: module
+				
+				# setting a new active module closes old active module
+				model.bind 'change:active', (sidebar, active) ->
+					prev = sidebar.previous('active')
+					if prev
+						prev.set closed: true
 				
 		# shows / hides the current sidebar module
 		toggle_content: (e) ->
@@ -526,13 +539,6 @@ $ ->
 			
 			# set property/display on new module
 			model.set 'closed': !(model.get 'closed')
-			
-			# set property/display on previous module
-			if active && active != model
-				active.set closed: true
-				
-			# update "current" module
-			@model.set active: model
 	
 	# init sidebar
 	new SidebarView
