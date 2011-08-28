@@ -1,5 +1,5 @@
 (function() {
-  var CELL_SIZE, Cell, Emitter, NUM_COLS, NUM_ROWS, Particle, Sound, StateHash, cell_colors, cells, collide, decays, doLoop, init, initSockets, iterate, log, occupied, particle_color, particles, select_color, socket;
+  var CELL_SIZE, Cell, Emitter, Instrument, NUM_COLS, NUM_ROWS, Particle, Sample, Sound, StateHash, cell_colors, cells, collide, decays, doLoop, init, initSockets, iterate, log, occupied, particle_color, particles, select_color, socket;
   var __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) {
     for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; }
     function ctor() { this.constructor = child; }
@@ -42,54 +42,67 @@
     };
     return _Class;
   })();
-  Phon.Sounds.Lead = (function() {
+  Instrument = (function() {
     __extends(_Class, Sound);
     function _Class() {
       _Class.__super__.constructor.apply(this, arguments);
     }
     _Class.prototype.defaults = {
-      type: 'Lead',
       pitch: 0,
       length: 0
     };
+    return _Class;
+  })();
+  Sample = (function() {
+    __extends(_Class, Sound);
+    function _Class() {
+      _Class.__super__.constructor.apply(this, arguments);
+    }
+    _Class.prototype.defaults = {
+      pitch: 0,
+      offset: 0,
+      sample: 0
+    };
+    return _Class;
+  })();
+  Phon.Sounds.Lead = (function() {
+    __extends(_Class, Instrument);
+    function _Class() {
+      _Class.__super__.constructor.apply(this, arguments);
+    }
+    _Class.prototype.defaults = _.extend(Instrument.prototype.defaults, {
+      type: 'Lead'
+    });
     return _Class;
   })();
   Phon.Sounds.Bass = (function() {
-    __extends(_Class, Sound);
+    __extends(_Class, Instrument);
     function _Class() {
       _Class.__super__.constructor.apply(this, arguments);
     }
-    _Class.prototype.defaults = {
-      type: 'Bass',
-      pitch: 0,
-      length: 0
-    };
+    _Class.prototype.defaults = _.extend(Instrument.prototype.defaults, {
+      type: 'Bass'
+    });
     return _Class;
   })();
   Phon.Sounds.Drum = (function() {
-    __extends(_Class, Sound);
+    __extends(_Class, Sample);
     function _Class() {
       _Class.__super__.constructor.apply(this, arguments);
     }
-    _Class.prototype.defaults = {
-      type: 'Drum',
-      pitch: 0,
-      offset: 0,
-      sample: 0
-    };
+    _Class.prototype.defaults = _.extend(Sample.prototype.defaults, {
+      type: 'Drum'
+    });
     return _Class;
   })();
   Phon.Sounds.Sample = (function() {
-    __extends(_Class, Sound);
+    __extends(_Class, Sample);
     function _Class() {
       _Class.__super__.constructor.apply(this, arguments);
     }
-    _Class.prototype.defaults = {
-      type: 'Sample',
-      pitch: 0,
-      offset: 0,
-      sample: 0
-    };
+    _Class.prototype.defaults = _.extend(Sample.prototype.defaults, {
+      type: 'Sample'
+    });
     return _Class;
   })();
   Raphael.fn.octagon = function(x, y, side, side_rad) {
@@ -699,6 +712,7 @@
         var sound;
         sound = this.get('sound');
         this.gui = new DAT.GUI;
+        console.log(sound);
         this.gui.add(sound.attributes, 'sample').options('kick', 'snare');
         this.gui.add(sound.attributes, 'pitch').min(0).max(440);
         return this.gui.add(sound.attributes, 'offset').min(0).max(100);

@@ -43,6 +43,7 @@ $ ->
 		initialize: ->
 			sound = @get 'sound'
 			@gui = new DAT.GUI
+			console.log sound
 			@gui.add(sound.attributes, 'sample').options('kick', 'snare')
 			@gui.add(sound.attributes, 'pitch').min(0).max(440)
 			@gui.add(sound.attributes, 'offset').min(0).max(100)
@@ -163,7 +164,7 @@ $ ->
 
 			$module = $(e.target).closest('.module')
 			sound_name = $module.attr('data-sound')
-			
+
 			if not @current_oct
 				return false
 			
