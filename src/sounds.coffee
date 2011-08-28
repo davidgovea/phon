@@ -9,7 +9,10 @@ Sound = class extends Backbone.Model
 	# this method registers the sound at a location via api
 	# ckpcw: @attributes contains the data for the sound, we should notify API here
 	register: (row, col) ->
-		console.log 'registering', @attributes, 'at', row, col
+		Phon.Socket.emit 'cell',
+			row: row
+			col: col
+			sound: @attributes
 
 Instrument = class extends Sound
 	defaults:

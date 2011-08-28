@@ -13,6 +13,13 @@ Raphael.fn.octogrid = (x, y, rows, cols, width) ->
 	starty		= y
 	raph		= this
 
+	# when the socket receives a broadcast message about a cell
+	# we create a sound object from those properties
+	# expects something like: { row: 0, col: 0, sound: { type: 'Lead', pitch: 0 } }
+	Phon.Socket.on 'cell', (cell_properties) ->
+		cell = cells["#{cell_properties.row}_#{cell_properties.col}_1"]
+		cell.addSound new Phon.Sounds[cell_properties.sound.type] cell_properties.sound
+		console.log cell
 
 	class Oct
 		constructor: (x, y, side, side_rad, @row, @col) ->
@@ -21,18 +28,7 @@ Raphael.fn.octogrid = (x, y, rows, cols, width) ->
 			@shape.dblclick @onDblClick
 		row: 0
 		col: 0
-		sound: false
-		# ckpcw: this addSound method should get called when the client receives a message a new sound has been added
-		# the audio stuff should bind to the @sound model property changes
-		addSound: (type) ->
-			@sound = new Phon.Sounds[type]
-		# ckpcw: this method gets called on "deactivate" click
-		# it should somehow notify the audio code to clean up the sound
-		removeSound: ->
-			@sound = false
 		onClick: (evt) =>
-			# this should probably go inside cell.select()
-			Phon.Elements.$paper.trigger 'cell-selected', [@]
 			cells["#{@row}_#{@col}_1"].select()
 		onDblClick: (evt) =>
 			log "dblclick #{@row},#{@col}"

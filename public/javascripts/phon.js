@@ -39,7 +39,11 @@
       _Class.__super__.constructor.apply(this, arguments);
     }
     _Class.prototype.register = function(row, col) {
-      return console.log('registering', this.attributes, 'at', row, col);
+      return Phon.Socket.emit('cell', {
+        row: row,
+        col: col,
+        sound: this.attributes
+      });
     };
     return _Class;
   })();
@@ -119,6 +123,12 @@
     startx = x;
     starty = y;
     raph = this;
+    Phon.Socket.on('cell', function(cell_properties) {
+      var cell;
+      cell = cells["" + cell_properties.row + "_" + cell_properties.col + "_1"];
+      cell.addSound(new Phon.Sounds[cell_properties.sound.type](cell_properties.sound));
+      return console.log(cell);
+    });
     Oct = (function() {
       function Oct(x, y, side, side_rad, row, col) {
         this.row = row;
@@ -131,15 +141,7 @@
       }
       Oct.prototype.row = 0;
       Oct.prototype.col = 0;
-      Oct.prototype.sound = false;
-      Oct.prototype.addSound = function(type) {
-        return this.sound = new Phon.Sounds[type];
-      };
-      Oct.prototype.removeSound = function() {
-        return this.sound = false;
-      };
       Oct.prototype.onClick = function(evt) {
-        Phon.Elements.$paper.trigger('cell-selected', [this]);
         return cells["" + this.row + "_" + this.col + "_1"].select();
       };
       Oct.prototype.onDblClick = function(evt) {
@@ -382,6 +384,13 @@
     Cell.prototype.walls = 0;
     Cell.prototype.active = false;
     Cell.prototype.shape = null;
+    Cell.prototype.sound = false;
+    Cell.prototype.addSound = function(sound) {
+      return this.sound = sound;
+    };
+    Cell.prototype.removeSound = function() {
+      return this.sound = false;
+    };
     Cell.prototype.activate = function() {};
     Cell.prototype.deactivate = function() {};
     Cell.prototype.setInstrument = function(parameters) {};
@@ -397,7 +406,8 @@
           stroke: select_color,
           'stroke-width': 4
         });
-        return cells.selected = this;
+        cells.selected = this;
+        return Phon.Elements.$paper.trigger('cell-selected', [this]);
       } else {
         return this.shape.attr({
           stroke: "#000",
@@ -761,7 +771,7 @@
       };
       _Class.prototype.$assign_button = false;
       _Class.prototype.$deactivate_button = false;
-      _Class.prototype.current_oct = false;
+      _Class.prototype.current_cell = false;
       _Class.prototype.initialize = function(options) {
         var $action_buttons, $assign_btn, $deactivate_btn, model;
         _.bindAll(this);
@@ -817,28 +827,28 @@
           'closed': !(model.get('closed'))
         });
       };
-      _Class.prototype.select_cell = function(e, oct) {
-        this.current_oct = oct;
+      _Class.prototype.select_cell = function(e, cell) {
+        this.current_cell = cell;
         this.$assign_btn.removeClass('disabled');
-        return this.$deactivate_btn[oct.sound ? 'removeClass' : 'addClass']('disabled');
+        return this.$deactivate_btn[cell.sound ? 'removeClass' : 'addClass']('disabled');
       };
       _Class.prototype.assign_sound = function(e) {
         var $module, sound, sound_name;
         $module = $(e.target).closest('.module');
         sound_name = $module.attr('data-sound');
-        if (!this.current_oct) {
+        if (!this.current_cell) {
           return false;
         }
         this.$deactivate_btn.removeClass('disabled');
         sound = new Phon.Sounds[sound_name];
-        return sound.register(this.current_oct.row, this.current_oct.col);
+        return sound.register(this.current_cell.row, this.current_cell.col);
       };
       _Class.prototype.deactivate_sound = function(e) {
-        if (!this.current_oct) {
+        if (!this.current_cell) {
           return false;
         }
         this.$deactivate_btn.addClass('disabled');
-        return this.current_oct.removeSound();
+        return this.current_cell.removeSound();
       };
       return _Class;
     })();

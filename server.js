@@ -36,8 +36,8 @@
     socket.emit('state', {
       data: 'phon state'
     });
-    socket.on('cell', function(data) {
-      return console.log(data);
+    socket.on('cell', function(cell_properties) {
+      return io.sockets.emit('cell', cell_properties);
     });
     socket.on('wall', function(data) {
       return console.log(data);
