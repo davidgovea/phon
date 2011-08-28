@@ -1432,7 +1432,7 @@
             cells["" + line.info.cell[0] + "_" + line.info.cell[1] + "_1"].split = 0;
         }
         line.remove();
-        return wallList[data.index] = null;
+        return wallList[data.index];
       default:
         xys = data.points;
         return vector.addWall(xys[0][0], xys[0][1], xys[1][0], xys[1][1]);
