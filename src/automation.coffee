@@ -280,7 +280,8 @@ init = ->
 		log notes
 		for note in notes
 			if note.type = "Lead" && leadCount < 4
-				leads[leadCount].freq = 300* leadCount
+				leads[leadCount].freq = Note.fromLatin(note.pitch.toUpperCase()+'4').frequency()
+				log note
 				leadCount++
 		
 		return {
@@ -294,17 +295,17 @@ init = ->
 	enabled = setNotes()
 	fillBuffer = (buf, channelCount) ->
 		l = buf.length
-		smpl = 0
 
 		for i in [0...l] by channelCount
 			bCount++
+			smpl = 0
 			if bCount is noteLength
 				enabled = setNotes()
 				bCount = 0
 
 			for lead in [0...enabled.leads]
 				leads[lead].generate()
-				smpl += leads[lead].getMix() / enabled.leads
+				smpl += leads[lead].getMix()
 
 			for n in [0...channelCount]
 				buf[i+n] = smpl

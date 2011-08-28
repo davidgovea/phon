@@ -808,7 +808,8 @@
       for (_i = 0, _len = notes.length; _i < _len; _i++) {
         note = notes[_i];
         if (note.type = "Lead" && leadCount < 4) {
-          leads[leadCount].freq = 300 * leadCount;
+          leads[leadCount].freq = Note.fromLatin(note.pitch.toUpperCase() + '4').frequency();
+          log(note);
           leadCount++;
         }
       }
@@ -822,17 +823,17 @@
     fillBuffer = function(buf, channelCount) {
       var i, l, lead, n, smpl, _ref, _results, _step;
       l = buf.length;
-      smpl = 0;
       _results = [];
       for (i = 0, _step = channelCount; 0 <= l ? i < l : i > l; i += _step) {
         bCount++;
+        smpl = 0;
         if (bCount === noteLength) {
           enabled = setNotes();
           bCount = 0;
         }
         for (lead = 0, _ref = enabled.leads; 0 <= _ref ? lead < _ref : lead > _ref; 0 <= _ref ? lead++ : lead--) {
           leads[lead].generate();
-          smpl += leads[lead].getMix() / enabled.leads;
+          smpl += leads[lead].getMix();
         }
         _results.push((function() {
           var _results2;
