@@ -510,7 +510,7 @@
       if (this.excited) {
         return this.direction = results.excited[this.direction];
       } else {
-        ;
+
       }
     };
     Particle.prototype.checkObstacles = function(repeat, split) {

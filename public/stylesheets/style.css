@@ -1,11 +1,11 @@
 body {
 	background: rgb(32, 32, 32);
-	font-family: Menlo;
+	font-family: Menlo, Consolas, "Courier New", Courier, monospace;
 	color: rgb(70, 70, 70);
 }
 
 input.text {
-	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+	font-family: Menlo, Consolas, "Courier New", Courier, monospace;
 	font-size: 13px;
 	font-weight: normal;
 	line-height: normal;
@@ -207,13 +207,13 @@ input.text:focus {
 				
 				#sidebar .module .content .guidat .guidat-controllers {
 					height: auto !important;
-					font-family: Menlo;
+					font-family: Menlo, Consolas, "Courier New", Courier, monospace;
 					-webkit-border-radius: 3px;
 					-moz-border-radius: 3px;
 				}
 				
 				#sidebar .module .content .guidat input {
-					font-family: Menlo;
+					font-family: Menlo, Consolas, "Courier New", Courier, monospace;
 				}
 				
 				#sidebar .module .content .guidat .guidat-toggle {
