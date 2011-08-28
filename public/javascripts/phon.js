@@ -973,18 +973,13 @@
   });
   $(function() {
     var ChatModel, ChatView, MessageCollection, MessageModel;
-    $(document).keypress(function(e) {
-      if (e.which === 13) {
-        return Phon.Socket.emit('chat', prompt("what?"));
-      }
-    });
     MessageModel = (function() {
       __extends(_Class, Backbone.Model);
       function _Class() {
         _Class.__super__.constructor.apply(this, arguments);
       }
       _Class.prototype.defaults = {
-        username: 'some user',
+        username: false,
         msg: ''
       };
       return _Class;
@@ -1002,11 +997,15 @@
       function _Class() {
         _Class.__super__.constructor.apply(this, arguments);
       }
+      _Class.prototype.defaults = {
+        username: false
+      };
       _Class.prototype.initialize = function() {
         this.messages = new MessageCollection;
-        return Phon.Socket.on('chat', __bind(function(msg) {
+        return Phon.Socket.on('chat', __bind(function(message) {
           return this.messages.add({
-            msg: msg
+            username: message.username,
+            msg: message.msg
           });
         }, this));
       };
@@ -1019,14 +1018,56 @@
       }
       _Class.prototype.el = '#chat';
       _Class.prototype.initialize = function(options) {
-        this.$content = $('.content', this.el);
-        return options.model.messages.bind('add', __bind(function(message) {
+        _.bindAll(this);
+        this.model = options.model;
+        this.$scroller = $('.scroller', this.el);
+        this.$content = $('.content', this.$scroller);
+        this.$username = $('input.username', this.el);
+        this.$input = $('input.msg', this.el);
+        $(document).keypress(__bind(function(e) {
+          if (e.which === 13) {
+            if ($(this.el).hasClass('ready')) {
+              return this.$input.focus();
+            } else {
+              return this.$username.focus();
+            }
+          }
+        }, this));
+        this.$input.keypress(this.send_message);
+        this.$username.keypress(this.set_username);
+        return this.model.messages.bind('add', __bind(function(message) {
           var text, user;
           text = message.get('msg');
           user = message.get('username');
-          this.$content.append($("<li>" + user + ": " + text + "</li>"));
-          return $(this.el).scrollTop(this.$content.height());
+          this.$content.append($("<li><strong>" + user + ":</strong> " + text + "</li>"));
+          return this.$scroller.scrollTop(this.$content.height());
         }, this));
+      };
+      _Class.prototype.send_message = function(e) {
+        var message, username;
+        username = this.model.get('username');
+        if (e.which === 13 && username) {
+          message = new MessageModel({
+            username: username,
+            msg: this.$input.val()
+          });
+          Phon.Socket.emit('chat', message);
+          this.$input.val('');
+        }
+        return e.stopPropagation();
+      };
+      _Class.prototype.set_username = function(e) {
+        var username;
+        username = this.$username.val();
+        if (e.which === 13 && username) {
+          this.model.set({
+            username: username
+          });
+          $(this.el).addClass('ready');
+          this.$username.blur();
+          this.$input.focus();
+        }
+        return e.stopPropagation();
       };
       return _Class;
     })();
