@@ -20,7 +20,7 @@ $ ->
 
 Phon.Socket = io.connect(document.location.protocol + '//' + document.location.host)
 Phon.Socket.on 'connect', ->
-	if paper is null
+	if paper is null and window.Phon.enabled
 		init()
 		vector.init()
 	
