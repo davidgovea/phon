@@ -4,14 +4,11 @@ body {
 	color: rgb(70, 70, 70);
 }
 
-input {
+input.text {
 	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 	font-size: 13px;
 	font-weight: normal;
 	line-height: normal;
-}
-
-input[type=text] {
 	display: inline-block;
 	width: 210px;
 	padding: 4px;
@@ -33,7 +30,7 @@ input[type=text] {
 	color: #bfbfbf;
 }
 
-input[type=text] {
+input.text {
 	-webkit-transition: border linear 0.2s, box-shadow linear 0.2s;
 	-moz-transition: border linear 0.2s, box-shadow linear 0.2s;
 	transition: border linear 0.2s, box-shadow linear 0.2s;
@@ -42,7 +39,7 @@ input[type=text] {
 	box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-input[type=text]:focus {
+input.text:focus {
 	outline: none;
 	border-color: rgba(82, 168, 236, 0.8);
 	-webkit-box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1), 0 0 8px rgba(82, 168, 236, 0.6);

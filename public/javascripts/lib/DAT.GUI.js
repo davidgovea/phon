@@ -268,7 +268,7 @@ DAT.GUI = function(parameters) {
 
   this.listen = function(whoToListenTo) {
     var arr = whoToListenTo || listening;
-    for (var i in arr) {
+    for (var i = 0; i < arr.length; i++) {
       arr[i].updateDisplay();
     }
   };
@@ -280,7 +280,7 @@ DAT.GUI = function(parameters) {
   this.autoListen = true;
 
   var alreadyControlled = function(object, propertyName) {
-    for (var i in controllers) {
+    for (var i = 0; i < controllers.length; i++) {
       if (controllers[i].object == object &&
           controllers[i].propertyName == propertyName) {
         return true;
@@ -303,7 +303,7 @@ DAT.GUI = function(parameters) {
 
     if (arguments.length == 1) {
       var toReturn = [];
-      for (var i in arguments[0]) {
+      for (var i = 0; i < arguments[0].length; i++) {
         toReturn.push(_this.add(arguments[0], i));
       }
       return toReturn;
@@ -552,14 +552,14 @@ DAT.GUI.toggleHide = function() {
 
 DAT.GUI.open = function() {
   DAT.GUI.hidden = false;
-  for (var i in DAT.GUI.allGuis) {
+  for (var i = 0; i < DAT.GUI.allGuis.length; i++) {
     DAT.GUI.allGuis[i].domElement.style.display = 'block';
   }
 }
 
 DAT.GUI.close = function() {
   DAT.GUI.hidden = true;
-  for (var i in DAT.GUI.allGuis) {
+  for (var i = 0; i < DAT.GUI.allGuis.length; i++) {
     DAT.GUI.allGuis[i].domElement.style.display = 'none';
   }
 }
@@ -835,7 +835,7 @@ DAT.GUI.Controller.prototype.options = function() {
   var select = document.createElement('select');
   if (arguments.length == 1) {
     var arr = arguments[0];
-    for (var i in arr) {
+    for (var i = 0; i < arr.length; i++) {
       var opt = document.createElement('option');
       opt.innerHTML = i;
       opt.setAttribute('value', arr[i]);
