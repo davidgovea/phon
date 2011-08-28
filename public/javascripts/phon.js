@@ -904,11 +904,13 @@
       }
       _Class.prototype.el = '#chat';
       _Class.prototype.initialize = function(options) {
+        this.$content = $('.content', this.el);
         return options.model.messages.bind('add', __bind(function(message) {
           var text, user;
           text = message.get('msg');
           user = message.get('username');
-          return $(this.el).append($("<li>" + user + ": " + text + "</li>"));
+          this.$content.append($("<li>" + user + ": " + text + "</li>"));
+          return $(this.el).scrollTop(this.$content.height());
         }, this));
       };
       return _Class;
