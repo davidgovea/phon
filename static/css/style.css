@@ -29,7 +29,6 @@ body {
 
 			#sidebar .module h2 .icon {
 				float: right;
-				content: "+";
 			}
 			
 			#sidebar .module h2 .icon:after {
