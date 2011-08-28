@@ -1,19 +1,8 @@
 $ ->
-		
-	Modules = {}
-
-	Modules.Global = class extends Backbone.Model
-		
-		defaults:
-			closed: false
-		
-		initialize: ->
-			@gui = new DAT.GUI
-			@gui.add(Phon.Properties, 'tick').min(0).max(300)
-			
-	Options = {}
 	
-	Options.Instrument =
+	Defaults = {}
+	
+	Defaults.Instrument =
 		
 		Note:
 			'a': 220
@@ -33,7 +22,7 @@ $ ->
 			min: 0
 			max: 100
 			
-	Options.Sample =
+	Defaults.Sample =
 
 		Sample: ['kick', 'snare']
 
@@ -46,37 +35,48 @@ $ ->
 			default: 0
 			min: 0
 			max: 99
+		
+	Modules = {}
+
+	Modules.Global = class extends Backbone.Model
+		
+		defaults:
+			closed: false
+		
+		initialize: ->
+			@gui = new DAT.GUI
+			@gui.add(Phon.Properties, 'tick').min(0).max(300)
 	
 	Modules.Instrument = class extends Backbone.Model
 
 		defaults:
 			
 			closed: true
-			note: Options.Instrument.Note['a']
-			length: Options.Instrument.Length.default
+			note: Defaults.Instrument.Note['a']
+			length: Defaults.Instrument.Length.default
 
 		initialize: ->
 			
 			@gui = new DAT.GUI
-			@gui.add(@attributes, 'note').options(Options.Instrument.Note)
-			@gui.add(@attributes, 'length').min(Options.Instrument.Length.min).max(Options.Instrument.Length.max)
+			@gui.add(@attributes, 'note').options(Defaults.Instrument.Note)
+			@gui.add(@attributes, 'length').min(Defaults.Instrument.Length.min).max(Defaults.Instrument.Length.max)
 			
 	Modules.Sample = class extends Backbone.Model
 
 		defaults:
 			
 			closed: true
-			sample: Options.Sample.Sample[0]
-			pitch: Options.Sample.Pitch.default
-			offset: Options.Sample.Offset.default
+			sample: Defaults.Sample.Sample[0]
+			pitch: Defaults.Sample.Pitch.default
+			offset: Defaults.Sample.Offset.default
 
 		initialize: ->
 			
 			@gui = new DAT.GUI
 			controller = @gui.add(@attributes, 'sample')
-			controller.options.apply(controller, Options.Sample.Sample)
-			@gui.add(@attributes, 'pitch').min(Options.Sample.Pitch.min).max(Options.Sample.Pitch.max)
-			@gui.add(@attributes, 'offset').min(Options.Sample.Offset.min).max(Options.Sample.Offset.max)
+			controller.options.apply(controller, Defaults.Sample.Sample)
+			@gui.add(@attributes, 'pitch').min(Defaults.Sample.Pitch.min).max(Defaults.Sample.Pitch.max)
+			@gui.add(@attributes, 'offset').min(Defaults.Sample.Offset.min).max(Defaults.Sample.Offset.max)
 			
 	Sidebar = class extends Backbone.Model
 
