@@ -128,7 +128,7 @@ io.sockets.on 'connection', (socket) ->
 				cell?.active = true
 				cell?.sound = cell_properties.sound
 			else
-				cell.active = false
+				cell?.active = false
 
 			
 		)

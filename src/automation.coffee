@@ -272,7 +272,60 @@ init = ->
 					period = emitter_periods.shift()
 					emitterHash["#{row}_#{col}"] = new Emitter row, col, period, 4
 					emitter_periods.push period	
+	
+	setNotes = ->
+		leadCount = 0
+		bassCount = 0
+		notes = doLoop()
+		for note in notes
+			if note.type = "Lead" && leadCount > 4
+				leads[leadCount].freq = 300* leadCount
+				leadCount++
+		
+		return {
+			leads: leadCount
+			bass: bassCount
+		}
+			
+
+	bCount = 0
+
+	enabled = setNotes()
+	fillBuffer = (buf, channelCount) ->
+		l = buf.length
+		smpl = 0
+
+		for i in [0...l] by channelCount
+			for lead in [0...enabled.leads]
+				leads[lead].generate()
+				smpl += leads / enabled.leads
+			
+			for n in [0...channelCount]
+				buf[i+n] = smpl
+			
+
+
+		
+
+			
 				
+				
+
+
+
+
+	dev	= audioLib.AudioDevice(fillBuffer, 2)
+	sampleRate = dev.sampleRate
+	noteLength = sampleRate * 0.001 * 200
+	reverb	= new audioLib.Reverb(sampleRate, 2)
+	drum1	= new audioLib.Sampler(sampleRate)
+	drum2	= new audioLib.Sampler(sampleRate)
+	leads	= [new audioLib.Oscillator(sampleRate, 440),new audioLib.Oscillator(sampleRate, 440),new audioLib.Oscillator(sampleRate, 440),new audioLib.Oscillator(sampleRate, 440)]
+	bass	= [new audioLib.Oscillator(sampleRate, 440),new audioLib.Oscillator(sampleRate, 440),new audioLib.Oscillator(sampleRate, 440)]
+
+
+	
+		
 
 iterate = ->
 	occupied.reset()
@@ -292,7 +345,8 @@ iterate = ->
 	
 	for emitIndex, emit of emitterHash
 	 	emit.step()
-	
+
+	toPlay = []
 	for cellIndex, cell of occupied.h
 		if cell.state is 1						# Normal cell
 			if cell.split
@@ -309,11 +363,10 @@ iterate = ->
 				)
 			
 			if cell.active
-				log cell
-				log "TODO / record note playback info"
+				toPlay.push(cell.sound)
 		#else # Diamond, no processing
 			#log "I'm a diamond!"
-	return this:occupied.thisBeat, last:occupied.lastBeat
+	return this:occupied.thisBeat, last:occupied.lastBeat, sounds:toPlay
 
 
 processSplit = (split, sums, particles) ->

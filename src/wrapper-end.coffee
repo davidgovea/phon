@@ -10,5 +10,4 @@ doLoop = ->
 	o.this.forEach((index)->
 		cells[index].occupy true
 	)
-	setTimeout doLoop, Phon.Properties.tick
-
+	return o.sounds
