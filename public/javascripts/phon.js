@@ -1051,7 +1051,6 @@
       _Class.prototype.initialize = function() {
         var $titles, bitcrusher, gui1, gui2, notify_grid, reverb;
         notify_grid = function(type, amount) {
-          console.log('notifying');
           return Phon.Socket.emit('effect', {
             type: type,
             amount: amount
@@ -1070,7 +1069,7 @@
             return $notify.fadeOut(function() {
               return $notify.remove();
             });
-          }, 2000);
+          }, 1000);
         });
         reverb = {
           more: function() {

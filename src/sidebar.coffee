@@ -58,7 +58,6 @@ $ ->
 		initialize: ->
 
 			notify_grid = (type, amount) ->
-				console.log 'notifying'
 				Phon.Socket.emit 'effect',
 					type: type
 					amount: amount
@@ -75,7 +74,7 @@ $ ->
 				setTimeout(->
 					$notify.fadeOut ->
 						$notify.remove()
-				, 2000)
+				, 1000)
 
 			reverb =
 				more: -> notify_grid 'reverb', 1
