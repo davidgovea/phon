@@ -413,6 +413,7 @@ $ ->
 	Modules.Instrument = class extends Backbone.Model
 
 		defaults:
+			type: ''
 			closed: true
 			note: 'a'
 			length: 25
@@ -495,8 +496,9 @@ $ ->
 			
 			$('.module', @el).each ->
 				
-				$module = $(this)
+				$module = $ this
 				module = new Modules[$module.attr 'data-module']
+					type: $module.attr 'data-type'
 				
 				# store reference to the model in DOM to be easily accessed from events
 				$module.data 'model', module
