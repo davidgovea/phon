@@ -143,8 +143,8 @@ class Cell
 			
 
 emitterHash = {}
-emitter_every = 4
-emitter_periods = [4, 16, 8, 16]
+emitter_every = 7
+emitter_periods = [8, 16, 32, 16]
 emitter_counter = 0
 
 class Emitter
@@ -158,7 +158,9 @@ class Emitter
 	setIndex: (num) ->
 		@index = num % @period
 	emit: ->
-		particles.push(new Particle @row, @col, 1, @direction)
+		particle = new Particle @row, @col, 1, @direction
+		occupied.add particle
+		particles.push particle
 
 
 
@@ -170,6 +172,7 @@ class StateHash
 	add: (particle) ->
 		index = "#{particle.row}_#{particle.col}_#{particle.state}"
 		if not @h[index]
+			log index
 			@h[index]			= cells[index]
 			@h[index].particles	= []
 			@h[index].sums		= [0,0]
@@ -215,7 +218,10 @@ decays = {
 init = ->
 	occupied = new StateHash
 	for row in [1..NUM_ROWS]
-		if row is 1 or row is NUM_ROWS then emitter_counter = 0
+		if row is 1 
+			emitter_counter = 0
+		else if row is NUM_ROWS  
+			emitter_counter = Math.floor(emitter_every/2)
 		for col in [1..NUM_COLS]
 			cells["#{row}_#{col}_1"] = new Cell row, col, 1
 			unless row is NUM_ROWS or col is NUM_COLS
@@ -227,7 +233,15 @@ init = ->
 					period = emitter_periods.shift()
 					emitterHash["#{row}_#{col}"] = new Emitter row, col, period, 2
 					emitter_periods.push period
+			else if row is NUM_ROWS
+				emitter_counter++
+				if emitter_counter is emitter_every
+					emitter_counter = 0
+					period = emitter_periods.shift()
+					emitterHash["#{row}_#{col}"] = new Emitter row, col, period, 2
+					emitter_periods.push period
 	log emitterHash
+	log cells
 
 				
 
@@ -248,7 +262,7 @@ iterate = ->
 		)
 	
 	for emitIndex, emit of emitterHash
-		emit.step()
+	 	emit.step()
 	
 	for cellIndex, cell of occupied.h
 		if cell.state is 1						# Normal cell
