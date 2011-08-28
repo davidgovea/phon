@@ -79,6 +79,11 @@ $ ->
 	
 		events:
 			'click h2': 'toggle_content'
+			'click a.assign': 'assign_sound'
+
+		$assign_button: false
+		$deactivate_button: false
+		current_oct: false
 			
 		initialize: (options) ->
 			
@@ -132,7 +137,7 @@ $ ->
 					prev = sidebar.previous('active')
 					if prev
 						prev.set closed: true
-				
+
 		# shows / hides the current sidebar module
 		toggle_content: (e) ->
 			
@@ -146,10 +151,22 @@ $ ->
 			# set property/display on new module
 			model.set 'closed': !(model.get 'closed')
 
-		select_cell: (e, row, col, sound) ->
+		select_cell: (e, oct) ->
+
+			@current_oct = oct
 			@$assign_btn.removeClass 'disabled'
-			@$deactivate_btn[if sound then 'removeClass' else 'addClass'] 'disabled'
-			console.log 'got', row, col, sound
+			@$deactivate_btn[if oct.sound then 'removeClass' else 'addClass'] 'disabled'
+			console.log 'got', oct.row, oct.col, oct.sound
+
+		assign_sound: (e) ->
+
+			$module = $(e.target).closest('.module')
+			sound_name = $module.attr('data-sound')
+
+			if not @current_oct
+				return false
+			
+			@current_oct.addSound Phon.Sounds[sound_name]
 	
 	#####################
 	# Make Thing Happen #

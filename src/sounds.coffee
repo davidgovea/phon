@@ -6,8 +6,10 @@ Phon.Sounds = {}
 
 Sound = class extends Backbone.Model
 	
-	assign: (row, col) ->
-		console.log 'registered at ', row, col
+	# this method registers the sound at a location via api
+	register: (row, col) ->
+		# ckpcw: @attributes contains the data from 
+		console.log 'registering', @attributes, 'at', row, col
 
 Phon.Sounds.Lead = class extends Sound
 	defaults:

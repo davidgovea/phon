@@ -1,5 +1,5 @@
 (function() {
-  var CELL_SIZE, Cell, Emitter, NUM_COLS, NUM_ROWS, Particle, StateHash, cell_colors, cells, collide, decays, doLoop, init, initSockets, iterate, log, occupied, particle_color, particles, select_color, socket;
+  var CELL_SIZE, Cell, Emitter, NUM_COLS, NUM_ROWS, Particle, Sound, StateHash, cell_colors, cells, collide, decays, doLoop, init, initSockets, iterate, log, occupied, particle_color, particles, select_color, socket;
   var __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) {
     for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; }
     function ctor() { this.constructor = child; }
@@ -12,6 +12,10 @@
   Phon.Properties = {
     tick: 200
   };
+  Phon.Elements = {};
+  $(function() {
+    return Phon.Elements.$paper = $('#paper');
+  });
   NUM_ROWS = 20;
   NUM_COLS = 28;
   CELL_SIZE = 28;
@@ -28,8 +32,18 @@
     return console.log(msg);
   };
   Phon.Sounds = {};
-  Phon.Sounds.Lead = (function() {
+  Sound = (function() {
     __extends(_Class, Backbone.Model);
+    function _Class() {
+      _Class.__super__.constructor.apply(this, arguments);
+    }
+    _Class.prototype.register = function(row, col) {
+      return console.log('registering', this.attributes, 'at', row, col);
+    };
+    return _Class;
+  })();
+  Phon.Sounds.Lead = (function() {
+    __extends(_Class, Sound);
     function _Class() {
       _Class.__super__.constructor.apply(this, arguments);
     }
@@ -41,7 +55,7 @@
     return _Class;
   })();
   Phon.Sounds.Bass = (function() {
-    __extends(_Class, Backbone.Model);
+    __extends(_Class, Sound);
     function _Class() {
       _Class.__super__.constructor.apply(this, arguments);
     }
@@ -53,7 +67,7 @@
     return _Class;
   })();
   Phon.Sounds.Drum = (function() {
-    __extends(_Class, Backbone.Model);
+    __extends(_Class, Sound);
     function _Class() {
       _Class.__super__.constructor.apply(this, arguments);
     }
@@ -66,7 +80,7 @@
     return _Class;
   })();
   Phon.Sounds.Sample = (function() {
-    __extends(_Class, Backbone.Model);
+    __extends(_Class, Sound);
     function _Class() {
       _Class.__super__.constructor.apply(this, arguments);
     }
@@ -103,8 +117,13 @@
       }
       Oct.prototype.row = 0;
       Oct.prototype.col = 0;
+      Oct.prototype.sound = false;
+      Oct.prototype.addSound = function(sound) {
+        this.sound = new sound;
+        return this.sound.register(this.row, this.col);
+      };
       Oct.prototype.onClick = function(evt) {
-        log(cells["" + this.row + "_" + this.col + "_1"]);
+        Phon.Elements.$paper.trigger('cell-selected', [this]);
         return cells["" + this.row + "_" + this.col + "_1"].select();
       };
       Oct.prototype.onDblClick = function(evt) {
@@ -634,7 +653,7 @@
     }
   };
   $(function() {
-    var Modules, Sidebar, SidebarView;
+    var Modules, SidebarModel, SidebarView;
     Modules = {};
     Modules.Instrument = (function() {
       __extends(_Class, Backbone.Model);
@@ -700,7 +719,7 @@
       };
       return _Class;
     })();
-    Sidebar = (function() {
+    SidebarModel = (function() {
       __extends(_Class, Backbone.Model);
       function _Class() {
         _Class.__super__.constructor.apply(this, arguments);
@@ -717,24 +736,40 @@
       }
       _Class.prototype.el = '#sidebar';
       _Class.prototype.events = {
-        'click h2': 'toggle_content'
+        'click h2': 'toggle_content',
+        'click a.assign': 'assign_sound'
       };
+      _Class.prototype.$assign_button = false;
+      _Class.prototype.$deactivate_button = false;
+      _Class.prototype.current_oct = false;
       _Class.prototype.initialize = function(options) {
-        var model;
+        var $action_buttons, $assign_btn, $deactivate_btn, model;
         _.bindAll(this);
         model = options.model;
+        Phon.Elements.$paper.bind('cell-selected', this.select_cell);
+        $action_buttons = $('<div class="buttons" />');
+        $assign_btn = $('<a class="disabled assign btn">Assign</a>');
+        $deactivate_btn = $('<a class="disabled deactivate btn">Deactivate</a>');
+        $action_buttons.append($assign_btn);
+        $action_buttons.append($deactivate_btn);
+        this.$assign_btn = $assign_btn;
+        this.$deactivate_btn = $deactivate_btn;
         return $('.module', this.el).each(function() {
-          var $module, module, props;
+          var $content, $module, module, props;
           $module = $(this);
+          $content = $('.content', $module);
           props = $module.attr('data-sound') ? {
             sound: new Phon.Sounds[$module.attr('data-sound')]
           } : {};
           module = new Modules[$module.attr('data-module')](props);
           $module.data('model', module);
-          $('.content', $module).append(module.gui.domElement);
+          $content.append(module.gui.domElement);
           module.bind('change:closed', __bind(function(module, closed) {
-            $module[closed ? 'removeClass' : 'addClass']('open');
-            if (!closed) {
+            if (closed) {
+              return $module.removeClass('open');
+            } else {
+              $module.addClass('open');
+              $content.append($action_buttons);
               return model.set({
                 active: module
               });
@@ -762,10 +797,25 @@
           'closed': !(model.get('closed'))
         });
       };
+      _Class.prototype.select_cell = function(e, oct) {
+        this.current_oct = oct;
+        this.$assign_btn.removeClass('disabled');
+        this.$deactivate_btn[oct.sound ? 'removeClass' : 'addClass']('disabled');
+        return console.log('got', oct.row, oct.col, oct.sound);
+      };
+      _Class.prototype.assign_sound = function(e) {
+        var $module, sound_name;
+        $module = $(e.target).closest('.module');
+        sound_name = $module.attr('data-sound');
+        if (!this.current_oct) {
+          return false;
+        }
+        return this.current_oct.addSound(Phon.Sounds[sound_name]);
+      };
       return _Class;
     })();
-    return new SidebarView({
-      model: new Sidebar
+    return window.Sidebar = new SidebarView({
+      model: new SidebarModel
     });
   });
   socket = null;
