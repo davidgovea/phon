@@ -57,20 +57,33 @@ $ ->
 
 		initialize: ->
 
-			notify_grid = (event_name, increment) ->
-				Phon.Socket.emit event_name, increment
+			notify_grid = (type, amount) ->
+				console.log 'notifying'
+				Phon.Socket.emit 'effect',
+					type: type
+					amount: amount
+
+			$titles = {}
+			$titles.reverb = $ '<h3>Reverb</h3>'
+			$titles.bitcrusher = $ '<h3>Bitcrusher</h3>'
+
+			Phon.Socket.on 'effect', (params) ->
+				amount = params.amount
+				count = if amount > 0 then ("+" + amount) else amount
+				$notify = $('<span class="notify" />').text count
+				$titles[params.type].append $notify
+				setTimeout(->
+					$notify.fadeOut ->
+						$notify.remove()
+				, 2000)
 
 			reverb =
-				more: ->
-					notify_grid 'reverb-changed', 1
-				less: ->
-					notify_grid 'reverb-changed', -1
+				more: -> notify_grid 'reverb', 1
+				less: -> notify_grid 'reverb', -1
 
 			bitcrusher =
-				more: ->
-					notify_grid 'reverb-changed', 1
-				less: ->
-					notify_grid 'reverb-changed', -1
+				more: -> notify_grid 'bitcrusher', 1
+				less: -> notify_grid 'bitcrusher', -1
 
 			gui1 = new DAT.GUI
 			gui1.add(reverb, 'more')
@@ -80,7 +93,7 @@ $ ->
 			gui2.add(bitcrusher, 'more')
 			gui2.add(bitcrusher, 'less')
 
-			@gui_elements = [$('<h3>Reverb</h3>'), gui1.domElement, $('<h3>Bitcrusher</h3>'), gui2.domElement]
+			@gui_elements = [$titles.reverb, gui1.domElement, $titles.bitcrusher, gui2.domElement]
 	
 	#################
 	# Sidebar Model #

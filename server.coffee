@@ -54,7 +54,11 @@ io.sockets.on 'connection', (socket) ->
 		socket.set('roomId', id, ->
 			socket.emit 'init', state
 		)
-
+	
+	socket.on 'effect', (params) ->
+		socket.get('roomId', (err, id) ->
+			io.sockets.in(id).emit 'effect', params
+		)
 
 	socket.on 'cell', (cell_properties) ->
 		socket.get('roomId', (err, id) ->
@@ -69,11 +73,6 @@ io.sockets.on 'connection', (socket) ->
 	socket.on 'chat', (msg) ->
 		socket.get('roomId', (err, id) ->
 			io.sockets.in(id).emit 'chat', msg
-		)
-
-	socket.on 'effect', (parameters) ->
-		socket.get('roomId', (err, id) ->
-			io.sockets.in(id).emit 'effect', parameters
 		)
 		
 
