@@ -1,16 +1,17 @@
 $ ->
 		
 	Modules = {}
+
+	Module = class extends Backbone.Model
+		defaults:
+			closed: true
+			sound: false
 		
 	#############################
 	# Instrument Sidebar Module #
 	#############################
 	
-	Modules.Instrument = class extends Backbone.Model
-
-		defaults:
-			closed: true
-			sound: false
+	Modules.Instrument = class extends Module
 
 		initialize: (options) ->
 			notes =
@@ -34,11 +35,7 @@ $ ->
 	# Sample Sidebar Module #
 	#########################
 	
-	Modules.Sample = class extends Backbone.Model
-
-		defaults:
-			closed: true
-			sound: false
+	Modules.Sample = class extends Module
 
 		initialize: ->
 			sound = @get 'sound'
@@ -80,6 +77,7 @@ $ ->
 		events:
 			'click h2': 'toggle_content'
 			'click a.assign': 'assign_sound'
+			'click a.deactivate': 'deactivate_sound'
 
 		$assign_button: false
 		$deactivate_button: false
@@ -150,14 +148,15 @@ $ ->
 			
 			# set property/display on new module
 			model.set 'closed': !(model.get 'closed')
-
+		
+		# accepts an oct from the grid and saves reference as current oct
 		select_cell: (e, oct) ->
 
 			@current_oct = oct
 			@$assign_btn.removeClass 'disabled'
 			@$deactivate_btn[if oct.sound then 'removeClass' else 'addClass'] 'disabled'
-			console.log 'got', oct.row, oct.col, oct.sound
 
+		# creates a new sound on the current oct
 		assign_sound: (e) ->
 
 			$module = $(e.target).closest('.module')
@@ -166,7 +165,17 @@ $ ->
 			if not @current_oct
 				return false
 			
-			@current_oct.addSound Phon.Sounds[sound_name]
+			@$deactivate_btn.removeClass 'disabled'
+			sound = new Phon.Sounds[sound_name]
+			sound.register @current_oct.row, @current_oct.col
+
+		deactivate_sound: (e) ->
+
+			if not @current_oct
+				return false
+			
+			@$deactivate_btn.addClass 'disabled'
+			@current_oct.removeSound()
 	
 	#####################
 	# Make Thing Happen #

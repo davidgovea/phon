@@ -1,5 +1,5 @@
 (function() {
-  var CELL_SIZE, Cell, Emitter, NUM_COLS, NUM_ROWS, Particle, Sound, StateHash, cell_colors, cells, collide, decays, doLoop, init, initSockets, iterate, log, occupied, particle_color, particles, select_color, socket;
+  var CELL_SIZE, Cell, Emitter, Instrument, NUM_COLS, NUM_ROWS, Particle, Sample, Sound, StateHash, cell_colors, cells, collide, decays, doLoop, init, initSockets, iterate, log, occupied, particle_color, particles, select_color, socket;
   var __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) {
     for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; }
     function ctor() { this.constructor = child; }
@@ -16,6 +16,7 @@
   $(function() {
     return Phon.Elements.$paper = $('#paper');
   });
+  Phon.Socket = io.connect(document.location.protocol + '//' + document.location.host);
   NUM_ROWS = 20;
   NUM_COLS = 28;
   CELL_SIZE = 28;
@@ -42,54 +43,67 @@
     };
     return _Class;
   })();
-  Phon.Sounds.Lead = (function() {
+  Instrument = (function() {
     __extends(_Class, Sound);
     function _Class() {
       _Class.__super__.constructor.apply(this, arguments);
     }
     _Class.prototype.defaults = {
-      type: 'Lead',
       pitch: 0,
       length: 0
     };
+    return _Class;
+  })();
+  Sample = (function() {
+    __extends(_Class, Sound);
+    function _Class() {
+      _Class.__super__.constructor.apply(this, arguments);
+    }
+    _Class.prototype.defaults = {
+      pitch: 0,
+      offset: 0,
+      sample: 0
+    };
+    return _Class;
+  })();
+  Phon.Sounds.Lead = (function() {
+    __extends(_Class, Instrument);
+    function _Class() {
+      _Class.__super__.constructor.apply(this, arguments);
+    }
+    _Class.prototype.defaults = _.extend(Instrument.prototype.defaults, {
+      type: 'Lead'
+    });
     return _Class;
   })();
   Phon.Sounds.Bass = (function() {
-    __extends(_Class, Sound);
+    __extends(_Class, Instrument);
     function _Class() {
       _Class.__super__.constructor.apply(this, arguments);
     }
-    _Class.prototype.defaults = {
-      type: 'Bass',
-      pitch: 0,
-      length: 0
-    };
+    _Class.prototype.defaults = _.extend(Instrument.prototype.defaults, {
+      type: 'Bass'
+    });
     return _Class;
   })();
   Phon.Sounds.Drum = (function() {
-    __extends(_Class, Sound);
+    __extends(_Class, Sample);
     function _Class() {
       _Class.__super__.constructor.apply(this, arguments);
     }
-    _Class.prototype.defaults = {
-      type: 'Drum',
-      pitch: 0,
-      offset: 0,
-      sample: 0
-    };
+    _Class.prototype.defaults = _.extend(Sample.prototype.defaults, {
+      type: 'Drum'
+    });
     return _Class;
   })();
   Phon.Sounds.Sample = (function() {
-    __extends(_Class, Sound);
+    __extends(_Class, Sample);
     function _Class() {
       _Class.__super__.constructor.apply(this, arguments);
     }
-    _Class.prototype.defaults = {
-      type: 'Sample',
-      pitch: 0,
-      offset: 0,
-      sample: 0
-    };
+    _Class.prototype.defaults = _.extend(Sample.prototype.defaults, {
+      type: 'Sample'
+    });
     return _Class;
   })();
   Raphael.fn.octagon = function(x, y, side, side_rad) {
@@ -118,9 +132,11 @@
       Oct.prototype.row = 0;
       Oct.prototype.col = 0;
       Oct.prototype.sound = false;
-      Oct.prototype.addSound = function(sound) {
-        this.sound = new sound;
-        return this.sound.register(this.row, this.col);
+      Oct.prototype.addSound = function(type) {
+        return this.sound = new Phon.Sounds[type];
+      };
+      Oct.prototype.removeSound = function() {
+        return this.sound = false;
       };
       Oct.prototype.onClick = function(evt) {
         Phon.Elements.$paper.trigger('cell-selected', [this]);
@@ -653,9 +669,9 @@
     }
   };
   $(function() {
-    var Modules, SidebarModel, SidebarView;
+    var Module, Modules, SidebarModel, SidebarView;
     Modules = {};
-    Modules.Instrument = (function() {
+    Module = (function() {
       __extends(_Class, Backbone.Model);
       function _Class() {
         _Class.__super__.constructor.apply(this, arguments);
@@ -664,6 +680,13 @@
         closed: true,
         sound: false
       };
+      return _Class;
+    })();
+    Modules.Instrument = (function() {
+      __extends(_Class, Module);
+      function _Class() {
+        _Class.__super__.constructor.apply(this, arguments);
+      }
       _Class.prototype.initialize = function(options) {
         var notes, sound;
         notes = {
@@ -687,14 +710,10 @@
       return _Class;
     })();
     Modules.Sample = (function() {
-      __extends(_Class, Backbone.Model);
+      __extends(_Class, Module);
       function _Class() {
         _Class.__super__.constructor.apply(this, arguments);
       }
-      _Class.prototype.defaults = {
-        closed: true,
-        sound: false
-      };
       _Class.prototype.initialize = function() {
         var sound;
         sound = this.get('sound');
@@ -737,7 +756,8 @@
       _Class.prototype.el = '#sidebar';
       _Class.prototype.events = {
         'click h2': 'toggle_content',
-        'click a.assign': 'assign_sound'
+        'click a.assign': 'assign_sound',
+        'click a.deactivate': 'deactivate_sound'
       };
       _Class.prototype.$assign_button = false;
       _Class.prototype.$deactivate_button = false;
@@ -800,22 +820,91 @@
       _Class.prototype.select_cell = function(e, oct) {
         this.current_oct = oct;
         this.$assign_btn.removeClass('disabled');
-        this.$deactivate_btn[oct.sound ? 'removeClass' : 'addClass']('disabled');
-        return console.log('got', oct.row, oct.col, oct.sound);
+        return this.$deactivate_btn[oct.sound ? 'removeClass' : 'addClass']('disabled');
       };
       _Class.prototype.assign_sound = function(e) {
-        var $module, sound_name;
+        var $module, sound, sound_name;
         $module = $(e.target).closest('.module');
         sound_name = $module.attr('data-sound');
         if (!this.current_oct) {
           return false;
         }
-        return this.current_oct.addSound(Phon.Sounds[sound_name]);
+        this.$deactivate_btn.removeClass('disabled');
+        sound = new Phon.Sounds[sound_name];
+        return sound.register(this.current_oct.row, this.current_oct.col);
+      };
+      _Class.prototype.deactivate_sound = function(e) {
+        if (!this.current_oct) {
+          return false;
+        }
+        this.$deactivate_btn.addClass('disabled');
+        return this.current_oct.removeSound();
       };
       return _Class;
     })();
     return window.Sidebar = new SidebarView({
       model: new SidebarModel
+    });
+  });
+  $(function() {
+    var ChatModel, ChatView, MessageCollection, MessageModel;
+    $(document).keypress(function(e) {
+      if (e.which === 13) {
+        return Phon.Socket.emit('chat', prompt("what?"));
+      }
+    });
+    MessageModel = (function() {
+      __extends(_Class, Backbone.Model);
+      function _Class() {
+        _Class.__super__.constructor.apply(this, arguments);
+      }
+      _Class.prototype.defaults = {
+        username: 'some user',
+        msg: ''
+      };
+      return _Class;
+    })();
+    MessageCollection = (function() {
+      __extends(_Class, Backbone.Collection);
+      function _Class() {
+        _Class.__super__.constructor.apply(this, arguments);
+      }
+      _Class.prototype.model = MessageModel;
+      return _Class;
+    })();
+    ChatModel = (function() {
+      __extends(_Class, Backbone.Model);
+      function _Class() {
+        _Class.__super__.constructor.apply(this, arguments);
+      }
+      _Class.prototype.initialize = function() {
+        this.messages = new MessageCollection;
+        return Phon.Socket.on('chat', __bind(function(msg) {
+          return this.messages.add({
+            msg: msg
+          });
+        }, this));
+      };
+      return _Class;
+    })();
+    ChatView = (function() {
+      __extends(_Class, Backbone.Model);
+      function _Class() {
+        _Class.__super__.constructor.apply(this, arguments);
+      }
+      _Class.prototype.el = '#chat';
+      _Class.prototype.initialize = function(options) {
+        return options.model.messages.bind('add', __bind(function(message) {
+          var text, user;
+          text = message.get('msg');
+          user = message.get('username');
+          return $(this.el).append($("<li>" + user + ": " + text + "</li>"));
+        }, this));
+      };
+      return _Class;
+    })();
+    return new ChatView({
+      model: new ChatModel
     });
   });
   socket = null;

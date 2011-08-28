@@ -10,6 +10,10 @@ Phon.Elements = {}
 $ ->
 	Phon.Elements.$paper = $ '#paper'
 
+Phon.Socket = io.connect(document.location.protocol + '//' + document.location.host)
+
+# Phon.Socket.emit 'lol'
+
 #Constants
 NUM_ROWS	= 20
 NUM_COLS	= 28

@@ -42,8 +42,8 @@
     socket.on('wall', function(data) {
       return console.log(data);
     });
-    return socket.on('chat', function(data) {
-      return console.log(data);
+    return socket.on('chat', function(msg) {
+      return io.sockets.emit('chat', msg);
     });
   });
   app.listen(parseInt(process.env.PORT) || 3000);

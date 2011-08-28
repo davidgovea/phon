@@ -21,9 +21,18 @@ Raphael.fn.octogrid = (x, y, rows, cols, width) ->
 			@shape.dblclick @onDblClick
 		row: 0
 		col: 0
+		sound: false
+		# ckpcw: this addSound method should get called when the client receives a message a new sound has been added
+		# the audio stuff should bind to the @sound model property changes
+		addSound: (type) ->
+			@sound = new Phon.Sounds[type]
+		# ckpcw: this method gets called on "deactivate" click
+		# it should somehow notify the audio code to clean up the sound
+		removeSound: ->
+			@sound = false
 		onClick: (evt) =>
-			#catshirt - hook in here
-			log cells["#{@row}_#{@col}_1"]
+			# this should probably go inside cell.select()
+			Phon.Elements.$paper.trigger 'cell-selected', [@]
 			cells["#{@row}_#{@col}_1"].select()
 		onDblClick: (evt) =>
 			log "dblclick #{@row},#{@col}"
