@@ -1,6 +1,5 @@
 
 all:
-	cat src/wrapper-start.coffee src/sounds.coffee src/vector.coffee src/automation.coffee src/sidebar.coffee src/wrapper-end.coffee > lib/phon.coffee
-	coffee -c lib/phon.coffee
-	cp lib/phon.js public/javascripts/phon.js
+	cat public/javascripts/wrapper-start.coffee public/javascripts/sounds.coffee public/javascripts/vector.coffee public/javascripts/automation.coffee public/javascripts/sidebar.coffee public/javascripts/wrapper-end.coffee > public/javascripts/phon.coffee
+	coffee -c public/javascripts/phon.coffee
 	coffee -c server.coffee
