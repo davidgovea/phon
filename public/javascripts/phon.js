@@ -1049,24 +1049,43 @@
         closed: false
       };
       _Class.prototype.initialize = function() {
-        var bitcrusher, gui1, gui2, notify_grid, reverb;
-        notify_grid = function(event_name, increment) {
-          return Phon.Socket.emit(event_name, increment);
+        var $titles, bitcrusher, gui1, gui2, notify_grid, reverb;
+        notify_grid = function(type, amount) {
+          console.log('notifying');
+          return Phon.Socket.emit('effect', {
+            type: type,
+            amount: amount
+          });
         };
+        $titles = {};
+        $titles.reverb = $('<h3>Reverb</h3>');
+        $titles.bitcrusher = $('<h3>Bitcrusher</h3>');
+        Phon.Socket.on('effect', function(params) {
+          var $notify, amount, count;
+          amount = params.amount;
+          count = amount > 0 ? "+" + amount : amount;
+          $notify = $('<span class="notify" />').text(count);
+          $titles[params.type].append($notify);
+          return setTimeout(function() {
+            return $notify.fadeOut(function() {
+              return $notify.remove();
+            });
+          }, 2000);
+        });
         reverb = {
           more: function() {
-            return notify_grid('reverb-changed', 1);
+            return notify_grid('reverb', 1);
           },
           less: function() {
-            return notify_grid('reverb-changed', -1);
+            return notify_grid('reverb', -1);
           }
         };
         bitcrusher = {
           more: function() {
-            return notify_grid('bitcrusher-changed', 1);
+            return notify_grid('bitcrusher', 1);
           },
           less: function() {
-            return notify_grid('bitcrusher-changed', -1);
+            return notify_grid('bitcrusher', -1);
           }
         };
         gui1 = new DAT.GUI;
@@ -1075,7 +1094,7 @@
         gui2 = new DAT.GUI;
         gui2.add(bitcrusher, 'more');
         gui2.add(bitcrusher, 'less');
-        return this.gui_elements = [$('<h3>Reverb</h3>'), gui1.domElement, $('<h3>Bitcrusher</h3>'), gui2.domElement];
+        return this.gui_elements = [$titles.reverb, gui1.domElement, $titles.bitcrusher, gui2.domElement];
       };
       return _Class;
     })();

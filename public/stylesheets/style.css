@@ -167,6 +167,7 @@ input.text:focus {
 	width: 230px;
 	padding: 0 15px;
 	height: 100%;
+	overflow-x: hidden;
 }
 	
 	#sidebar .module {
@@ -242,6 +243,19 @@ input.text:focus {
 	#sidebar .module.global .content {
 		
 	}
+
+		#sidebar .module.global h3 {
+			
+		}
+
+			#sidebar .module.global h3 .notify {
+				margin-left: 5px;
+				color: rgb(185, 120, 65);
+			}
+
+			#sidebar .module.global h3 .notify:after {
+				content: "!";
+			}
 
 		#sidebar .module.global .content .guidat-controller.function {
 			width: 99px;
