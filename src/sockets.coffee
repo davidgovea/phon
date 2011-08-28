@@ -15,8 +15,6 @@ server = {
 			socket.emit('cell', row: row, col: col, inst: null)
 		else
 			socket.emit 'cell', row: row, col: col, inst: instrument, settings: settings
-	sendChat: (userName, msg) ->
-		socket.emit 'chat', user: userName, msg: msg
 	sendEffect: (effect, value) ->
 		socket.emit 'effect', type: effect, value: value
 }

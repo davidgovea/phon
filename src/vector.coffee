@@ -153,8 +153,8 @@ vector = {
 		cell2.shape.toFront()
 
 		index = "#{order[0]}_#{order[1]}_#{order[2]}_#{order[3]}"
-		#if walls[index].remove? then walls.index.remove()
 		line.index = index
+		walls[index]?.remove()
 		walls[index] = line
 		if pending
 			line.attr 'stroke-width': '4', 'stroke-dasharray': "-", stroke: wall_color
@@ -164,6 +164,9 @@ vector = {
 			, 3000
 		else
 			line.attr 'stroke-width': '6', stroke: wall_color
+			line.dblclick ->
+				walls[line.index] = null
+				line.remove()
 
 			if rowdiff is coldiff
 				toSplit = [upperRow, upperCol, 1]
