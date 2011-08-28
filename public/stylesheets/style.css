@@ -106,7 +106,7 @@ input.text:focus {
 
 #chat {
 	width: 240px;
-	padding: 0 10px 10px;
+	padding: 10px;
 }
 
 	#chat .scroller {
@@ -187,9 +187,8 @@ input.text:focus {
 			}
 
 		#sidebar .module h3 {
-			padding-bottom: 3px;
-			padding-top: 3px;
-			margin: 0;
+			padding: 0;
+			margin: 0 0 3px;
 			font-size: 12px;
 		}
 	
@@ -254,7 +253,7 @@ input.text:focus {
 			}
 
 		#sidebar .module.global .content .guidat-controller.function {
-			width: 99px;
+			width: 104px;
 			display: inline-block;
 			margin-right: 10px;
 		}
@@ -299,8 +298,12 @@ input.text:focus {
 	}
 
 		#sidebar .footer .module {
-			padding: 0 15px 5px;
+			padding: 0 10px 10px;
 		}
+
+			#sidebar .footer .module .guidat:last-child {
+				margin-bottom: 0;
+			}
 
 #paper {
 	margin: 35px 0 0 280px;
