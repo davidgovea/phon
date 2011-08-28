@@ -4,6 +4,19 @@ body {
 	color: rgb(70, 70, 70);
 }
 
+h1 {
+	font-size: 28px;
+	padding: 0;
+	margin: 15px 0 5px;
+}
+
+h2 {
+	padding-bottom: 10px;
+	padding-top: 10px;
+	margin: 0;
+	font-size: 15px;
+}
+
 input.text {
 	font-family: Menlo, Consolas, "Courier New", Courier, monospace;
 	font-size: 13px;
@@ -96,17 +109,10 @@ input.text:focus {
 		-moz-box-shadow: none;
 		box-shadow: none;
 	}
+
 #chat {
-	position: fixed;
-	bottom: 0;
-	left: 0;
-	background: rgb(237, 238, 240);
 	width: 240px;
 	padding: 10px;
-	-moz-border-radius-topleft: 4px;
-    -webkit-border-top-left-radius: 4px;
-    -moz-border-radius-topright: 4px;
-    -webkit-border-top-right-radius: 4px;
 }
 
 	#chat .scroller {
@@ -174,12 +180,16 @@ input.text:focus {
 		border-bottom: 1px solid rgb(214, 217, 222);
 		border-top: 1px solid rgb(255, 255, 255);
 	}
+
+	#sidebar .module.first {
+		border-top: none;
+	}
+
+	#sidebar .module.last {
+		border-bottom: none;
+	}
 	
 		#sidebar .module h2 {
-			padding-bottom: 10px;
-			padding-top: 10px;
-			margin: 0;
-			font-size: 15px;
 		}
 
 			#sidebar .module h2 .icon {
@@ -191,9 +201,8 @@ input.text:focus {
 			}
 
 		#sidebar .module h3 {
-			padding-bottom: 3px;
-			padding-top: 3px;
-			margin: 0;
+			padding: 0;
+			margin: 0 0 3px;
 			font-size: 12px;
 		}
 	
@@ -258,7 +267,7 @@ input.text:focus {
 			}
 
 		#sidebar .module.global .content .guidat-controller.function {
-			width: 99px;
+			width: 104px;
 			display: inline-block;
 			margin-right: 10px;
 		}
@@ -290,6 +299,27 @@ input.text:focus {
 		#sidebar .module.open h2 .icon:after {
 			content: "-";
 		}
+
+	#sidebar .footer {
+		position: fixed;
+		bottom: 0;
+		left: 0;
+		background: rgb(237, 238, 240);
+		-moz-border-radius-topleft: 4px;
+	    -webkit-border-top-left-radius: 4px;
+	    -moz-border-radius-topright: 4px;
+	    -webkit-border-top-right-radius: 4px;
+		border-top: 1px solid rgb(255, 255, 255);
+	}
+
+		#sidebar .footer .module {
+			padding: 10px;
+			border-top: 1px solid rgb(214, 217, 222);
+		}
+
+			#sidebar .footer .module .guidat:last-child {
+				margin-bottom: 0;
+			}
 
 #paper {
 	margin: 35px 0 0 280px;

@@ -1,6 +1,8 @@
 #sidebar
+
 	h1 Phon
-	.module(data-module='Instrument', data-sound='Lead')
+
+	.module.first(data-module='Instrument', data-sound='Lead')
 		h2.clearfix Lead
 			span.icon
 		.content
@@ -15,22 +17,22 @@
 			span.icon
 		.content
 
-	.module(data-module='Sample', data-sound='Sample')
+	.module.last(data-module='Sample', data-sound='Sample')
 		h2.clearfix Samples
 			span.icon
 		.content
+	
+	.footer
 
-	.global.persistent.module(data-module='Global')
-		h2.clearfix Global
-			span.icon
-		.content
+		.global.persistent.module(data-module='Global')
+			.content
+
+		#chat
+			.scroller
+				ul.content
+			.name.clearfix
+				label pick a name
+				input.text.username(type='text')		
+			input.text.msg(type='text', placeholder='chat here')
 
 #paper
-
-#chat
-	.scroller
-		ul.content
-	.name.clearfix
-		label pick a name
-		input.text.username(type='text')		
-	input.text.msg(type='text', placeholder='chat here')

@@ -1069,7 +1069,7 @@
             return $notify.fadeOut(function() {
               return $notify.remove();
             });
-          }, 1000);
+          }, 1500);
         });
         reverb = {
           more: function() {
@@ -1256,6 +1256,7 @@
       }
       _Class.prototype.el = '#chat';
       _Class.prototype.initialize = function(options) {
+        var add_chat_content;
         _.bindAll(this);
         this.model = options.model;
         this.$scroller = $('.scroller', this.el);
@@ -1273,12 +1274,18 @@
         }, this));
         this.$input.keyup(this.send_message);
         this.$username.keyup(this.set_username);
-        return this.model.messages.bind('add', __bind(function(message) {
-          var text, user;
-          text = message.get('msg');
-          user = message.get('username');
-          this.$content.append($("<li><strong>" + user + ":</strong> " + text + "</li>"));
+        add_chat_content = __bind(function(content) {
+          this.$content.append($("<li>" + content + "</li>"));
           return this.$scroller.scrollTop(this.$content.height());
+        }, this);
+        Phon.Socket.on('connection', __bind(function() {
+          return add_chat_content("<strong><em>*you are now connected to phon*</em></strong>");
+        }, this));
+        return this.model.messages.bind('add', __bind(function(message) {
+          var text, username;
+          text = message.get('msg');
+          username = message.get('username');
+          return add_chat_content("<strong>" + username + ":</strong> " + text);
         }, this));
       };
       _Class.prototype.send_message = function(e) {
