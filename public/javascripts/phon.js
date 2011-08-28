@@ -9,6 +9,14 @@
     return child;
   }, __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
   window.Phon = {};
+  window.Phon.enabled = (typeof AudioContext !== "undefined" && AudioContext !== null) || (typeof webkitAudioContext !== "undefined" && webkitAudioContext !== null) || ((new Audio()).mozSetup != null);
+  $(function() {
+    if (window.Phon.enabled) {
+      return $('#disclaimer').fadeIn();
+    } else {
+      return $('#disclaimer').remove();
+    }
+  });
   Phon.Properties = {
     tick: 200,
     roomId: document.location.pathname.substring(1)

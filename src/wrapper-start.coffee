@@ -2,6 +2,16 @@
 #wrapper-start.coffee
 
 window.Phon = {}
+window.Phon.enabled = AudioContext? or webkitAudioContext? or (new Audio()).mozSetup?
+
+$ ->
+	if (window.Phon.enabled)
+		$('#disclaimer').fadeIn()
+	else
+		$('#disclaimer').remove()
+
+if window.Phon.enabled
+	return false
 	
 Phon.Properties =
 	tick: 200
