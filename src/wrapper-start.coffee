@@ -5,16 +5,20 @@ window.Phon = {}
 	
 Phon.Properties =
 	tick: 200
+	roomId: document.location.pathname.substring(1)
 
 Phon.Elements = {}
 $ ->
 	Phon.Elements.$paper = $ '#paper'
 
+console.log Phon.Properties
 Phon.Socket = io.connect(document.location.protocol + '//' + document.location.host)
 Phon.Socket.on('connection', ->
-	Phon.Socket.emit "init", document.location.pathname.substring(1)
+	Phon.Socket.emit "room", Phon.Properties.roomId
 )
 Phon.Socket.on('init', (data) ->
+	console.log 'init'
+	console.log data
 
 )
 

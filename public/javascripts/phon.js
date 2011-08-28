@@ -10,17 +10,22 @@
   }, __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
   window.Phon = {};
   Phon.Properties = {
-    tick: 200
+    tick: 200,
+    roomId: document.location.pathname.substring(1)
   };
   Phon.Elements = {};
   $(function() {
     return Phon.Elements.$paper = $('#paper');
   });
+  console.log(Phon.Properties);
   Phon.Socket = io.connect(document.location.protocol + '//' + document.location.host);
   Phon.Socket.on('connection', function() {
-    return Phon.Socket.emit("init", document.location.pathname.substring(1));
+    return Phon.Socket.emit("room", Phon.Properties.roomId);
   });
-  Phon.Socket.on('init', function(data) {});
+  Phon.Socket.on('init', function(data) {
+    console.log('init');
+    return console.log(data);
+  });
   NUM_ROWS = 18;
   NUM_COLS = 24;
   CELL_SIZE = 28;
@@ -333,8 +338,8 @@
       walls[index] = line;
       if (pending) {
         line.attr({
-          'stroke-width': '4',
-          'stroke-dasharray': "-",
+          'stroke-width': '3',
+          'stroke-dasharray': ".",
           stroke: wall_color
         });
         return setTimeout(function() {

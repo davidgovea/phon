@@ -1,5 +1,5 @@
 (function() {
-  var app, coffee, express, io, nko;
+  var app, coffee, express, io, nko, states;
   express = require('express');
   nko = require('nko')('Z6+o2A6kn7+tCofT');
   coffee = require('coffee-script');
@@ -27,18 +27,32 @@
   app.configure('production', function() {
     return app.use(express.errorHandler());
   });
-  app.get('/', function(req, res) {
+  app.get('/:id?', function(req, res) {
     return res.render('index', {
       title: 'Phon'
     });
   });
+  states = {
+    main: "main state",
+    "default": "default state"
+  };
   io.sockets.on('connection', function(socket) {
-    socket.on('init', function(id) {
+    socket.emit('connection');
+    socket.on('room', function(id, callback) {
+      var state;
       if (id === "") {
-        return console.log("got init");
-      } else {
-        ;
+        id = "main";
       }
+      console.log("got client in room: " + id);
+      if (states[id] != null) {
+        state = states[id];
+      } else {
+        state = 'empty!';
+      }
+      socket.join(id);
+      return socket.set('roomId', id, function() {
+        return socket.emit('init', state);
+      });
     });
     socket.on('cell', function(cell_properties) {
       return io.sockets.emit('cell', cell_properties);
@@ -47,7 +61,9 @@
       return io.sockets.emit('wall', data);
     });
     return socket.on('chat', function(msg) {
-      return io.sockets.emit('chat', msg);
+      return socket.get('roomId', function(err, id) {
+        return io.sockets["in"](id).emit('chat', msg);
+      });
     });
   });
   app.listen(parseInt(process.env.PORT) || 3000);
