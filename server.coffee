@@ -24,38 +24,58 @@ app.configure 'production', ->
 
 ## Routes ##
 
-app.get '/', (req, res) ->
+app.get '/:id?', (req, res) ->
 	res.render 'index',
 		title: 'Phon'
 
 
 ## State ##
 
-# states: {
-# 	main:
-# 	default:
-# }
+states = {
+ 	main: "main state"
+ 	default: "default state"
+}
 
 
 ## socket.IO ##
 
 io.sockets.on 'connection', (socket) ->
 
-	socket.on 'init', (id) ->
-		if id is ""		#index
-			console.log "got init"
+	socket.emit 'connection'
+
+	socket.on 'room', (id, callback) ->
+		if id is ""	then id = "main"
+		console.log "got client in room: "+id
+		if states[id]?
+			state = states[id]
 		else
-			#get or create state map
+			state = 'empty!' #TODO - handle
+		socket.join(id)
+		socket.set('roomId', id, ->
+			socket.emit 'init', state
+		)
 
 
 	socket.on 'cell', (cell_properties) ->
-		io.sockets.emit 'cell', cell_properties
+		socket.get('roomId', (err, id) ->
+			io.sockets.in(id).emit 'cell', cell_properties
+		)
 	
 	socket.on 'wall', (data) ->
-		io.sockets.emit 'wall', data
+		socket.get('roomId', (err, id) ->
+			io.sockets.in(id).emit 'wall', data
+		)
 	
 	socket.on 'chat', (msg) ->
-		io.sockets.emit 'chat', msg
+		socket.get('roomId', (err, id) ->
+			io.sockets.in(id).emit 'chat', msg
+		)
+
+	socket.on 'effect', (parameters) ->
+		socket.get('roomId', (err, id) ->
+			io.sockets.in(id).emit 'effect', parameters
+		)
+		
 
 app.listen (parseInt(process.env.PORT) || 3000)
 console.log "Listening on #{app.address().port}"

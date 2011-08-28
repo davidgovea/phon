@@ -157,7 +157,7 @@ vector = {
 		walls[index]?.remove()
 		walls[index] = line
 		if pending
-			line.attr 'stroke-width': '4', 'stroke-dasharray': "-", stroke: wall_color
+			line.attr 'stroke-width': '3', 'stroke-dasharray': ".", stroke: wall_color
 			setTimeout ->
 				line.remove()
 				walls[index] = null
