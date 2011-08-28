@@ -184,8 +184,8 @@ vector = {
 					cells: []
 				}
 				walls.forEach((c) ->
-					c["#{c[0]}_#{c[1]}_1"].walls += c[2]
-					info.cells.push(cell)
+					myCell = cells["#{c[0]}_#{c[1]}_1"].walls += c[2]
+					info.cells.push(myCell)
 				)
 				line.info = info
 			

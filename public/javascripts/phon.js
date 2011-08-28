@@ -403,8 +403,9 @@
             cells: []
           };
           walls.forEach(function(c) {
-            c["" + c[0] + "_" + c[1] + "_1"].walls += c[2];
-            return info.cells.push(cell);
+            var myCell;
+            myCell = cells["" + c[0] + "_" + c[1] + "_1"].walls += c[2];
+            return info.cells.push(myCell);
           });
           return line.info = info;
         }
