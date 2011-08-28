@@ -27,10 +27,12 @@ $ ->
 		el: '#chat'
 
 		initialize: (options) ->
+			@$content = $('.content', @el)
 			options.model.messages.bind 'add', (message) =>
 				text = message.get 'msg'
 				user = message.get 'username'
-				$(@el).append $ "<li>#{user}: #{text}</li>"
+				@$content.append $ "<li>#{user}: #{text}</li>"
+				$(@el).scrollTop @$content.height()
 
 	new ChatView
 		model: new ChatModel
