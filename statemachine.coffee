@@ -3,7 +3,7 @@
 
 	NUM_ROWS	= 18
 	NUM_COLS	= 24
-	exports.cells = {}
+	cells = {}
 
 
 	class Particle
@@ -106,11 +106,11 @@
 		setInstrument: (parameters) ->
 			#phon.setInstrument @row, @col, parameters
 			# show instrument settings pending state (until server responds & sets)
-		occupy: (state) ->
-			if state is true
-				@shape.attr fill: particle_color
-			else
-				@shape.attr fill: cell_colors[@state]
+		# occupy: (state) ->
+		# 	if state is true
+		# 		@shape.attr fill: particle_color
+		# 	else
+		# 		@shape.attr fill: cell_colors[@state]
 				
 	class Emitter
 
@@ -126,8 +126,8 @@
 			index = "#{particle.row}_#{particle.col}_#{particle.state}"
 			if not @h[index]
 				@h[index]			= cells[index]
-				@h[index].particles	= []
-				@h[index].sums		= [0,0]
+				#@h[index].particles	= []
+				#@h[index].sums		= [0,0]
 				@thisBeat.push index
 			@h[index].sums[particle.excited] += particle.direction
 			@h[index].particles.push particle
@@ -135,6 +135,13 @@
 			@h			= {}
 			@lastBeat	= @thisBeat
 			@thisBeat	= []
+	
+	class ReflectorHash
+		constructor: ->
+			@h		= {}
+		add: (index, value) ->
+			if not @h[index]
+
 
 
 	exports.init = ->
@@ -143,6 +150,7 @@
 				cells["#{row}_#{col}_1"] = new Cell row, col, 1
 				unless row is NUM_ROWS or col is NUM_COLS
 					cells["#{row}_#{col}_2"] = new Cell row, col, 2
+
 
 
 
