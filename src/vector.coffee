@@ -24,7 +24,7 @@ Raphael.fn.octogrid = (x, y, rows, cols, width) ->
 		sound: false
 		addSound: (sound) ->
 			@sound = new sound
-			@sound.register(@row, @col)
+			@sound.register @row, @col
 		onClick: (evt) =>
 			# this should probably go inside cell.select()
 			Phon.Elements.$paper.trigger 'cell-selected', [@]

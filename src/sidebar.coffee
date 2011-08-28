@@ -150,19 +150,20 @@ $ ->
 			
 			# set property/display on new module
 			model.set 'closed': !(model.get 'closed')
-
+		
+		# accepts an oct from the grid and saves reference as current oct
 		select_cell: (e, oct) ->
 
 			@current_oct = oct
 			@$assign_btn.removeClass 'disabled'
 			@$deactivate_btn[if oct.sound then 'removeClass' else 'addClass'] 'disabled'
-			console.log 'got', oct.row, oct.col, oct.sound
 
+		# creates a new sound on the current oct
 		assign_sound: (e) ->
 
 			$module = $(e.target).closest('.module')
 			sound_name = $module.attr('data-sound')
-
+			
 			if not @current_oct
 				return false
 			

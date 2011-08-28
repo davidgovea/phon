@@ -800,8 +800,7 @@
       _Class.prototype.select_cell = function(e, oct) {
         this.current_oct = oct;
         this.$assign_btn.removeClass('disabled');
-        this.$deactivate_btn[oct.sound ? 'removeClass' : 'addClass']('disabled');
-        return console.log('got', oct.row, oct.col, oct.sound);
+        return this.$deactivate_btn[oct.sound ? 'removeClass' : 'addClass']('disabled');
       };
       _Class.prototype.assign_sound = function(e) {
         var $module, sound_name;
