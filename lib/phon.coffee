@@ -403,42 +403,6 @@ collide = (sums, particles) ->
 					dirs = [[2, 8], [1, 4]].shuffle().shift().shuffle()
 
 $ ->
-	
-	Defaults = {}
-	
-	Defaults.Instrument =
-		
-		Note:
-			'a': 220
-			'a#': 233.08
-			'b': 246.94
-			'c': 261.63
-			'c#': 277.18
-			'd': 293.66
-			'd#': 311.13
-			'e': 329.63
-			'f': 349.23
-			'f#': 369.99
-			'g': 392.00
-		
-		Length:
-			default: 100
-			min: 0
-			max: 100
-			
-	Defaults.Sample =
-
-		Sample: ['kick', 'snare']
-
-		Pitch:
-			default: 440
-			min: 0
-			max: 1000
-
-		Offset:
-			default: 0
-			min: 0
-			max: 99
 		
 	Modules = {}
 
@@ -454,33 +418,39 @@ $ ->
 	Modules.Instrument = class extends Backbone.Model
 
 		defaults:
-			
 			closed: true
-			note: Defaults.Instrument.Note['a']
-			length: Defaults.Instrument.Length.default
+			note: 'a'
+			length: 25
 
 		initialize: ->
-			
 			@gui = new DAT.GUI
-			@gui.add(@attributes, 'note').options(Defaults.Instrument.Note)
-			@gui.add(@attributes, 'length').min(Defaults.Instrument.Length.min).max(Defaults.Instrument.Length.max)
+			@gui.add(@attributes, 'length').min(0).max(100)
+			@gui.add(@attributes, 'note').options
+				'a': 220
+				'a#': 233.08
+				'b': 246.94
+				'c': 261.63
+				'c#': 277.18
+				'd': 293.66
+				'd#': 311.13
+				'e': 329.63
+				'f': 349.23
+				'f#': 369.99
+				'g': 392.00
 			
 	Modules.Sample = class extends Backbone.Model
 
 		defaults:
-			
 			closed: true
-			sample: Defaults.Sample.Sample[0]
-			pitch: Defaults.Sample.Pitch.default
-			offset: Defaults.Sample.Offset.default
+			sample: 'kick'
+			pitch: 440
+			offset: 0
 
 		initialize: ->
-			
 			@gui = new DAT.GUI
-			controller = @gui.add(@attributes, 'sample')
-			controller.options.apply(controller, Defaults.Sample.Sample)
-			@gui.add(@attributes, 'pitch').min(Defaults.Sample.Pitch.min).max(Defaults.Sample.Pitch.max)
-			@gui.add(@attributes, 'offset').min(Defaults.Sample.Offset.min).max(Defaults.Sample.Offset.max)
+			@gui.add(@attributes, 'sample').options('kick', 'snare')
+			@gui.add(@attributes, 'pitch').min(0).max(440)
+			@gui.add(@attributes, 'offset').min(0).max(100)
 			
 	Sidebar = class extends Backbone.Model
 
@@ -531,7 +501,6 @@ $ ->
 			
 			$module = $(e.target).closest('.module')
 			model = $module.data('model')
-			active = @model.get 'active'
 			
 			# module can have a "persistent" class to refuse closing
 			if $module.hasClass('persistent')
