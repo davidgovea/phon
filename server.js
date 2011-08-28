@@ -43,7 +43,7 @@
       return console.log(data);
     });
     return socket.on('chat', function(msg) {
-      return socket.emit('chat', msg);
+      return io.sockets.emit('chat', msg);
     });
   });
   app.listen(parseInt(process.env.PORT) || 3000);

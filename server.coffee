@@ -39,7 +39,7 @@ io.sockets.on 'connection', (socket) ->
 		console.log data
 	
 	socket.on 'chat', (msg) ->
-		socket.emit 'chat', msg
+		io.sockets.emit 'chat', msg
 
 app.listen (parseInt(process.env.PORT) || 3000)
 console.log "Listening on #{app.address().port}"
