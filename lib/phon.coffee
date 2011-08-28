@@ -518,7 +518,7 @@ $ ->
 			model.set 'closed': !(model.get 'closed')
 			
 			# set property/display on previous module
-			if active
+			if active && active != model
 				active.set closed: true
 				
 			# update "current" module
