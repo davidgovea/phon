@@ -95,7 +95,7 @@
     }
     _Class.prototype.defaults = {
       type: 'Lead',
-      pitch: 0,
+      pitch: 'a',
       length: 0
     };
     return _Class;
@@ -107,7 +107,7 @@
     }
     _Class.prototype.defaults = {
       type: 'Bass',
-      pitch: 0,
+      pitch: 'a',
       length: 0
     };
     return _Class;
@@ -121,7 +121,7 @@
       type: 'Drum',
       pitch: 0,
       offset: 0,
-      sample: 0
+      sample: 'kick'
     };
     return _Class;
   })();
@@ -134,7 +134,7 @@
       type: 'Sample',
       pitch: 0,
       offset: 0,
-      sample: 0
+      sample: 'snare'
     };
     return _Class;
   })();
@@ -1064,7 +1064,7 @@
     }
   };
   $(function() {
-    var Module, Modules, SidebarModel, SidebarView;
+    var ChatModel, ChatView, MessageCollection, MessageModel, Module, Modules, SidebarModel, SidebarView;
     Modules = {};
     Module = (function() {
       __extends(_Class, Backbone.Model);
@@ -1086,11 +1086,10 @@
         return this.refresh_gui();
       };
       _Class.prototype.refresh_gui = function() {
-        var gui, notes, sound;
+        var gui, sound;
         sound = this.get('sound');
-        notes = ['a', 'a#', 'b', 'c', 'c#', 'd', 'd#', 'e', 'f', 'f#', 'g'];
         gui = new DAT.GUI;
-        gui.add(sound.attributes, 'pitch').options(notes);
+        gui.add(sound.attributes, 'pitch').options('a', 'a#', 'b', 'c', 'c#', 'd', 'd#', 'e', 'f', 'f#', 'g');
         gui.add(sound.attributes, 'length').min(0).max(100);
         return this.gui_elements = [gui.domElement];
       };
@@ -1310,6 +1309,7 @@
         }
         this.$assign_btn.addClass('disabled');
         this.$deactivate_btn.addClass('disabled');
+        console.info('ASSIGNING SOUND', module.get('sound').attributes);
         sound = new Phon.Sounds[sound_name](module.get('sound').attributes);
         console.info('ASSIGN_SOUND CALLED, SOUND:', sound);
         module.set({
@@ -1330,12 +1330,14 @@
       };
       return _Class;
     })();
-    return window.Sidebar = new SidebarView({
+    window.Sidebar = new SidebarView({
       model: new SidebarModel
     });
-  });
-  $(function() {
-    var ChatModel, ChatView, MessageCollection, MessageModel;
+    /*
+    	[DAT.GUI ERROR] [object Object] either has no property 'sample', or the property is inaccessible.
+    	phon.js:1111Uncaught TypeError: Cannot call method 'options' of undefined
+    	*/
+    $(function() {});
     MessageModel = (function() {
       __extends(_Class, Backbone.Model);
       function _Class() {

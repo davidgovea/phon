@@ -17,13 +17,13 @@ Sound = class extends Backbone.Model
 Phon.Sounds.Lead = class extends Sound
 	defaults:
 		type: 'Lead'
-		pitch: 0
+		pitch: 'a'
 		length: 0
 	
 Phon.Sounds.Bass = class extends Sound
 	defaults:
 		type: 'Bass'
-		pitch: 0
+		pitch: 'a'
 		length: 0
 	
 Phon.Sounds.Drum = class extends Sound
@@ -31,11 +31,11 @@ Phon.Sounds.Drum = class extends Sound
 		type: 'Drum'
 		pitch: 0
 		offset: 0
-		sample: 0
+		sample: 'kick'
 	
 Phon.Sounds.Sample = class extends Sound
 	defaults:
 		type: 'Sample'
 		pitch: 0
 		offset: 0
-		sample: 0
+		sample: 'snare'
