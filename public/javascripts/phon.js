@@ -1,5 +1,5 @@
 (function() {
-  var CELL_SIZE, Cell, Emitter, Instrument, NUM_COLS, NUM_ROWS, Particle, Sample, Sound, StateHash, cell_colors, cells, collide, decays, doLoop, init, iterate, log, occupied, paper, particle_color, particles, processSplit, select_color, server, socket, vector, wallList, wall_color;
+  var CELL_SIZE, Cell, Emitter, Instrument, NUM_COLS, NUM_ROWS, Particle, Sample, Sound, StateHash, cell_colors, cells, collide, decays, doLoop, emitterHash, emitter_counter, emitter_counter2, emitter_counter3, emitter_every, emitter_periods, init, iterate, log, occupied, paper, particle_color, particles, processSplit, select_color, server, socket, vector, wallList, wall_color;
   var __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) {
     for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; }
     function ctor() { this.constructor = child; }
@@ -19,11 +19,31 @@
   });
   Phon.Socket = io.connect(document.location.protocol + '//' + document.location.host);
   Phon.Socket.on('connection', function() {
+    init();
+    vector.init();
     return Phon.Socket.emit("room", Phon.Properties.roomId);
   });
   Phon.Socket.on('init', function(data) {
-    console.log('init');
-    return console.log(data);
+    var cell, emit, key, rc, wallIndex, walls, _i, _j, _len, _len2, _len3, _ref, _ref2;
+    console.log(data);
+    walls = data.walls;
+    for (_i = 0, _len = walls.length; _i < _len; _i++) {
+      wallIndex = walls[_i];
+      rc = wallIndex.split("_");
+      vector.addWall(rc[0], rc[1], rc[2], rc[3]);
+    }
+    _ref = data.emitters;
+    for (emit = 0, _len2 = _ref.length; emit < _len2; emit++) {
+      key = _ref[emit];
+      emitterHash[key].setIndex(emitter.index);
+    }
+    _ref2 = data.cells;
+    for (_j = 0, _len3 = _ref2.length; _j < _len3; _j++) {
+      cell = _ref2[_j];
+      cells[cell.index].active = true;
+      cells[cell.index].sound = cell.sound;
+    }
+    return doLoop();
   });
   NUM_ROWS = 18;
   NUM_COLS = 24;
@@ -136,8 +156,7 @@
     Phon.Socket.on('cell', function(cell_properties) {
       var cell;
       cell = cells["" + cell_properties.row + "_" + cell_properties.col + "_1"];
-      cell.addSound(new Phon.Sounds[cell_properties.sound.type](cell_properties.sound));
-      return console.log(cell);
+      return cell.addSound(new Phon.Sounds[cell_properties.sound.type](cell_properties.sound));
     });
     Oct = (function() {
       function Oct(x, y, side, side_rad, row, col) {
@@ -154,9 +173,7 @@
       Oct.prototype.onClick = function(evt) {
         return cells["" + this.row + "_" + this.col + "_1"].select();
       };
-      Oct.prototype.onDblClick = function(evt) {
-        return log("dblclick " + this.row + "," + this.col);
-      };
+      Oct.prototype.onDblClick = function(evt) {};
       return Oct;
     })();
     Diamond = (function() {
@@ -395,7 +412,7 @@
       this.col = col;
       this.state = state;
       this.direction = direction;
-      this.lifetime = lifetime != null ? lifetime : -1;
+      this.lifetime = lifetime != null ? lifetime : 32;
     }
     Particle.prototype.excited = 0;
     Particle.prototype.excite = function() {
@@ -510,7 +527,7 @@
       if (this.excited) {
         return this.direction = results.excited[this.direction];
       } else {
-
+        ;
       }
     };
     Particle.prototype.checkObstacles = function(repeat, split) {
@@ -610,8 +627,36 @@
     };
     return Cell;
   })();
+  emitterHash = {};
+  emitter_every = 7;
+  emitter_periods = [8, 16, 32, 16];
+  emitter_counter = 0;
+  emitter_counter2 = 0;
+  emitter_counter3 = Math.floor(emitter_every / 2);
   Emitter = (function() {
-    function Emitter() {}
+    function Emitter(row, col, period, direction) {
+      this.row = row;
+      this.col = col;
+      this.period = period;
+      this.direction = direction;
+    }
+    Emitter.prototype.index = 0;
+    Emitter.prototype.step = function() {
+      this.index++;
+      if (this.index === this.period) {
+        this.index = 0;
+        return this.emit();
+      }
+    };
+    Emitter.prototype.setIndex = function(num) {
+      return this.index = num % this.period;
+    };
+    Emitter.prototype.emit = function() {
+      var particle;
+      particle = new Particle(this.row, this.col, 1, this.direction);
+      occupied.add(particle);
+      return particles.push(particle);
+    };
     return Emitter;
   })();
   StateHash = (function() {
@@ -672,19 +717,30 @@
     },
     pair: function() {
       return Math.random() * 100 < 50;
+    },
+    headon: function() {
+      return Math.random() * 100 < 15;
     }
   };
   init = function() {
-    var col, row, _results;
+    var col, period, row, _results;
     occupied = new StateHash;
     _results = [];
     for (row = 1; 1 <= NUM_ROWS ? row <= NUM_ROWS : row >= NUM_ROWS; 1 <= NUM_ROWS ? row++ : row--) {
+      if (row === 1) {
+        emitter_counter = 0;
+      } else if (row === NUM_ROWS) {
+        emitter_counter = Math.floor(emitter_every / 2);
+      }
       _results.push((function() {
         var _results2;
         _results2 = [];
         for (col = 1; 1 <= NUM_COLS ? col <= NUM_COLS : col >= NUM_COLS; 1 <= NUM_COLS ? col++ : col--) {
           cells["" + row + "_" + col + "_1"] = new Cell(row, col, 1);
-          _results2.push(!(row === NUM_ROWS || col === NUM_COLS) ? cells["" + row + "_" + col + "_2"] = new Cell(row, col, 2) : void 0);
+          if (!(row === NUM_ROWS || col === NUM_COLS)) {
+            cells["" + row + "_" + col + "_2"] = new Cell(row, col, 2);
+          }
+          _results2.push(row === 1 ? (emitter_counter++, emitter_counter === emitter_every ? (emitter_counter = 0, period = emitter_periods.shift(), emitterHash["" + row + "_" + col] = new Emitter(row, col, period, 2), emitter_periods.push(period)) : void 0) : row === NUM_ROWS ? (emitter_counter++, emitter_counter === emitter_every ? (emitter_counter = 0, period = emitter_periods.shift(), emitterHash["" + row + "_" + col] = new Emitter(row, col, period, 8), emitter_periods.push(period)) : void 0) : col === 1 ? (emitter_counter2++, emitter_counter2 === emitter_every ? (emitter_counter2 = 0, period = emitter_periods.shift(), emitterHash["" + row + "_" + col] = new Emitter(row, col, period, 1), emitter_periods.push(period)) : void 0) : col === NUM_COLS ? (emitter_counter3++, emitter_counter3 === emitter_every ? (emitter_counter3 = 0, period = emitter_periods.shift(), emitterHash["" + row + "_" + col] = new Emitter(row, col, period, 4), emitter_periods.push(period)) : void 0) : void 0);
         }
         return _results2;
       })());
@@ -692,7 +748,7 @@
     return _results;
   };
   iterate = function() {
-    var cell, cellIndex, particle, toKill, _i, _len, _ref;
+    var cell, cellIndex, emit, emitIndex, particle, toKill, _i, _len, _ref;
     occupied.reset();
     toKill = [];
     for (_i = 0, _len = particles.length; _i < _len; _i++) {
@@ -708,6 +764,10 @@
       toKill.forEach(function(p) {
         return particles.splice(particles.indexOf(p), 1);
       });
+    }
+    for (emitIndex in emitterHash) {
+      emit = emitterHash[emitIndex];
+      emit.step();
     }
     _ref = occupied.h;
     for (cellIndex in _ref) {
@@ -1391,9 +1451,6 @@
   window.particles = particles;
   window.cells = cells;
   setTimeout(function() {
-    init();
-    vector.init();
-    particles.push(new Particle(3, 2, 1, 1), new Particle(5, 4, 1, 8), new Particle(3, 6, 1, 4), new Particle(9, 10, 1, 4), new Particle(6, 6, 1, 8), new Particle(7, 2, 1, 1), new Particle(4, 5, 1, 2));
     return doLoop();
   }, 2000);
 }).call(this);
