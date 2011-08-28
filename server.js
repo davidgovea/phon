@@ -109,7 +109,7 @@
     return setTimeout(iterateEmitters, beatLength);
   };
   io.sockets.on('connection', function(socket) {
-    socket.emit('connection');
+    socket.once('connect');
     socket.on('room', function(id, callback) {
       var walls;
       if (id === "") {
