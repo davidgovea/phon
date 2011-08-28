@@ -492,29 +492,39 @@ $ ->
 				
 				$module = $(this)
 				module = new Modules[$module.attr 'data-module']
+				
+				# store reference to the model in DOM to be easily accessed from events
 				$module.data 'model', module
+				
+				# move DAT.GUI into container
 				$('.content', $module).append module.gui.domElement
 				
+				# show/hide the panels when the module's "closed" property changes
 				module.bind 'change:closed', (module, closed) ->
 					$module[if !closed then 'addClass' else 'removeClass']('open')
 				
-		
+		# shows / hides the current sidebar module
 		toggle_content: (e) ->
 			
 			$module = $(e.target).closest('.module')
 			model = $module.data('model')
 			active = @model.get 'active'
 			
+			# module can have a "persistent" class to refuse closing
 			if $module.hasClass('persistent')
 				return false
-				
+			
+			# set property/display on new module
 			model.set 'closed': !(model.get 'closed')
 			
+			# set property/display on previous module
 			if active
 				active.set closed: true
 				
+			# update "current" module
 			@model.set active: model
-		
+	
+	# init sidebar
 	new SidebarView
 	 	model: new Sidebar
 #wrapper-end.coffee

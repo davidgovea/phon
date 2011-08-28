@@ -29,6 +29,11 @@ body {
 
 			#sidebar .module h2 .icon {
 				float: right;
+				content: "+";
+			}
+			
+			#sidebar .module h2 .icon:after {
+				content: "+";
 			}
 	
 	#sidebar .module:first-child {
@@ -84,7 +89,7 @@ body {
 			display: block;
 		}
 		
-		#sidebar .module.open h2 .icon {
+		#sidebar .module.open h2 .icon:after {
 			content: "-";
 		}
 
