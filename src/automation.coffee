@@ -308,6 +308,7 @@ iterate = ->
 				)
 			
 			if cell.active
+				log cell
 				log "TODO / record note playback info"
 		#else # Diamond, no processing
 			#log "I'm a diamond!"

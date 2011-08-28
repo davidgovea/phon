@@ -144,6 +144,7 @@
       });
     });
     socket.on('effect', function(params) {
+      console.log(params);
       return socket.get('roomId', function(err, id) {
         state = states[id];
         state.effects[params.type] += params.amount;
@@ -151,21 +152,20 @@
       });
     });
     socket.on('cell', function(cell_properties) {
+      console.log(cell_properties);
       return socket.get('roomId', function(err, id) {
         var cell, index;
+        io.sockets["in"](id).emit('cell', cell_properties);
         index = "" + cell_properties.row + "_" + cell_properties.col;
         cell = states[id].cells[index];
         if (cell_properties.sound !== null) {
           if (cell != null) {
             cell.active = true;
           }
-          if (cell != null) {
-            cell.sound = cell_properties.sound;
-          }
+          return cell != null ? cell.sound = cell_properties.sound : void 0;
         } else {
-          cell.active = false;
+          return cell.active = false;
         }
-        return io.sockets["in"](id).emit('cell', cell_properties);
       });
     });
     socket.on('wall', function(data) {

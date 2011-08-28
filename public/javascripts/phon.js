@@ -1,5 +1,5 @@
 (function() {
-  var CELL_SIZE, Cell, Emitter, Instrument, NUM_COLS, NUM_ROWS, Particle, Sample, Sound, StateHash, cell_colors, cells, collide, decays, doLoop, emitterHash, emitter_counter, emitter_counter2, emitter_counter3, emitter_every, emitter_periods, init, iterate, log, occupied, paper, particle_color, particles, processSplit, select_color, server, socket, vector, wallList, wall_color;
+  var CELL_SIZE, Cell, Emitter, Instrument, NUM_COLS, NUM_ROWS, Particle, Sample, Sound, StateHash, cell_colors, cells, collide, decays, doLoop, emitterHash, emitter_counter, emitter_counter2, emitter_counter3, emitter_every, emitter_periods, init, iterate, log, note_color, occupied, paper, particle_color, particles, processSplit, select_color, server, socket, vector, wallList, wall_color;
   var __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) {
     for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; }
     function ctor() { this.constructor = child; }
@@ -24,7 +24,7 @@
     return Phon.Socket.emit("room", Phon.Properties.roomId);
   });
   Phon.Socket.on('init', function(data) {
-    var cell, emit, key, rc, wallIndex, walls, _i, _j, _len, _len2, _len3, _ref, _ref2, _results;
+    var cell, emit, key, rc, wallIndex, walls, _i, _j, _len, _len2, _len3, _ref, _ref2;
     console.log(data);
     walls = data.walls;
     for (_i = 0, _len = walls.length; _i < _len; _i++) {
@@ -38,13 +38,19 @@
       emitterHash[key].setIndex(emitter.index);
     }
     _ref2 = data.cells;
-    _results = [];
     for (_j = 0, _len3 = _ref2.length; _j < _len3; _j++) {
       cell = _ref2[_j];
       cells[cell.index].active = true;
-      _results.push(cells[cell.index].sound = cell.sound);
+      cells[cell.index].sound = cell.sound;
     }
-    return _results;
+    return doLoop();
+  });
+  Phon.Socket.on('cell', function(cell_properties) {
+    var cell;
+    console.log(cell_properties);
+    cell = cells["" + cell_properties.row + "_" + cell_properties.col + "_1"];
+    cell.setActive(true);
+    return cell.addSound(cell_properties.sound);
   });
   NUM_ROWS = 18;
   NUM_COLS = 24;
@@ -60,6 +66,7 @@
   particle_color = "#52C8FF";
   select_color = "#00AEFF";
   wall_color = '#1ED233';
+  note_color = "#E61D5F";
   log = function(msg) {
     return console.log(msg);
   };
@@ -154,11 +161,6 @@
     startx = x;
     starty = y;
     raph = this;
-    Phon.Socket.on('cell', function(cell_properties) {
-      var cell;
-      cell = cells["" + cell_properties.row + "_" + cell_properties.col + "_1"];
-      return cell.addSound(new Phon.Sounds[cell_properties.sound.type](cell_properties.sound));
-    });
     Oct = (function() {
       function Oct(x, y, side, side_rad, row, col) {
         this.row = row;
@@ -583,13 +585,26 @@
     Cell.prototype.shape = null;
     Cell.prototype.sound = false;
     Cell.prototype.addSound = function(sound) {
+      this.activate();
       return this.sound = sound;
     };
     Cell.prototype.removeSound = function() {
-      return this.sound = false;
+      this.setActive(false);
+      return this.sound = null;
     };
-    Cell.prototype.activate = function() {};
-    Cell.prototype.deactivate = function() {};
+    Cell.prototype.activate = function(sound) {
+      this.active = true;
+      this.sound = sound;
+      return this.shape.attr({
+        fill: "#0f0"
+      });
+    };
+    Cell.prototype.deactivate = function() {
+      this.active = false;
+      return this.shape.attr({
+        fill: cell_colors[this.state]
+      });
+    };
     Cell.prototype.setInstrument = function(parameters) {};
     Cell.prototype.select = function(state) {
       if (state == null) {
@@ -615,6 +630,22 @@
     Cell.prototype.activate = function() {};
     Cell.prototype.deactivate = function() {};
     Cell.prototype.setInstrument = function(parameters) {};
+    Cell.prototype.setActive = function(state) {
+      if (state == null) {
+        state = true;
+      }
+      if (state === true) {
+        this.shape.attr({
+          fill: note_color
+        });
+      } else {
+        this.shape.attr({
+          fill: cell_colors[this.state]
+        });
+      }
+      this.active = state;
+      return log(this);
+    };
     Cell.prototype.occupy = function(state) {
       if (state === true) {
         return this.shape.attr({
@@ -788,6 +819,7 @@
           });
         }
         if (cell.active) {
+          log(cell);
           log("TODO / record note playback info");
         }
       }
