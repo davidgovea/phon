@@ -33,14 +33,18 @@
     });
   });
   io.sockets.on('connection', function(socket) {
-    socket.emit('state', {
-      data: 'phon state'
+    socket.on('init', function(id) {
+      if (id === "") {
+        return console.log("got init");
+      } else {
+        ;
+      }
     });
     socket.on('cell', function(cell_properties) {
       return io.sockets.emit('cell', cell_properties);
     });
     socket.on('wall', function(data) {
-      return console.log(data);
+      return io.sockets.emit('wall', data);
     });
     return socket.on('chat', function(msg) {
       return io.sockets.emit('chat', msg);

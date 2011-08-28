@@ -1,5 +1,5 @@
 (function() {
-  var CELL_SIZE, Cell, Emitter, Instrument, NUM_COLS, NUM_ROWS, Particle, Sample, Sound, StateHash, cell_colors, cells, collide, decays, doLoop, init, initSockets, iterate, log, occupied, particle_color, particles, select_color, socket;
+  var CELL_SIZE, Cell, Emitter, Instrument, NUM_COLS, NUM_ROWS, Particle, Sample, Sound, StateHash, cell_colors, cells, collide, decays, doLoop, init, iterate, log, occupied, paper, particle_color, particles, select_color, server, socket, vector, wall_color, walls;
   var __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) {
     for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; }
     function ctor() { this.constructor = child; }
@@ -17,10 +17,15 @@
     return Phon.Elements.$paper = $('#paper');
   });
   Phon.Socket = io.connect(document.location.protocol + '//' + document.location.host);
-  NUM_ROWS = 20;
-  NUM_COLS = 28;
+  Phon.Socket.on('connection', function() {
+    return Phon.Socket.emit("init", document.location.pathname.substring(1));
+  });
+  Phon.Socket.on('init', function(data) {});
+  NUM_ROWS = 18;
+  NUM_COLS = 24;
   CELL_SIZE = 28;
   cells = {};
+  walls = {};
   particles = [];
   occupied = null;
   cell_colors = {
@@ -29,6 +34,7 @@
   };
   particle_color = "#52C8FF";
   select_color = "#00AEFF";
+  wall_color = '#1ED233';
   log = function(msg) {
     return console.log(msg);
   };
@@ -157,6 +163,7 @@
         this.dragMove = __bind(this.dragMove, this);
         this.dragStart = __bind(this.dragStart, this);
         this.shape = raph.rect(x - side / 2, y - side / 2, side, side);
+        this.shape.center = [x, y];
         this.shape.rotate(45);
         this.shape.drag(this.dragMove, this.dragStart, this.dragUp);
       }
@@ -183,7 +190,7 @@
           } else {
             line = this.neighbors[target];
           }
-          pathString = "M" + (this.shape.attrs.x + this.shape.attrs.height / 2) + " " + (this.shape.attrs.y + this.shape.attrs.height / 2) + "l" + (line[0] * width) + " " + (line[1] * width);
+          pathString = "M" + (this.shape.attrs.x + this.shape.attrs.height / 2) + " " + (this.shape.attrs.y + this.shape.attrs.height / 2) + "l" + (line[0] * (width + 3)) + " " + (line[1] * (width + 3));
           if (this.dragLine != null) {
             this.dragLine.animate({
               path: pathString
@@ -207,13 +214,25 @@
         return this.dragLine.attr('stroke-width', 5);
       };
       Diamond.prototype.dragUp = function() {
+        var col2, row2;
         if (this.dragLine != null) {
-          log(this.dragLine.valid);
-          if (!this.dragLine.valid) {
-            this.dragLine.remove();
-          } else {
-
+          if (this.dragLine.valid) {
+            row2 = this.row + this.dragLine.line[1];
+            col2 = this.col + this.dragLine.line[0];
+            if (this.dragLine.line[0] === this.dragLine.line[1] || this.dragLine.line[0] === this.dragLine.line[1]) {
+              Phon.Socket.emit('wall', {
+                action: 'split',
+                points: [[this.row, this.col], [row2, col2]]
+              });
+            } else {
+              Phon.Socket.emit('wall', {
+                action: 'add',
+                points: [[this.row, this.col], [row2, col2]]
+              });
+            }
+            vector.addWall(this.row, this.col, row2, col2, true);
           }
+          this.dragLine.remove();
           this.dragLine = null;
         }
         return this.shape.attr({
@@ -271,6 +290,84 @@
       y += width + 3;
     }
     return console.timeEnd('octogrid');
+  };
+  paper = null;
+  vector = {
+    init: function() {
+      paper = Raphael("paper", (NUM_COLS + 2) * (CELL_SIZE + 3), (NUM_ROWS + 2) * (CELL_SIZE + 3));
+      return paper.octogrid(1, 1, NUM_ROWS, NUM_COLS, CELL_SIZE);
+    },
+    addWall: function(row1, col1, row2, col2, pending) {
+      var cell1, cell2, coldiff, index, line, order, rowdiff, toSplit, upperCol, upperRow, _ref;
+      if (pending == null) {
+        pending = false;
+      }
+      cell1 = cells["" + row1 + "_" + col1 + "_2"];
+      cell2 = cells["" + row2 + "_" + col2 + "_2"];
+      rowdiff = row1 - row2;
+      coldiff = col1 - col2;
+      if (col1 >= col2) {
+        upperCol = col1;
+        order = [row1, col1, row2, col2];
+      } else {
+        upperCol = col2;
+        order = [row2, col2, row1, col1];
+      }
+      if (row1 >= row2) {
+        upperRow = row1;
+        if (row1 !== row2) {
+          order = [row1, col1, row2, col2];
+        }
+      } else {
+        upperRow = row2;
+        order = [row2, col2, row1, col1];
+      }
+      line = paper.path("M" + cell1.shape.center[0] + " " + cell1.shape.center[1] + "L" + cell2.shape.center[0] + " " + cell2.shape.center[1]);
+      cell1.shape.toFront();
+      cell2.shape.toFront();
+      index = "" + order[0] + "_" + order[1] + "_" + order[2] + "_" + order[3];
+      line.index = index;
+      if ((_ref = walls[index]) != null) {
+        _ref.remove();
+      }
+      walls[index] = line;
+      if (pending) {
+        line.attr({
+          'stroke-width': '4',
+          'stroke-dasharray': "-",
+          stroke: wall_color
+        });
+        return setTimeout(function() {
+          line.remove();
+          return walls[index] = null;
+        }, 3000);
+      } else {
+        line.attr({
+          'stroke-width': '6',
+          stroke: wall_color
+        });
+        line.dblclick(function() {
+          walls[line.index] = null;
+          return line.remove();
+        });
+        if (rowdiff === coldiff) {
+          toSplit = [upperRow, upperCol, 1];
+        } else if (rowdiff === -coldiff) {
+          toSplit = [upperRow, upperCol, 2];
+        } else if (rowdiff === 0) {
+          walls = [[upperRow, upperCol, 2], [upperRow + 1, upperCol, 8]];
+        } else {
+          walls = [[upperRow, upperCol, 1], [upperRow, upperCol, 4]];
+        }
+        if (toSplit != null) {
+          return cells["" + toSplit[0] + "_" + toSplit[1] + "_1"].split = toSplit[2];
+        } else if (walls != null) {
+          return walls.forEach(function(cell) {
+            return cells["" + cell[0] + "_" + cell[1] + "_1"].walls += cell[2];
+          });
+        }
+      }
+    }
   };
   Particle = (function() {
     function Particle(row, col, state, direction, lifetime) {
@@ -361,10 +458,23 @@
         }
       }
     };
-    Particle.prototype.checkObstacles = function() {
+    Particle.prototype.checkObstacles = function(repeat) {
+      if (repeat == null) {
+        repeat = false;
+      }
       if (!this.excited) {
         if ((this.row === 1 && this.direction === 8) || (this.row === NUM_ROWS && this.direction === 2) || (this.col === 1 && this.direction === 4) || (this.col === NUM_COLS && this.direction === 1)) {
-          return this.reverse();
+          if (!repeat) {
+            return this.reverse();
+          } else {
+            return this.lifetime = 0;
+          }
+        } else if (cells["" + this.row + "_" + this.col + "_1"].walls & this.direction) {
+          if (!repeat) {
+            return this.reverse();
+          } else {
+            return this.lifetime = 0;
+          }
         }
       } else if (this.state === 1) {
         if ((this.row === 1 && (this.direction === 16 || this.direction === 64)) || (this.row === NUM_ROWS && (this.direction === 1 || this.direction === 4)) || (this.col === 1 && (this.direction === 4 || this.direction === 16)) || (this.col === NUM_COLS && (this.direction === 1 || this.direction === 64))) {
@@ -920,25 +1030,13 @@
     });
   });
   socket = null;
-  initSockets = function() {
-    socket = io.connect();
-    socket.on('cell', function(data) {
-      return log(data);
-    });
-    socket.on('wall', function(data) {
-      return log(data);
-    });
-    return socket.on('chat', function(data) {
-      return log(data);
-    });
-  };
-  ({
-    newWall: function(row1, col1, row2, col2) {
-      return socket.emit('wall', {
-        action: 'new',
-        points: [[row1, col1], [row2, col2]]
-      });
-    },
+  Phon.Socket.on('wall', function(data) {
+    var xys;
+    log(data);
+    xys = data.points;
+    return vector.addWall(xys[0][0], xys[0][1], xys[1][0], xys[1][1]);
+  });
+  server = {
     delWall: function(row1, col1, row2, col2) {
       return socket.emit('wall', {
         action: 'del',
@@ -961,19 +1059,13 @@
         });
       }
     },
-    sendChat: function(userName, msg) {
-      return socket.emit('chat', {
-        user: userName,
-        msg: msg
-      });
-    },
     sendEffect: function(effect, value) {
       return socket.emit('effect', {
         type: effect,
         value: value
       });
     }
-  });
+  };
   doLoop = function() {
     var o;
     o = iterate();
@@ -990,10 +1082,8 @@
   window.particles = particles;
   window.cells = cells;
   setTimeout(function() {
-    var paper;
     init();
-    paper = Raphael("paper", (NUM_COLS + 2) * (CELL_SIZE + 3), (NUM_ROWS + 2) * (CELL_SIZE + 3));
-    paper.octogrid(1, 1, NUM_ROWS, NUM_COLS, CELL_SIZE);
+    vector.init();
     particles.push(new Particle(3, 2, 1, 1), new Particle(5, 4, 1, 8), new Particle(3, 6, 1, 4), new Particle(9, 10, 1, 4), new Particle(6, 6, 1, 8), new Particle(7, 2, 1, 1), new Particle(4, 5, 1, 2));
     return doLoop();
   }, 2000);

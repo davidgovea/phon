@@ -11,12 +11,18 @@ $ ->
 	Phon.Elements.$paper = $ '#paper'
 
 Phon.Socket = io.connect(document.location.protocol + '//' + document.location.host)
+Phon.Socket.on('connection', ->
+	Phon.Socket.emit "init", document.location.pathname.substring(1)
+)
+Phon.Socket.on('init', (data) ->
+
+)
 
 # Phon.Socket.emit 'lol'
 
 #Constants
-NUM_ROWS	= 20
-NUM_COLS	= 28
+NUM_ROWS	= 18
+NUM_COLS	= 24
 CELL_SIZE	= 28
 cells		= {}
 walls		= {}

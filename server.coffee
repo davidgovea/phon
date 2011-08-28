@@ -5,6 +5,7 @@ nko		= require('nko')('Z6+o2A6kn7+tCofT')
 coffee	= require 'coffee-script'
 app		= module.exports = express.createServer()
 io		= require('socket.io').listen app
+#state	= require './statemachine'
 
 
 app.configure ->
@@ -27,9 +28,25 @@ app.get '/', (req, res) ->
 	res.render 'index',
 		title: 'Phon'
 
+
+## State ##
+
+# states: {
+# 	main:
+# 	default:
+# }
+
+
+## socket.IO ##
+
 io.sockets.on 'connection', (socket) ->
 
-	#socket.emit 'state', data: 'phon state'
+	socket.on 'init', (id) ->
+		if id is ""		#index
+			console.log "got init"
+		else
+			#get or create state map
+
 
 	socket.on 'cell', (cell_properties) ->
 		io.sockets.emit 'cell', cell_properties
