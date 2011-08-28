@@ -1024,7 +1024,7 @@
         this.$content = $('.content', this.$scroller);
         this.$username = $('input.username', this.el);
         this.$input = $('input.msg', this.el);
-        $(document).keypress(__bind(function(e) {
+        $(document).keyup(__bind(function(e) {
           if (e.which === 13) {
             if ($(this.el).hasClass('ready')) {
               return this.$input.focus();
@@ -1033,8 +1033,8 @@
             }
           }
         }, this));
-        this.$input.keypress(this.send_message);
-        this.$username.keypress(this.set_username);
+        this.$input.keyup(this.send_message);
+        this.$username.keyup(this.set_username);
         return this.model.messages.bind('add', __bind(function(message) {
           var text, user;
           text = message.get('msg');

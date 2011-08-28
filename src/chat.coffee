@@ -37,15 +37,15 @@ $ ->
 			@$username = $('input.username', @el)
 			@$input = $('input.msg', @el)
 			
-			$(document).keypress (e) =>
+			$(document).keyup (e) =>
 				if e.which == 13
 					if $(@el).hasClass 'ready'
 						@$input.focus()
 					else
 						@$username.focus()
 					
-			@$input.keypress @send_message
-			@$username.keypress @set_username
+			@$input.keyup @send_message
+			@$username.keyup @set_username
 			
 			@model.messages.bind 'add', (message) =>
 				text = message.get 'msg'
