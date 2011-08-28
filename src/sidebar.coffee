@@ -14,8 +14,19 @@ $ ->
 	Options = {}
 	
 	Options.Instrument =
-	
-		Note: ['A', 'B', 'C', 'D', 'E', 'F', 'G']
+		
+		Note:
+			'a': 220
+			'a#': 233.08
+			'b': 246.94
+			'c': 261.63
+			'c#': 277.18
+			'd': 293.66
+			'd#': 311.13
+			'e': 329.63
+			'f': 349.23
+			'f#': 369.99
+			'g': 392.00
 		
 		Length:
 			default: 100
@@ -41,14 +52,13 @@ $ ->
 		defaults:
 			
 			closed: true
-			note: Options.Instrument.Note[0]
+			note: Options.Instrument.Note['a']
 			length: Options.Instrument.Length.default
 
 		initialize: ->
 			
 			@gui = new DAT.GUI
-			controller = @gui.add(@attributes, 'note')
-			controller.options.apply(controller, Options.Instrument.Note)
+			@gui.add(@attributes, 'note').options(Options.Instrument.Note)
 			@gui.add(@attributes, 'length').min(Options.Instrument.Length.min).max(Options.Instrument.Length.max)
 			
 	Modules.Sample = class extends Backbone.Model
