@@ -55,14 +55,23 @@
       });
     });
     socket.on('cell', function(cell_properties) {
-      return io.sockets.emit('cell', cell_properties);
+      return socket.get('roomId', function(err, id) {
+        return io.sockets["in"](id).emit('cell', cell_properties);
+      });
     });
     socket.on('wall', function(data) {
-      return io.sockets.emit('wall', data);
+      return socket.get('roomId', function(err, id) {
+        return io.sockets["in"](id).emit('wall', data);
+      });
     });
-    return socket.on('chat', function(msg) {
+    socket.on('chat', function(msg) {
       return socket.get('roomId', function(err, id) {
         return io.sockets["in"](id).emit('chat', msg);
+      });
+    });
+    return socket.on('effect', function(parameters) {
+      return socket.get('roomId', function(err, id) {
+        return io.sockets["in"](id).emit('effect', parameters);
       });
     });
   });
