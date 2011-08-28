@@ -14,19 +14,11 @@ $ ->
 	Modules.Instrument = class extends Module
 
 		initialize: (options) ->
-			notes =
-				'a': 220
-				'a#': 233.08
-				'b': 246.94
-				'c': 261.63
-				'c#': 277.18
-				'd': 293.66
-				'd#': 311.13
-				'e': 329.63
-				'f': 349.23
-				'f#': 369.99
-				'g': 392.00
+			@refresh_gui()
+			
+		refresh_gui: ->
 			sound = @get 'sound'
+			notes = ['a', 'a#', 'b', 'c','c#','d','d#','e', 'f', 'f#', 'g']
 			gui = new DAT.GUI
 			gui.add(sound.attributes, 'pitch').options(notes)
 			gui.add(sound.attributes, 'length').min(0).max(100)
@@ -39,6 +31,9 @@ $ ->
 	Modules.Sample = class extends Module
 
 		initialize: ->
+			@refresh_gui()
+
+		refresh_gui: ->
 			sound = @get 'sound'
 			gui = new DAT.GUI
 			gui.add(sound.attributes, 'sample').options('kick', 'snare')
@@ -127,7 +122,8 @@ $ ->
 			# views store options as properties anyway
 			# but for some reason they arent accessible in constructor?
 			model = options.model
-				
+			@model = model
+
 			# paper can trigger events that sidebar responds to
 			Phon.Elements.$paper.bind 'cell-selected', @select_cell
 
@@ -141,6 +137,9 @@ $ ->
 			# save action buttons
 			@$assign_btn = $assign_btn
 			@$deactivate_btn = $deactivate_btn
+
+			modules = {}
+
 			$('.module', @el).each ->
 				
 				$module = $ this
@@ -151,13 +150,26 @@ $ ->
 				# store reference to the model in DOM to be easily accessed from events
 				$module.data 'model', module
 				
+				populate = (elements) ->
+					for el in elements
+						$content.append el
+
 				# move DAT.GUI into container
-				for el in module.gui_elements
-					$content.append el 
+				populate module.gui_elements
+
+				if module.get 'sound'
+					modules[$module.attr 'data-sound'] = module
+
+				module.bind 'change:sound', (module, sound) =>
+					$content.empty()
+					populate module.refresh_gui()
+					$content.append $action_buttons
+					module.set closed: false
 
 				# setting the closed property on the module
 				# shows it and sets it as active
 				module.bind 'change:closed', (module, closed) =>
+					console.info 'GOT CLOSED'
 					# close module
 					if closed
 						$module.removeClass 'open'
@@ -172,6 +184,8 @@ $ ->
 					prev = sidebar.previous('active')
 					if prev
 						prev.set closed: true
+
+			@modules = modules
 
 		# shows / hides the current sidebar module
 		toggle_content: (e) ->
@@ -188,21 +202,47 @@ $ ->
 		# accepts an cell from the grid and saves reference as current cell
 		select_cell: (e, cell) ->
 
+			sound = cell.sound
 			@current_cell = cell
 			@$assign_btn.removeClass 'disabled'
-			@$deactivate_btn[if cell.sound then 'removeClass' else 'addClass'] 'disabled'
+
+			console.info 'SELECT CELL', sound
+
+			if sound
+				module = @modules[sound.type]
+				@$deactivate_btn.removeClass 'disabled'
+				module.set sound: new Phon.Sounds[sound.type] sound
+				module.set closed: false
+
+			else
+				active = @model.get('active')
+				if active
+					active.set
+						closed: true
+				@$deactivate_btn.addClass 'disabled'
+				
 
 		# tells api to create a new sound on a given cell
 		assign_sound: (e) ->
 
 			$module = $(e.target).closest('.module')
+			module = @modules[$module.attr('data-sound')]
 			sound_name = $module.attr('data-sound')
 
 			if not @current_cell
 				return false
 			
-			@$deactivate_btn.removeClass 'disabled'
-			sound = new Phon.Sounds[sound_name]
+			# reset UI snd reset module model
+			@$assign_btn.addClass 'disabled'
+			@$deactivate_btn.addClass 'disabled'
+
+			# dummy sound just created to trigger api
+			sound = new Phon.Sounds[sound_name] module.get('sound').attributes
+
+			console.info 'ASSIGN_SOUND CALLED, SOUND:', sound
+
+			module.set sound: new Phon.Sounds[sound_name], silent: true
+			module.set closed: true
 			sound.register @current_cell.row, @current_cell.col
 
 		# tells api to delete sound from a cell
