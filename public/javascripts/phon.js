@@ -1,5 +1,5 @@
 (function() {
-  var CELL_SIZE, Cell, Emitter, Instrument, NUM_COLS, NUM_ROWS, Particle, Sample, Sound, StateHash, cell_colors, cells, collide, decays, doLoop, emitterHash, emitter_counter, emitter_counter2, emitter_counter3, emitter_every, emitter_periods, init, iterate, log, note_color, occupied, paper, particle_color, particles, processSplit, select_color, server, socket, vector, wallList, wall_color;
+  var CELL_SIZE, Cell, Emitter, NUM_COLS, NUM_ROWS, Particle, Sound, StateHash, cell_colors, cells, collide, decays, doLoop, emitterHash, emitter_counter, emitter_counter2, emitter_counter3, emitter_every, emitter_periods, init, iterate, log, note_color, occupied, paper, particle_color, particles, processSplit, select_color, server, socket, vector, wallList, wall_color;
   var __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) {
     for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; }
     function ctor() { this.constructor = child; }
@@ -88,67 +88,54 @@
     };
     return _Class;
   })();
-  Instrument = (function() {
+  Phon.Sounds.Lead = (function() {
     __extends(_Class, Sound);
     function _Class() {
       _Class.__super__.constructor.apply(this, arguments);
     }
     _Class.prototype.defaults = {
+      type: 'Lead',
       pitch: 0,
       length: 0
     };
     return _Class;
   })();
-  Sample = (function() {
+  Phon.Sounds.Bass = (function() {
     __extends(_Class, Sound);
     function _Class() {
       _Class.__super__.constructor.apply(this, arguments);
     }
     _Class.prototype.defaults = {
+      type: 'Bass',
+      pitch: 0,
+      length: 0
+    };
+    return _Class;
+  })();
+  Phon.Sounds.Drum = (function() {
+    __extends(_Class, Sound);
+    function _Class() {
+      _Class.__super__.constructor.apply(this, arguments);
+    }
+    _Class.prototype.defaults = {
+      type: 'Drum',
       pitch: 0,
       offset: 0,
       sample: 0
     };
     return _Class;
   })();
-  Phon.Sounds.Lead = (function() {
-    __extends(_Class, Instrument);
-    function _Class() {
-      _Class.__super__.constructor.apply(this, arguments);
-    }
-    _Class.prototype.defaults = _.extend(Instrument.prototype.defaults, {
-      type: 'Lead'
-    });
-    return _Class;
-  })();
-  Phon.Sounds.Bass = (function() {
-    __extends(_Class, Instrument);
-    function _Class() {
-      _Class.__super__.constructor.apply(this, arguments);
-    }
-    _Class.prototype.defaults = _.extend(Instrument.prototype.defaults, {
-      type: 'Bass'
-    });
-    return _Class;
-  })();
-  Phon.Sounds.Drum = (function() {
-    __extends(_Class, Sample);
-    function _Class() {
-      _Class.__super__.constructor.apply(this, arguments);
-    }
-    _Class.prototype.defaults = _.extend(Sample.prototype.defaults, {
-      type: 'Drum'
-    });
-    return _Class;
-  })();
   Phon.Sounds.Sample = (function() {
-    __extends(_Class, Sample);
+    __extends(_Class, Sound);
     function _Class() {
       _Class.__super__.constructor.apply(this, arguments);
     }
-    _Class.prototype.defaults = _.extend(Sample.prototype.defaults, {
-      type: 'Sample'
-    });
+    _Class.prototype.defaults = {
+      type: 'Sample',
+      pitch: 0,
+      offset: 0,
+      sample: 0
+    };
     return _Class;
   })();
   Raphael.fn.octagon = function(x, y, side, side_rad) {
@@ -533,7 +520,7 @@
       if (this.excited) {
         return this.direction = results.excited[this.direction];
       } else {
-        ;
+
       }
     };
     Particle.prototype.checkObstacles = function(repeat, split) {
@@ -1093,21 +1080,12 @@
         _Class.__super__.constructor.apply(this, arguments);
       }
       _Class.prototype.initialize = function(options) {
+        return this.refresh_gui();
+      };
+      _Class.prototype.refresh_gui = function() {
         var gui, notes, sound;
-        notes = {
-          'a': 220,
-          'a#': 233.08,
-          'b': 246.94,
-          'c': 261.63,
-          'c#': 277.18,
-          'd': 293.66,
-          'd#': 311.13,
-          'e': 329.63,
-          'f': 349.23,
-          'f#': 369.99,
-          'g': 392.00
-        };
         sound = this.get('sound');
+        notes = ['a', 'a#', 'b', 'c', 'c#', 'd', 'd#', 'e', 'f', 'f#', 'g'];
         gui = new DAT.GUI;
         gui.add(sound.attributes, 'pitch').options(notes);
         gui.add(sound.attributes, 'length').min(0).max(100);
@@ -1121,6 +1099,9 @@
         _Class.__super__.constructor.apply(this, arguments);
       }
       _Class.prototype.initialize = function() {
+        return this.refresh_gui();
+      };
+      _Class.prototype.refresh_gui = function() {
         var gui, sound;
         sound = this.get('sound');
         gui = new DAT.GUI;
@@ -1213,9 +1194,10 @@
       _Class.prototype.$deactivate_button = false;
       _Class.prototype.current_cell = false;
       _Class.prototype.initialize = function(options) {
-        var $action_buttons, $assign_btn, $deactivate_btn, model;
+        var $action_buttons, $assign_btn, $deactivate_btn, model, modules;
         _.bindAll(this);
         model = options.model;
+        this.model = model;
         Phon.Elements.$paper.bind('cell-selected', this.select_cell);
         $action_buttons = $('<div class="buttons" />');
         $assign_btn = $('<a class="disabled assign btn">Assign</a>');
@@ -1224,8 +1206,9 @@
         $action_buttons.append($deactivate_btn);
         this.$assign_btn = $assign_btn;
         this.$deactivate_btn = $deactivate_btn;
-        return $('.module', this.el).each(function() {
-          var $content, $module, el, module, props, _i, _len, _ref;
+        modules = {};
+        $('.module', this.el).each(function() {
+          var $content, $module, module, populate, props;
           $module = $(this);
           $content = $('.content', $module);
           props = $module.attr('data-sound') ? {
@@ -1233,12 +1216,29 @@
           } : {};
           module = new Modules[$module.attr('data-module')](props);
           $module.data('model', module);
-          _ref = module.gui_elements;
-          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-            el = _ref[_i];
-            $content.append(el);
+          populate = function(elements) {
+            var el, _i, _len, _results;
+            _results = [];
+            for (_i = 0, _len = elements.length; _i < _len; _i++) {
+              el = elements[_i];
+              _results.push($content.append(el));
+            }
+            return _results;
+          };
+          populate(module.gui_elements);
+          if (module.get('sound')) {
+            modules[$module.attr('data-sound')] = module;
           }
+          module.bind('change:sound', __bind(function(module, sound) {
+            $content.empty();
+            populate(module.refresh_gui());
+            $content.append($action_buttons);
+            return module.set({
+              closed: false
+            });
+          }, this));
           module.bind('change:closed', __bind(function(module, closed) {
+            console.info('GOT CLOSED');
             if (closed) {
               return $module.removeClass('open');
             } else {
@@ -1259,6 +1259,7 @@
             }
           });
         });
+        return this.modules = modules;
       };
       _Class.prototype.toggle_content = function(e) {
         var $module, model;
@@ -1272,19 +1273,49 @@
         });
       };
       _Class.prototype.select_cell = function(e, cell) {
+        var active, module, sound;
+        sound = cell.sound;
         this.current_cell = cell;
         this.$assign_btn.removeClass('disabled');
-        return this.$deactivate_btn[cell.sound ? 'removeClass' : 'addClass']('disabled');
+        console.info('SELECT CELL', sound);
+        if (sound) {
+          module = this.modules[sound.type];
+          this.$deactivate_btn.removeClass('disabled');
+          module.set({
+            sound: new Phon.Sounds[sound.type](sound)
+          });
+          return module.set({
+            closed: false
+          });
+        } else {
+          active = this.model.get('active');
+          if (active) {
+            active.set({
+              closed: true
+            });
+          }
+          return this.$deactivate_btn.addClass('disabled');
+        }
       };
       _Class.prototype.assign_sound = function(e) {
-        var $module, sound, sound_name;
+        var $module, module, sound, sound_name;
         $module = $(e.target).closest('.module');
+        module = this.modules[$module.attr('data-sound')];
         sound_name = $module.attr('data-sound');
         if (!this.current_cell) {
           return false;
         }
-        this.$deactivate_btn.removeClass('disabled');
-        sound = new Phon.Sounds[sound_name];
+        this.$assign_btn.addClass('disabled');
+        this.$deactivate_btn.addClass('disabled');
+        sound = new Phon.Sounds[sound_name](module.get('sound').attributes);
+        console.info('ASSIGN_SOUND CALLED, SOUND:', sound);
+        module.set({
+          sound: new Phon.Sounds[sound_name],
+          silent: true
+        });
+        module.set({
+          closed: true
+        });
         return sound.register(this.current_cell.row, this.current_cell.col);
       };
       _Class.prototype.deactivate_sound = function(e) {

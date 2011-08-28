@@ -14,25 +14,28 @@ Sound = class extends Backbone.Model
 			col: col
 			sound: @attributes
 
-Instrument = class extends Sound
+Phon.Sounds.Lead = class extends Sound
 	defaults:
+		type: 'Lead'
 		pitch: 0
 		length: 0
-
-Sample = class extends Sound
+	
+Phon.Sounds.Bass = class extends Sound
 	defaults:
+		type: 'Bass'
+		pitch: 0
+		length: 0
+	
+Phon.Sounds.Drum = class extends Sound
+	defaults:
+		type: 'Drum'
 		pitch: 0
 		offset: 0
 		sample: 0
-
-Phon.Sounds.Lead = class extends Instrument
-	defaults: _.extend(Instrument.prototype.defaults, type: 'Lead')
 	
-Phon.Sounds.Bass = class extends Instrument
-	defaults: _.extend(Instrument.prototype.defaults, type: 'Bass')
-	
-Phon.Sounds.Drum = class extends Sample
-	defaults: _.extend(Sample.prototype.defaults, type: 'Drum')
-	
-Phon.Sounds.Sample = class extends Sample
-	defaults: _.extend(Sample.prototype.defaults, type: 'Sample')
+Phon.Sounds.Sample = class extends Sound
+	defaults:
+		type: 'Sample'
+		pitch: 0
+		offset: 0
+		sample: 0
