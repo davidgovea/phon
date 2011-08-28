@@ -1063,10 +1063,10 @@
         };
         bitcrusher = {
           more: function() {
-            return notify_grid('reverb-changed', 1);
+            return notify_grid('bitcrusher-changed', 1);
           },
           less: function() {
-            return notify_grid('reverb-changed', -1);
+            return notify_grid('bitcrusher-changed', -1);
           }
         };
         gui1 = new DAT.GUI;

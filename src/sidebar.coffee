@@ -61,16 +61,12 @@ $ ->
 				Phon.Socket.emit event_name, increment
 
 			reverb =
-				more: ->
-					notify_grid 'reverb-changed', 1
-				less: ->
-					notify_grid 'reverb-changed', -1
+				more: -> notify_grid 'reverb-changed', 1
+				less: -> notify_grid 'reverb-changed', -1
 
 			bitcrusher =
-				more: ->
-					notify_grid 'reverb-changed', 1
-				less: ->
-					notify_grid 'reverb-changed', -1
+				more: -> notify_grid 'bitcrusher-changed', 1
+				less: -> notify_grid 'bitcrusher-changed', -1
 
 			gui1 = new DAT.GUI
 			gui1.add(reverb, 'more')
