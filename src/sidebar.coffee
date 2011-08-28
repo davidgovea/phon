@@ -88,11 +88,11 @@ $ ->
 			# but for some reason they arent accessible in constructor?
 			model = options.model
 			
-			$('.module[data-sound]', @el).each ->
+			$('.module', @el).each ->
 				
 				$module = $ this
-				module = new Modules[$module.attr 'data-module']
-					sound: new Phon.Sounds[$module.attr 'data-sound']
+				props = if $module.attr('data-sound') then sound: new Phon.Sounds[$module.attr 'data-sound']  else {}
+				module = new Modules[$module.attr 'data-module'] props
 				
 				# store reference to the model in DOM to be easily accessed from events
 				$module.data 'model', module
