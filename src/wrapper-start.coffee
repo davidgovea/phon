@@ -9,9 +9,6 @@ $ ->
 		$('#disclaimer').fadeIn()
 	else
 		$('#disclaimer').remove()
-
-if !window.Phon.enabled
-	return false
 	
 Phon.Properties =
 	tick: 200
