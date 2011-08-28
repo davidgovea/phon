@@ -90,10 +90,22 @@ $ ->
 				
 			# paper can trigger events that sidebar responds to
 			Phon.Elements.$paper.bind 'cell-selected', @select_cell
+
+			# build assign/deactivate buttons
+			$action_buttons = $ '<div class="buttons" />'
+			$assign_btn = $ '<a class="disabled assign btn">Assign</a>'
+			$deactivate_btn = $ '<a class="disabled deactivate btn">Deactivate</a>'
+			$action_buttons.append $assign_btn	
+			$action_buttons.append $deactivate_btn
 			
+			# save action buttons
+			@$assign_btn = $assign_btn
+			@$deactivate_btn = $deactivate_btn
+
 			$('.module', @el).each ->
 				
 				$module = $ this
+				$content = $('.content', $module)
 				props = if $module.attr('data-sound') then sound: new Phon.Sounds[$module.attr 'data-sound'] else {}
 				module = new Modules[$module.attr 'data-module'] props
 				
@@ -101,13 +113,18 @@ $ ->
 				$module.data 'model', module
 				
 				# move DAT.GUI into container
-				$('.content', $module).prepend module.gui.domElement
+				$content.append module.gui.domElement
 
 				# setting the closed property on the module
 				# shows it and sets it as active
 				module.bind 'change:closed', (module, closed) =>
-					$module[if closed then 'removeClass' else 'addClass']('open')
-					if not closed
+					# close module
+					if closed
+						$module.removeClass 'open'
+					# open module and add buttons
+					else
+						$module.addClass 'open'
+						$content.append $action_buttons
 						model.set active: module
 				
 				# setting a new active module closes old active module
@@ -130,6 +147,7 @@ $ ->
 			model.set 'closed': !(model.get 'closed')
 
 		select_cell: (e, row, col, sound) ->
+			@$assign_btn.removeClass 'disabled'
 			console.log 'got', row, col, sound
 	
 	#####################

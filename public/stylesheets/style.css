@@ -41,6 +41,18 @@ body {
 	transition: 0.1s linear all;
 }
 
+	.btn.disabled {
+		background-image: none;
+		filter: alpha(opacity=65);
+		-khtml-opacity: 0.65;
+		-moz-opacity: 0.65;
+		opacity: 0.65;
+		cursor: default;
+		-webkit-box-shadow: none;
+		-moz-box-shadow: none;
+		box-shadow: none;
+	}
+
 #sidebar {
 	background: rgb(237, 238, 240);
 	position: absolute;
