@@ -580,34 +580,20 @@
   $(function() {
     var Modules, Sidebar, SidebarView;
     Modules = {};
-    Modules.Global = (function() {
-      __extends(_Class, Backbone.Model);
-      function _Class() {
-        _Class.__super__.constructor.apply(this, arguments);
-      }
-      _Class.prototype.defaults = {
-        closed: false
-      };
-      _Class.prototype.initialize = function() {
-        this.gui = new DAT.GUI;
-        return this.gui.add(Phon.Properties, 'tick').min(0).max(300);
-      };
-      return _Class;
-    })();
     Modules.Instrument = (function() {
       __extends(_Class, Backbone.Model);
       function _Class() {
         _Class.__super__.constructor.apply(this, arguments);
       }
       _Class.prototype.defaults = {
+        type: '',
         closed: true,
         note: 'a',
         length: 25
       };
       _Class.prototype.initialize = function() {
-        this.gui = new DAT.GUI;
-        this.gui.add(this.attributes, 'length').min(0).max(100);
-        return this.gui.add(this.attributes, 'note').options({
+        var notes;
+        notes = {
           'a': 220,
           'a#': 233.08,
           'b': 246.94,
@@ -619,7 +605,10 @@
           'f': 349.23,
           'f#': 369.99,
           'g': 392.00
-        });
+        };
+        this.gui = new DAT.GUI;
+        this.gui.add(this.attributes, 'note').options(notes);
+        return this.gui.add(this.attributes, 'length').min(0).max(100);
       };
       return _Class;
     })();
@@ -639,6 +628,20 @@
         this.gui.add(this.attributes, 'sample').options('kick', 'snare');
         this.gui.add(this.attributes, 'pitch').min(0).max(440);
         return this.gui.add(this.attributes, 'offset').min(0).max(100);
+      };
+      return _Class;
+    })();
+    Modules.Global = (function() {
+      __extends(_Class, Backbone.Model);
+      function _Class() {
+        _Class.__super__.constructor.apply(this, arguments);
+      }
+      _Class.prototype.defaults = {
+        closed: false
+      };
+      _Class.prototype.initialize = function() {
+        this.gui = new DAT.GUI;
+        return this.gui.add(Phon.Properties, 'tick').min(0).max(300);
       };
       return _Class;
     })();
@@ -668,7 +671,9 @@
         return $('.module', this.el).each(function() {
           var $module, module;
           $module = $(this);
-          module = new Modules[$module.attr('data-module')];
+          module = new Modules[$module.attr('data-module')]({
+            type: $module.attr('data-type')
+          });
           $module.data('model', module);
           $('.content', $module).append(module.gui.domElement);
           module.bind('change:closed', __bind(function(module, closed) {
