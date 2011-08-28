@@ -28,6 +28,7 @@ app.get '/', (req, res) ->
 		title: 'Phon'
 
 io.sockets.on 'connection', (socket) ->
+
 	socket.emit 'state', data: 'phon state'
 
 	socket.on 'cell', (data) ->
@@ -37,8 +38,8 @@ io.sockets.on 'connection', (socket) ->
 	socket.on 'wall', (data) ->
 		console.log data
 	
-	socket.on 'chat', (data) ->
-		console.log data
+	socket.on 'chat', (msg) ->
+		socket.emit 'chat', msg
 
 app.listen (parseInt(process.env.PORT) || 3000)
 console.log "Listening on #{app.address().port}"

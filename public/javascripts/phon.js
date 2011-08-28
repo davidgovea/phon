@@ -16,6 +16,7 @@
   $(function() {
     return Phon.Elements.$paper = $('#paper');
   });
+  Phon.Socket = io.connect(document.location.protocol + '//' + document.location.host);
   NUM_ROWS = 20;
   NUM_COLS = 28;
   CELL_SIZE = 28;
@@ -843,6 +844,67 @@
     })();
     return window.Sidebar = new SidebarView({
       model: new SidebarModel
+    });
+  });
+  $(function() {
+    var ChatModel, ChatView, MessageCollection, MessageModel;
+    $(document).keypress(function(e) {
+      if (e.which === 13) {
+        return Phon.Socket.emit('chat', prompt("what?"));
+      }
+    });
+    MessageModel = (function() {
+      __extends(_Class, Backbone.Model);
+      function _Class() {
+        _Class.__super__.constructor.apply(this, arguments);
+      }
+      _Class.prototype.defaults = {
+        username: 'some user',
+        msg: ''
+      };
+      return _Class;
+    })();
+    MessageCollection = (function() {
+      __extends(_Class, Backbone.Collection);
+      function _Class() {
+        _Class.__super__.constructor.apply(this, arguments);
+      }
+      _Class.prototype.model = MessageModel;
+      return _Class;
+    })();
+    ChatModel = (function() {
+      __extends(_Class, Backbone.Model);
+      function _Class() {
+        _Class.__super__.constructor.apply(this, arguments);
+      }
+      _Class.prototype.initialize = function() {
+        this.messages = new MessageCollection;
+        return Phon.Socket.on('chat', __bind(function(msg) {
+          return this.messages.add({
+            msg: msg
+          });
+        }, this));
+      };
+      return _Class;
+    })();
+    ChatView = (function() {
+      __extends(_Class, Backbone.Model);
+      function _Class() {
+        _Class.__super__.constructor.apply(this, arguments);
+      }
+      _Class.prototype.el = '#chat';
+      _Class.prototype.initialize = function(options) {
+        return options.model.messages.bind('add', __bind(function(message) {
+          var text, user;
+          text = message.get('msg');
+          user = message.get('username');
+          return $(this.el).append($("<li>" + user + ": " + text + "</li>"));
+        }, this));
+      };
+      return _Class;
+    })();
+    return new ChatView({
+      model: new ChatModel
     });
   });
   socket = null;
