@@ -69,10 +69,13 @@ Raphael.fn.octogrid = (x, y, rows, cols, width) ->
 		dragUp: =>
 			if @dragLine? 
 				if @dragLine.valid
+					row2 = @row+@dragLine.line[1]
+					col2 = @col+@dragLine.line[0]
 					if @dragLine.line[0] is @dragLine.line[1] or @dragLine.line[0] is @dragLine.line[1]
-						server.newSplit @row, @col, @row+@dragLine.line[1], @col+@dragLine.line[0]
+						Phon.Socket.emit 'wall', action: 'split', points: [[@row, @col],[row2, col2]]
 					else
-						server.newWall @row, @col, @row+@dragLine.line[1], @col+@dragLine.line[0]
+						Phon.Socket.emit 'wall', action: 'add', points: [[@row, @col],[row2, col2]]
+					vector.addWall @row, @col, row2, col2, true
 				@dragLine.remove()
 				@dragLine = null
 			@shape.attr opacity: 1
@@ -145,8 +148,6 @@ vector = {
 			upperRow = row2
 			order = [row2, col2, row1, col1]
 
-		log cell1
-		log cell2
 		line 		= paper.path("M#{cell1.shape.center[0]} #{cell1.shape.center[1]}L#{cell2.shape.center[0]} #{cell2.shape.center[1]}")
 		cell1.shape.toFront()
 		cell2.shape.toFront()
@@ -156,13 +157,13 @@ vector = {
 		line.index = index
 		walls[index] = line
 		if pending
-			line.attr 'stroke-width': '2', 'stroke-dasharray': "-..", stroke: wall_colors[2]
+			line.attr 'stroke-width': '4', 'stroke-dasharray': "-", stroke: wall_color
 			setTimeout ->
 				line.remove()
 				walls[index] = null
 			, 3000
 		else
-			line.attr 'stroke-width': '4', stroke: wall_colors[1]
+			line.attr 'stroke-width': '6', stroke: wall_color
 
 			if rowdiff is coldiff
 				toSplit = [upperRow, upperCol, 1]
@@ -180,6 +181,6 @@ vector = {
 				walls.forEach((cell) ->
 					cells["#{cell[0]}_#{cell[1]}_1"].walls += cell[2]
 				)
-			
+							
 }
 

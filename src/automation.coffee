@@ -47,19 +47,24 @@ class Particle
 			@direction = @direction << 4
 			if @direction > 64 then @direction = @direction >> 8
 
-	checkObstacles: ->
+	checkObstacles: (repeat=false)->
 		unless @excited
 			if (@row is 1 and @direction is 8) or
 			(@row is NUM_ROWS and @direction is 2) or
 			(@col is 1 and @direction is 4) or
 			(@col is NUM_COLS and @direction is 1)
-				@reverse()						# Grid boundary detection, normal particles
+				unless repeat then @reverse()			# Grid boundary detection, normal particles
+				else @lifetime = 0
+			else if cells["#{@row}_#{@col}_1"].walls & @direction
+				unless repeat then @reverse()
+				else @lifetime = 0
 		else if @state is 1
 			if (@row is 1 and (@direction is 16 or @direction is 64)) or
 			(@row is NUM_ROWS and (@direction is 1 or @direction is 4)) or
 			(@col is 1 and (@direction is 4 or @direction is 16)) or
 			(@col is NUM_COLS and (@direction is 1 or @direction is 64))
 				@reverse()						# Grid boundary detection, excited particles	
+			
 
 class Cell
 	constructor: (@row, @col, @state) ->

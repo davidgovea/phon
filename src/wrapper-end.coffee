@@ -25,7 +25,6 @@ window.cells = cells
 setTimeout(->
 	init()
 	vector.init()
-	initSockets()
 	
 	particles.push(
 		new Particle(3,2,1,1), 

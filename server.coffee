@@ -35,7 +35,6 @@ io.sockets.on 'connection', (socket) ->
 		io.sockets.emit 'cell', cell_properties
 	
 	socket.on 'wall', (data) ->
-		log data
 		io.sockets.emit 'wall', data
 	
 	socket.on 'chat', (msg) ->
