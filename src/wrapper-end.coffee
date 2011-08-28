@@ -24,8 +24,9 @@ window.particles = particles
 window.cells = cells
 setTimeout(->
 	init()
-	paper = Raphael("paper", (NUM_COLS+2)*(CELL_SIZE+3), (NUM_ROWS+2)*(CELL_SIZE+3))
-	paper.octogrid(1,1,NUM_ROWS,NUM_COLS,CELL_SIZE);
+	vector.init()
+	initSockets()
+	
 	particles.push(
 		new Particle(3,2,1,1), 
 		new Particle(5,4,1,8), 

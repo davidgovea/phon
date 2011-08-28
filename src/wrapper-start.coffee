@@ -15,6 +15,7 @@ NUM_ROWS	= 20
 NUM_COLS	= 28
 CELL_SIZE	= 28
 cells		= {}
+walls		= {}
 particles	= []
 occupied	= null
 

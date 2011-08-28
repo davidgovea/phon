@@ -64,7 +64,7 @@ class Particle
 class Cell
 	constructor: (@row, @col, @state) ->
 	split: false
-	walls: 0
+	walls: 0 # 1=east, 2=south, 4=west, 8=north
 	active: false
 	shape: null
 	activate: ->
@@ -173,6 +173,7 @@ iterate = ->
 		else	# Diamond, no processing
 			#log "I'm a diamond!"
 	return this:occupied.thisBeat, last:occupied.lastBeat
+
 
 
 collide = (sums, particles) ->

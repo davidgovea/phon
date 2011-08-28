@@ -21,13 +21,9 @@ Raphael.fn.octogrid = (x, y, rows, cols, width) ->
 			@shape.dblclick @onDblClick
 		row: 0
 		col: 0
-		sound: false
-		addSound: (sound) ->
-			@sound = new sound
-			@sound.register(@row, @col)
 		onClick: (evt) =>
-			# this should probably go inside cell.select()
-			Phon.Elements.$paper.trigger 'cell-selected', [@]
+			#catshirt - hook in here
+			log cells["#{@row}_#{@col}_1"]
 			cells["#{@row}_#{@col}_1"].select()
 		onDblClick: (evt) =>
 			log "dblclick #{@row},#{@col}"
@@ -35,7 +31,8 @@ Raphael.fn.octogrid = (x, y, rows, cols, width) ->
 
 	class Diamond
 		constructor: (x, y, side, @row, @col)->
-			@shape = raph.rect x-side/2, y-side/2, side, side
+			@shape	= raph.rect x-side/2, y-side/2, side, side
+			@shape.center	= [x, y]
 			@shape.rotate 45
 			@shape.drag @dragMove, @dragStart, @dragUp
 		row: 0
@@ -52,7 +49,7 @@ Raphael.fn.octogrid = (x, y, rows, cols, width) ->
 				else if @col is (cols-1) and (target is 0 or target is 1 or target is 7) then return false
 				else line = @neighbors[target]
 
-				pathString = "M#{@shape.attrs.x+@shape.attrs.height/2} #{@shape.attrs.y+@shape.attrs.height/2}l#{line[0]*width} #{line[1]*width}"
+				pathString = "M#{@shape.attrs.x+@shape.attrs.height/2} #{@shape.attrs.y+@shape.attrs.height/2}l#{line[0]*(width+3)} #{line[1]*(width+3)}"
 				if @dragLine? then @dragLine.animate path: pathString, 20
 				else @dragLine = @shape.paper.path pathString
 				@dragLine.valid = true
@@ -66,12 +63,11 @@ Raphael.fn.octogrid = (x, y, rows, cols, width) ->
 
 		dragUp: =>
 			if @dragLine? 
-				log @dragLine.valid
 				unless @dragLine.valid then @dragLine.remove()
 				else
-					# TODO - handle this
-					#phon.addLink @row, @col, @row+@dragLine.line[1], @col+@dragLine.line[0], @dragLine
-					#@dragLine.click
+					server.newWall @row, @col, @row+@dragLine.line[1], @col+@dragLine.line[0]
+					vector.addWall @row, @col, @row+@dragLine.line[1], @col+@dragLine.line[0], true
+					@dragLine.remove()
 				@dragLine = null
 			@shape.attr opacity: 1
 		getAngle: (x, y)->
@@ -117,3 +113,61 @@ Raphael.fn.octogrid = (x, y, rows, cols, width) ->
 		y += width+3
 
 	console.timeEnd('octogrid')
+
+
+paper = null
+
+vector = {
+	init: ->
+		paper = Raphael("paper", (NUM_COLS+2)*(CELL_SIZE+3), (NUM_ROWS+2)*(CELL_SIZE+3))
+		paper.octogrid(1,1,NUM_ROWS,NUM_COLS,CELL_SIZE);
+	addWall: (row1, col1, row2, col2, pending=false) ->
+		cell1		= cells["#{row1}_#{col1}_2"]
+		cell2		= cells["#{row2}_#{col2}_2"]
+		rowdiff		= row1-row2
+		coldiff		= col1-col2
+		if col1 >= col2
+			upperCol = col1
+			order	= [row1, col1, row2, col2]
+		else
+			upperCol = col2
+			order = [row2, col2, row1, col1]
+		if row1 >= row2 
+			upperRow = row1
+			if row1 isnt row2 then order = [row1, col1, row2, col2]
+		else
+			upperRow = row2
+			order = [row2, col2, row1, col1]
+
+		log cell1
+		log cell2
+		line 		= paper.path("M#{cell1.shape.center[0]} #{cell1.shape.center[1]}L#{cell2.shape.center[0]} #{cell2.shape.center[1]}")
+		cell1.shape.toFront()
+		cell2.shape.toFront()
+
+		index = "#{order[0]}_#{order[1]}_#{order[2]}_#{order[3]}"
+		walls[index] = line
+
+		if rowdiff is coldiff
+			toSplit = [upperRow, upperCol, 1]
+		else if rowdiff is -coldiff
+			toSplit = [upperRow, upperCol, 2]
+		else if rowdiff is 0
+			walls = [[upperRow, upperCol, 2], [upperRow+1, upperCol, 8]]
+		else
+			walls = [[upperRow, upperCol, 1], [upperRow, upperCol, 4]]
+		
+		if pending
+			setTimeout ->
+				line.remove()
+				walls[index] = null
+			, 3000
+		else
+			if toSplit? 
+				cells["#{toSplit[0]}_#{toSplit[1]}_1"].split = toSplit[2]
+			else if walls?
+				walls.forEach((cell) ->
+					cells["#{cell[0]}_#{cell[1]}_1"].walls += cell[2]
+				)
+}
+
