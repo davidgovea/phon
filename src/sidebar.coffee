@@ -18,9 +18,8 @@ $ ->
 			
 		refresh_gui: ->
 			sound = @get 'sound'
-			notes = ['a', 'a#', 'b', 'c','c#','d','d#','e', 'f', 'f#', 'g']
 			gui = new DAT.GUI
-			gui.add(sound.attributes, 'pitch').options(notes)
+			gui.add(sound.attributes, 'pitch').options('a', 'a#', 'b', 'c','c#','d','d#','e', 'f', 'f#', 'g')
 			gui.add(sound.attributes, 'length').min(0).max(100)
 			@gui_elements = [gui.domElement]
 	
@@ -239,8 +238,6 @@ $ ->
 			# dummy sound just created to trigger api
 			sound = new Phon.Sounds[sound_name] module.get('sound').attributes
 
-			console.info 'ASSIGN_SOUND CALLED, SOUND:', sound
-
 			module.set sound: new Phon.Sounds[sound_name], silent: true
 			module.set closed: true
 			sound.register @current_cell.row, @current_cell.col
@@ -259,3 +256,9 @@ $ ->
 	#####################
 	window.Sidebar = new SidebarView
 	 	model: new SidebarModel
+
+
+	###
+	[DAT.GUI ERROR] [object Object] either has no property 'sample', or the property is inaccessible.
+	phon.js:1111Uncaught TypeError: Cannot call method 'options' of undefined
+	###
