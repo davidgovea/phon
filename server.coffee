@@ -4,6 +4,7 @@ express	= require 'express'
 nko		= require('nko')('Z6+o2A6kn7+tCofT')
 coffee	= require 'coffee-script'
 app		= module.exports = express.createServer()
+io		= require('socket.io').listen app
 
 
 app.configure ->
@@ -25,6 +26,19 @@ app.configure 'production', ->
 app.get '/', (req, res) ->
 	res.render 'index',
 		title: 'Phon'
+
+io.sockets.on 'connection', (socket) ->
+	socket.emit 'state', data: 'phon state'
+
+	socket.on 'cell', (data) ->
+		#process cell
+		console.log data
+	
+	socket.on 'wall', (data) ->
+		console.log data
+	
+	socket.on 'chat', (data) ->
+		console.log data
 
 app.listen (parseInt(process.env.PORT) || 3000)
 console.log "Listening on #{app.address().port}"
