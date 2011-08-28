@@ -1309,9 +1309,7 @@
         }
         this.$assign_btn.addClass('disabled');
         this.$deactivate_btn.addClass('disabled');
-        console.info('ASSIGNING SOUND', module.get('sound').attributes);
         sound = new Phon.Sounds[sound_name](module.get('sound').attributes);
-        console.info('ASSIGN_SOUND CALLED, SOUND:', sound);
         module.set({
           sound: new Phon.Sounds[sound_name],
           silent: true
