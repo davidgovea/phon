@@ -11,7 +11,10 @@
     "node": "~v0.4.11"
   },
   "dependencies": {
-    "nko": "~0.1.1"
+    "nko": "~0.1.1",
+    "express": "~2.4.6",
+    "jade": "~0.15.2",
+    "coffee-script": "~1.1.2"
   },
   "devDependencies": {}
 }
