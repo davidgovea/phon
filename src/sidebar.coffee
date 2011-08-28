@@ -148,7 +148,7 @@ $ ->
 
 		select_cell: (e, row, col, sound) ->
 			@$assign_btn.removeClass 'disabled'
-			@$deactivate_btn[if sound then 'removeClass' else 'addClass'] 'disabled'
+			@$deactivate_btn[if !sound then 'removeClass' else 'addClass'] 'disabled'
 			console.log 'got', row, col, sound
 	
 	#####################
