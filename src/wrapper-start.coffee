@@ -13,8 +13,9 @@ $ ->
 
 Phon.Socket = io.connect(document.location.protocol + '//' + document.location.host)
 Phon.Socket.on 'connection', ->
-	init()
-	vector.init()
+	if paper is null
+		init()
+		vector.init()
 	Phon.Socket.emit "room", Phon.Properties.roomId
 
 Phon.Socket.on 'init', (data) ->
@@ -51,6 +52,7 @@ cells		= {}
 wallList	= {}
 particles	= []
 occupied	= null
+paper = null
 
 cell_colors	= {
 	1: "#8A8A8A"

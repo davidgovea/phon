@@ -116,7 +116,6 @@ Raphael.fn.octogrid = (x, y, rows, cols, width) ->
 	console.timeEnd('octogrid')
 
 
-paper = null
 
 vector = {
 	init: ->
@@ -184,8 +183,8 @@ vector = {
 					type: 'wall'
 					cells: []
 				}
-				walls.forEach((cell) ->
-					cells["#{cell[0]}_#{cell[1]}_1"].walls += cell[2]
+				walls.forEach((c) ->
+					c["#{c[0]}_#{c[1]}_1"].walls += c[2]
 					info.cells.push(cell)
 				)
 				line.info = info

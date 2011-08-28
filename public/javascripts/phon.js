@@ -19,8 +19,10 @@
   });
   Phon.Socket = io.connect(document.location.protocol + '//' + document.location.host);
   Phon.Socket.on('connection', function() {
-    init();
-    vector.init();
+    if (paper === null) {
+      init();
+      vector.init();
+    }
     return Phon.Socket.emit("room", Phon.Properties.roomId);
   });
   Phon.Socket.on('init', function(data) {
@@ -59,6 +61,7 @@
   wallList = {};
   particles = [];
   occupied = null;
+  paper = null;
   cell_colors = {
     1: "#8A8A8A",
     2: "#616161"
@@ -315,7 +318,6 @@
     }
     return console.timeEnd('octogrid');
   };
-  paper = null;
   vector = {
     init: function() {
       paper = Raphael("paper", (NUM_COLS + 2) * (CELL_SIZE + 3), (NUM_ROWS + 2) * (CELL_SIZE + 3));
@@ -400,8 +402,8 @@
             type: 'wall',
             cells: []
           };
-          walls.forEach(function(cell) {
-            cells["" + cell[0] + "_" + cell[1] + "_1"].walls += cell[2];
+          walls.forEach(function(c) {
+            c["" + c[0] + "_" + c[1] + "_1"].walls += c[2];
             return info.cells.push(cell);
           });
           return line.info = info;
@@ -643,13 +645,16 @@
           fill: cell_colors[this.state]
         });
       }
-      this.active = state;
-      return log(this);
+      return this.active = state;
     };
     Cell.prototype.occupy = function(state) {
       if (state === true) {
         return this.shape.attr({
           fill: particle_color
+        });
+      } else if (this.active) {
+        return this.shape.attr({
+          fill: note_color
         });
       } else {
         return this.shape.attr({
@@ -1469,7 +1474,6 @@
     o["this"].forEach(function(index) {
       return cells[index].occupy(true);
     });
-    setTimeout(doLoop, Phon.Properties.tick);
-    return console.timeEnd('loop');
+    return setTimeout(doLoop, Phon.Properties.tick);
   };
 }).call(this);

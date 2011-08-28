@@ -148,10 +148,11 @@ class Cell
 		else
 			@shape.attr fill: cell_colors[@state]
 		@active = state
-		log this
 	occupy: (state) ->
 		if state is true
 			@shape.attr fill: particle_color
+		else if @active
+			@shape.attr fill: note_color
 		else
 			@shape.attr fill: cell_colors[@state]
 			
