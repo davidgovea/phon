@@ -4,6 +4,12 @@ body {
 	color: rgb(70, 70, 70);
 }
 
+h1 {
+	font-size: 28px;
+	padding: 0;
+	margin: 15px 0 5px;
+}
+
 h2 {
 	padding-bottom: 10px;
 	padding-top: 10px;
