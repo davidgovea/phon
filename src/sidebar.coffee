@@ -77,6 +77,7 @@ $ ->
 		events:
 			'click h2': 'toggle_content'
 			'click a.assign': 'assign_sound'
+			'click a.deactivate': 'deactivate_sound'
 
 		$assign_button: false
 		$deactivate_button: false
@@ -164,7 +165,17 @@ $ ->
 			if not @current_oct
 				return false
 			
-			@current_oct.addSound Phon.Sounds[sound_name]
+			@$deactivate_btn.removeClass 'disabled'
+			sound = new Phon.Sounds[sound_name]
+			sound.register @current_oct.row, @current_oct.col
+
+		deactivate_sound: (e) ->
+
+			if not @current_oct
+				return false
+			
+			@$deactivate_btn.addClass 'disabled'
+			@current_oct.removeSound()
 	
 	#####################
 	# Make Thing Happen #

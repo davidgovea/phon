@@ -22,9 +22,14 @@ Raphael.fn.octogrid = (x, y, rows, cols, width) ->
 		row: 0
 		col: 0
 		sound: false
-		addSound: (sound) ->
-			@sound = new sound
-			@sound.register @row, @col
+		# ckpcw: this addSound method should get called when the client receives a message a new sound has been added
+		# the audio stuff should bind to the @sound model property changes
+		addSound: (type) ->
+			@sound = new Phon.Sounds[type]
+		# ckpcw: this method gets called on "deactivate" click
+		# it should somehow notify the audio code to clean up the sound
+		removeSound: ->
+			@sound = false
 		onClick: (evt) =>
 			# this should probably go inside cell.select()
 			Phon.Elements.$paper.trigger 'cell-selected', [@]

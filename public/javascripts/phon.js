@@ -131,9 +131,11 @@
       Oct.prototype.row = 0;
       Oct.prototype.col = 0;
       Oct.prototype.sound = false;
-      Oct.prototype.addSound = function(sound) {
-        this.sound = new sound;
-        return this.sound.register(this.row, this.col);
+      Oct.prototype.addSound = function(type) {
+        return this.sound = new Phon.Sounds[type];
+      };
+      Oct.prototype.removeSound = function() {
+        return this.sound = false;
       };
       Oct.prototype.onClick = function(evt) {
         Phon.Elements.$paper.trigger('cell-selected', [this]);
@@ -753,7 +755,8 @@
       _Class.prototype.el = '#sidebar';
       _Class.prototype.events = {
         'click h2': 'toggle_content',
-        'click a.assign': 'assign_sound'
+        'click a.assign': 'assign_sound',
+        'click a.deactivate': 'deactivate_sound'
       };
       _Class.prototype.$assign_button = false;
       _Class.prototype.$deactivate_button = false;
@@ -819,13 +822,22 @@
         return this.$deactivate_btn[oct.sound ? 'removeClass' : 'addClass']('disabled');
       };
       _Class.prototype.assign_sound = function(e) {
-        var $module, sound_name;
+        var $module, sound, sound_name;
         $module = $(e.target).closest('.module');
         sound_name = $module.attr('data-sound');
         if (!this.current_oct) {
           return false;
         }
-        return this.current_oct.addSound(Phon.Sounds[sound_name]);
+        this.$deactivate_btn.removeClass('disabled');
+        sound = new Phon.Sounds[sound_name];
+        return sound.register(this.current_oct.row, this.current_oct.col);
+      };
+      _Class.prototype.deactivate_sound = function(e) {
+        if (!this.current_oct) {
+          return false;
+        }
+        this.$deactivate_btn.addClass('disabled');
+        return this.current_oct.removeSound();
       };
       return _Class;
     })();
