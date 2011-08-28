@@ -280,7 +280,7 @@ init = ->
 		log notes
 		for note in notes
 			if note.type = "Lead" && leadCount < 4
-				leads[leadCount].freq = Note.fromLatin(note.pitch.toUpperCase()+'4').frequency()
+				leads[leadCount].frequency = Note.fromLatin(note.pitch.toUpperCase()+'4').frequency()
 				log note
 				leadCount++
 		

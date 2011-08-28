@@ -27,7 +27,7 @@
   });
   Phon.Socket = io.connect(document.location.protocol + '//' + document.location.host);
   Phon.Socket.on('connect', function() {
-    if (paper === null) {
+    if (paper === null && window.Phon.enabled) {
       init();
       vector.init();
     }
@@ -816,7 +816,7 @@
       for (_i = 0, _len = notes.length; _i < _len; _i++) {
         note = notes[_i];
         if (note.type = "Lead" && leadCount < 4) {
-          leads[leadCount].freq = Note.fromLatin(note.pitch.toUpperCase() + '4').frequency();
+          leads[leadCount].frequency = Note.fromLatin(note.pitch.toUpperCase() + '4').frequency();
           log(note);
           leadCount++;
         }
