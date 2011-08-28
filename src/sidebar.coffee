@@ -81,7 +81,7 @@ $ ->
 
 		$assign_button: false
 		$deactivate_button: false
-		current_oct: false
+		current_cell: false
 			
 		initialize: (options) ->
 			
@@ -149,33 +149,34 @@ $ ->
 			# set property/display on new module
 			model.set 'closed': !(model.get 'closed')
 		
-		# accepts an oct from the grid and saves reference as current oct
-		select_cell: (e, oct) ->
+		# accepts an cell from the grid and saves reference as current cell
+		select_cell: (e, cell) ->
 
-			@current_oct = oct
+			@current_cell = cell
 			@$assign_btn.removeClass 'disabled'
-			@$deactivate_btn[if oct.sound then 'removeClass' else 'addClass'] 'disabled'
+			@$deactivate_btn[if cell.sound then 'removeClass' else 'addClass'] 'disabled'
 
-		# creates a new sound on the current oct
+		# tells api to create a new sound on a given cell
 		assign_sound: (e) ->
 
 			$module = $(e.target).closest('.module')
 			sound_name = $module.attr('data-sound')
 
-			if not @current_oct
+			if not @current_cell
 				return false
 			
 			@$deactivate_btn.removeClass 'disabled'
 			sound = new Phon.Sounds[sound_name]
-			sound.register @current_oct.row, @current_oct.col
+			sound.register @current_cell.row, @current_cell.col
 
+		# tells api to delete sound from a cell
 		deactivate_sound: (e) ->
 
-			if not @current_oct
+			if not @current_cell
 				return false
 			
 			@$deactivate_btn.addClass 'disabled'
-			@current_oct.removeSound()
+			@current_cell.removeSound()
 	
 	#####################
 	# Make Thing Happen #

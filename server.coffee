@@ -31,9 +31,8 @@ io.sockets.on 'connection', (socket) ->
 
 	#socket.emit 'state', data: 'phon state'
 
-	socket.on 'cell', (data) ->
-		#process cell
-		console.log data
+	socket.on 'cell', (cell_properties) ->
+		io.sockets.emit 'cell', cell_properties
 	
 	socket.on 'wall', (data) ->
 		log data

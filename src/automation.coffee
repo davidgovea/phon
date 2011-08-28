@@ -67,6 +67,15 @@ class Cell
 	walls: 0 # 1=east, 2=south, 4=west, 8=north
 	active: false
 	shape: null
+	sound: false
+	# ckpcw: this addSound method should get called when the client receives a message a new sound has been added
+	# the audio stuff should bind to the @sound model property changes
+	addSound: (sound) ->
+		@sound = sound
+	# ckpcw: this method gets called on "deactivate" click
+	# it should somehow notify the audio code to clean up the sound
+	removeSound: ->
+		@sound = false
 	activate: ->
 	deactivate: ->
 	setInstrument: (parameters) ->
@@ -75,6 +84,7 @@ class Cell
 			if cells.selected? then cells.selected.select(false)
 			@shape.attr stroke: select_color, 'stroke-width': 4
 			cells.selected = @
+			Phon.Elements.$paper.trigger 'cell-selected', [@]
 		else
 			@shape.attr stroke: "#000", 'stroke-width': 1
 	activate: ->
