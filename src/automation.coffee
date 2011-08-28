@@ -3,7 +3,7 @@
 
 class Particle
 	constructor: (@row, @col, @state, @direction, lifetime) ->
-		@lifetime = lifetime ? -1
+		@lifetime = lifetime ? 32
 	excited: 0
 	excite:	-> @excited	= 1
 	decay: -> @excited	= 0
@@ -141,8 +141,24 @@ class Cell
 		else
 			@shape.attr fill: cell_colors[@state]
 			
-class Emitter
 
+emitterHash = {}
+emitter_every = 4
+emitter_periods = [4, 16, 8, 16]
+emitter_counter = 0
+
+class Emitter
+	constructor: (@row, @col, @period, @direction) ->
+	index: 0
+	step: ->
+		@index++
+		if @index is @period 
+			@index = 0
+			@emit()
+	setIndex: (num) ->
+		@index = num % @period
+	emit: ->
+		particles.push(new Particle @row, @col, 1, @direction)
 
 
 
@@ -199,10 +215,21 @@ decays = {
 init = ->
 	occupied = new StateHash
 	for row in [1..NUM_ROWS]
+		if row is 1 or row is NUM_ROWS then emitter_counter = 0
 		for col in [1..NUM_COLS]
 			cells["#{row}_#{col}_1"] = new Cell row, col, 1
 			unless row is NUM_ROWS or col is NUM_COLS
 				cells["#{row}_#{col}_2"] = new Cell row, col, 2
+			if row is 1
+				emitter_counter++
+				if emitter_counter is emitter_every
+					emitter_counter = 0
+					period = emitter_periods.shift()
+					emitterHash["#{row}_#{col}"] = new Emitter row, col, period, 2
+					emitter_periods.push period
+	log emitterHash
+
+				
 
 iterate = ->
 	occupied.reset()
@@ -219,6 +246,9 @@ iterate = ->
 		toKill.forEach((p) ->
 			particles.splice(particles.indexOf(p), 1)
 		)
+	
+	for emitIndex, emit of emitterHash
+		emit.step()
 	
 	for cellIndex, cell of occupied.h
 		if cell.state is 1						# Normal cell
