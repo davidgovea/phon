@@ -154,19 +154,19 @@ vector = {
 
 		index = "#{order[0]}_#{order[1]}_#{order[2]}_#{order[3]}"
 		line.index = index
-		walls[index]?.remove()
-		walls[index] = line
+		wallList[index]?.remove()
+		wallList[index] = line
 		if pending
 			line.attr 'stroke-width': '3', 'stroke-dasharray': ".", stroke: wall_color
 			setTimeout ->
 				line.remove()
-				walls[index] = null
 			, 3000
 		else
 			line.attr 'stroke-width': '6', stroke: wall_color
 			line.dblclick ->
-				walls[line.index] = null
-				line.remove()
+				Phon.Socket.emit 'wall', action: 'del', index: line.index
+				#wallList[line.index] = null
+				#line.remove()
 
 			if rowdiff is coldiff
 				toSplit = [upperRow, upperCol, 1]
@@ -175,15 +175,29 @@ vector = {
 			else if rowdiff is 0
 				walls = [[upperRow, upperCol, 2], [upperRow+1, upperCol, 8]]
 			else
-				walls = [[upperRow, upperCol, 1], [upperRow, upperCol, 4]]
+				walls = [[upperRow, upperCol, 1], [upperRow, upperCol+1, 4]]
 			
 
 			if toSplit? 
-				cells["#{toSplit[0]}_#{toSplit[1]}_1"].split = toSplit[2]
+				cell = cells["#{toSplit[0]}_#{toSplit[1]}_1"]
+				cell.splitLine?.remove()
+				cell.split = toSplit[2]
+				cell.splitLine = line
+				line.info = {
+					type: 'split'
+					cell: toSplit
+				}
 			else if walls?
+				info = {
+					type: 'wall'
+					cells: []
+				}
 				walls.forEach((cell) ->
 					cells["#{cell[0]}_#{cell[1]}_1"].walls += cell[2]
+					info.cells.push(cell)
 				)
+				line.info = info
+			
 							
 }
 

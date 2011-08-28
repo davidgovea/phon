@@ -1,5 +1,5 @@
 (function() {
-  var CELL_SIZE, Cell, Emitter, Instrument, NUM_COLS, NUM_ROWS, Particle, Sample, Sound, StateHash, cell_colors, cells, collide, decays, doLoop, init, iterate, log, occupied, paper, particle_color, particles, select_color, server, socket, vector, wall_color, walls;
+  var CELL_SIZE, Cell, Emitter, Instrument, NUM_COLS, NUM_ROWS, Particle, Sample, Sound, StateHash, cell_colors, cells, collide, decays, doLoop, init, iterate, log, occupied, paper, particle_color, particles, processSplit, select_color, server, socket, vector, wallList, wall_color;
   var __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) {
     for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; }
     function ctor() { this.constructor = child; }
@@ -17,7 +17,6 @@
   $(function() {
     return Phon.Elements.$paper = $('#paper');
   });
-  console.log(Phon.Properties);
   Phon.Socket = io.connect(document.location.protocol + '//' + document.location.host);
   Phon.Socket.on('connection', function() {
     return Phon.Socket.emit("room", Phon.Properties.roomId);
@@ -30,7 +29,7 @@
   NUM_COLS = 24;
   CELL_SIZE = 28;
   cells = {};
-  walls = {};
+  wallList = {};
   particles = [];
   occupied = null;
   cell_colors = {
@@ -303,7 +302,7 @@
       return paper.octogrid(1, 1, NUM_ROWS, NUM_COLS, CELL_SIZE);
     },
     addWall: function(row1, col1, row2, col2, pending) {
-      var cell1, cell2, coldiff, index, line, order, rowdiff, toSplit, upperCol, upperRow, _ref;
+      var cell, cell1, cell2, coldiff, index, info, line, order, rowdiff, toSplit, upperCol, upperRow, walls, _ref, _ref2;
       if (pending == null) {
         pending = false;
       }
@@ -332,10 +331,10 @@
       cell2.shape.toFront();
       index = "" + order[0] + "_" + order[1] + "_" + order[2] + "_" + order[3];
       line.index = index;
-      if ((_ref = walls[index]) != null) {
+      if ((_ref = wallList[index]) != null) {
         _ref.remove();
       }
-      walls[index] = line;
+      wallList[index] = line;
       if (pending) {
         line.attr({
           'stroke-width': '3',
@@ -343,8 +342,7 @@
           stroke: wall_color
         });
         return setTimeout(function() {
-          line.remove();
-          return walls[index] = null;
+          return line.remove();
         }, 3000);
       } else {
         line.attr({
@@ -352,8 +350,10 @@
           stroke: wall_color
         });
         line.dblclick(function() {
-          walls[line.index] = null;
-          return line.remove();
+          return Phon.Socket.emit('wall', {
+            action: 'del',
+            index: line.index
+          });
         });
         if (rowdiff === coldiff) {
           toSplit = [upperRow, upperCol, 1];
@@ -362,14 +362,29 @@
         } else if (rowdiff === 0) {
           walls = [[upperRow, upperCol, 2], [upperRow + 1, upperCol, 8]];
         } else {
-          walls = [[upperRow, upperCol, 1], [upperRow, upperCol, 4]];
+          walls = [[upperRow, upperCol, 1], [upperRow, upperCol + 1, 4]];
         }
         if (toSplit != null) {
-          return cells["" + toSplit[0] + "_" + toSplit[1] + "_1"].split = toSplit[2];
+          cell = cells["" + toSplit[0] + "_" + toSplit[1] + "_1"];
+          if ((_ref2 = cell.splitLine) != null) {
+            _ref2.remove();
+          }
+          cell.split = toSplit[2];
+          cell.splitLine = line;
+          return line.info = {
+            type: 'split',
+            cell: toSplit
+          };
         } else if (walls != null) {
-          return walls.forEach(function(cell) {
-            return cells["" + cell[0] + "_" + cell[1] + "_1"].walls += cell[2];
+          info = {
+            type: 'wall',
+            cells: []
+          };
+          walls.forEach(function(cell) {
+            cells["" + cell[0] + "_" + cell[1] + "_1"].walls += cell[2];
+            return info.cells.push(cell);
           });
+          return line.info = info;
         }
       }
     }
@@ -380,7 +395,7 @@
       this.col = col;
       this.state = state;
       this.direction = direction;
-      this.lifetime = lifetime != null ? lifetime : 200;
+      this.lifetime = lifetime != null ? lifetime : -1;
     }
     Particle.prototype.excited = 0;
     Particle.prototype.excite = function() {
@@ -463,27 +478,76 @@
         }
       }
     };
-    Particle.prototype.checkObstacles = function(repeat) {
+    Particle.prototype.splitReverse = function(splitMode) {
+      var results;
+      results = {
+        1: {
+          1: 2,
+          8: 4,
+          4: 8,
+          2: 1,
+          excited: {
+            1: 1,
+            16: 16,
+            64: 4,
+            4: 64
+          }
+        },
+        2: {
+          1: 8,
+          2: 4,
+          4: 2,
+          8: 1,
+          excited: {
+            4: 4,
+            64: 64,
+            16: 1,
+            1: 16
+          }
+        }
+      }[splitMode];
+      this.direction = this.excited ? results.excited[this.direction] : results[this.direction];
+      if (this.excited) {
+        return this.direction = results.excited[this.direction];
+      } else {
+        ;
+      }
+    };
+    Particle.prototype.checkObstacles = function(repeat, split) {
       if (repeat == null) {
         repeat = false;
+      }
+      if (split == null) {
+        split = 0;
       }
       if (!this.excited) {
         if ((this.row === 1 && this.direction === 8) || (this.row === NUM_ROWS && this.direction === 2) || (this.col === 1 && this.direction === 4) || (this.col === NUM_COLS && this.direction === 1)) {
           if (!repeat) {
-            return this.reverse();
+            this.reverse();
+            if (split) {
+              this.splitReverse(split);
+            }
+            return this.checkObstacles(true);
           } else {
             return this.lifetime = 0;
           }
         } else if (cells["" + this.row + "_" + this.col + "_1"].walls & this.direction) {
           if (!repeat) {
-            return this.reverse();
+            this.reverse();
+            if (split) {
+              this.splitReverse(split);
+            }
+            return this.checkObstacles(true);
           } else {
             return this.lifetime = 0;
           }
         }
       } else if (this.state === 1) {
         if ((this.row === 1 && (this.direction === 16 || this.direction === 64)) || (this.row === NUM_ROWS && (this.direction === 1 || this.direction === 4)) || (this.col === 1 && (this.direction === 4 || this.direction === 16)) || (this.col === NUM_COLS && (this.direction === 1 || this.direction === 64))) {
-          return this.reverse();
+          this.reverse();
+          if (split) {
+            return this.splitReverse(split);
+          }
         }
       }
     };
@@ -557,7 +621,7 @@
       this.thisBeat = [];
     }
     StateHash.prototype.add = function(particle) {
-      var index;
+      var dir, index;
       index = "" + particle.row + "_" + particle.col + "_" + particle.state;
       if (!this.h[index]) {
         this.h[index] = cells[index];
@@ -565,7 +629,29 @@
         this.h[index].sums = [0, 0];
         this.thisBeat.push(index);
       }
-      this.h[index].sums[particle.excited] += particle.direction;
+      if (this.h[index].split) {
+        dir = particle.direction;
+        this.h[index].sums = [0, 0, 0, 0];
+        if (this.h[index].split === 1) {
+          if (!(particle.excited === 1 && (dir === 1 || dir === 16))) {
+            if (dir === 1 || dir === 8 || dir === 64) {
+              this.h[index].sums[particle.excited] += dir;
+            } else {
+              this.h[index].sums[2 + particle.excited] += dir;
+            }
+          }
+        } else {
+          if (!(particle.excited === 1 && (dir === 4 || dir === 64))) {
+            if (dir === 1 || dir === 2) {
+              this.h[index].sums[particle.excited] += dir;
+            } else {
+              this.h[index].sums[2 + particle.excited] += dir;
+            }
+          }
+        }
+      } else {
+        this.h[index].sums[particle.excited] += particle.direction;
+      }
       return this.h[index].particles.push(particle);
     };
     StateHash.prototype.reset = function() {
@@ -627,7 +713,12 @@
     for (cellIndex in _ref) {
       cell = _ref[cellIndex];
       if (cell.state === 1) {
-        if (cell.split) {} else {
+        if (cell.split) {
+          processSplit(cell.split, cell.sums, cell.particles);
+          cell.particles.forEach(function(p) {
+            return p.checkObstacles(false, cell.split);
+          });
+        } else {
           if (cell.sums[1] || cell.particles.length > 1) {
             collide(cell.sums, cell.particles);
           }
@@ -638,8 +729,6 @@
         if (cell.active) {
           log("TODO / record note playback info");
         }
-      } else {
-
       }
     }
     return {
@@ -647,11 +736,139 @@
       last: occupied.lastBeat
     };
   };
+  processSplit = function(split, sums, particles) {
+    var eSum1, eSum2, nSum1, nSum2;
+    nSum1 = sums[0];
+    eSum1 = sums[1];
+    nSum2 = sums[2];
+    eSum2 = sums[3];
+    switch (split) {
+      case 1:
+        switch (nSum1) {
+          case 1:
+          case 8:
+            switch (eSum1) {
+              case 0:
+                particles.forEach(function(p) {
+                  if (p.direction === 1 || p.direction === 8) {
+                    return p.splitReverse(split);
+                  }
+                });
+                break;
+              case 64:
+                break;
+              case 128:
+            }
+            break;
+          case 9:
+        }
+        switch (nSum2) {
+          case 2:
+          case 4:
+            switch (eSum2) {
+              case 0:
+                return particles.forEach(function(p) {
+                  if (p.direction === 2 || p.direction === 4) {
+                    return p.splitReverse(split);
+                  }
+                });
+              case 4:
+                break;
+              case 8:
+            }
+            break;
+          case 6:
+        }
+        break;
+      case 2:
+        switch (nSum1) {
+          case 1:
+          case 2:
+            switch (eSum1) {
+              case 0:
+                particles.forEach(function(p) {
+                  if (p.direction === 1 || p.direction === 2) {
+                    return p.splitReverse(split);
+                  }
+                });
+                break;
+              case 1:
+                break;
+              case 2:
+            }
+            break;
+          case 3:
+        }
+        switch (nSum2) {
+          case 4:
+          case 8:
+            switch (eSum2) {
+              case 0:
+                return particles.forEach(function(p) {
+                  if (p.direction === 4 || p.direction === 8) {
+                    return p.splitReverse(split);
+                  }
+                });
+              case 16:
+                break;
+              case 64:
+            }
+            break;
+          case 12:
+        }
+    }
+  };
   collide = function(sums, particles) {
-    var dir, dirs, eSum, nSum, result;
+    var Module, Modules, SidebarModel, SidebarView, dir, dirs, eSum, nSum, result;
     nSum = sums[0];
     eSum = sums[1];
+    console.time('find');
     switch (nSum) {
+      case 0:
+        switch (eSum) {
+          case 1:
+          case 4:
+          case 16:
+          case 64:
+            if (decays.single()) {
+              dirs = {
+                1: [1, 2],
+                4: [2, 4],
+                16: [4, 8],
+                64: [8, 1]
+              }[eSum].shuffle();
+              particles.forEach(function(p) {
+                p.decay();
+                return p.direction = dirs.shift();
+              });
+            }
+            return true;
+          case 2:
+          case 8:
+          case 32:
+          case 128:
+            if (decays.pair()) {
+              dirs = {
+                2: [1, 2],
+                8: [2, 4],
+                32: [4, 8],
+                128: [8, 1]
+              }[eSum].shuffle();
+              particles.forEach(function(p) {
+                p.decay();
+                return p.direction = dirs.shift();
+              });
+            }
+            return true;
+          case 17:
+          case 64:
+            dirs = [[2, 8], [1, 4]].shuffle().shift().shuffle();
+            return true;
+          default:
+            alert('unhandled 5');
+            return false;
+        }
+        break;
       case 1:
       case 4:
       case 8:
@@ -661,20 +878,24 @@
           case 4:
           case 16:
           case 64:
-            break;
+            return true;
           case 2:
           case 8:
           case 32:
           case 128:
+            return true;
         }
         break;
       case 5:
       case 10:
         switch (eSum) {
           case 0:
-            return particles.forEach(function(p) {
+            particles.forEach(function(p) {
               return p.reverse();
             });
+            return true;
+          default:
+            alert('unhandled 1');
         }
         break;
       case 3:
@@ -689,10 +910,13 @@
               9: 64,
               12: 16
             }[nSum];
-            return particles.forEach(function(p) {
+            particles.forEach(function(p) {
               p.excite();
               return p.direction = dir;
             });
+            return true;
+          default:
+            alert('unhandled 2');
         }
         break;
       case 7:
@@ -731,7 +955,7 @@
                 }
               }
             }[nSum];
-            return particles.forEach(function(p) {
+            particles.forEach(function(p) {
               p.excite();
               if (p.direction === result.kill) {
                 return p.kill();
@@ -739,62 +963,25 @@
                 return p.direction = result.dir[p.direction];
               }
             });
+            return true;
+          default:
+            alert('unhandled 3');
         }
         break;
       case 15:
         switch (eSum) {
           case 0:
             dirs = [1, 4, 16, 64].shuffle();
-            return particles.forEach(function(p) {
+            particles.forEach(function(p) {
               p.econsoxcite();
               return p.direction = dirs.shift();
             });
-        }
-        break;
-      case 0:
-        switch (eSum) {
-          case 1:
-          case 4:
-          case 16:
-          case 64:
-            if (decays.single()) {
-              dirs = {
-                1: [1, 2],
-                4: [2, 4],
-                16: [4, 8],
-                64: [8, 1]
-              }[eSum].shuffle();
-              return particles.forEach(function(p) {
-                p.decay();
-                return p.direction = dirs.shift();
-              });
-            }
-            break;
-          case 2:
-          case 8:
-          case 32:
-          case 128:
-            if (decays.pair()) {
-              dirs = {
-                2: [1, 2],
-                8: [2, 4],
-                32: [4, 8],
-                128: [8, 1]
-              }[eSum].shuffle();
-              return particles.forEach(function(p) {
-                p.decay();
-                return p.direction = dirs.shift();
-              });
-            }
-            break;
-          case 17:
-          case 64:
-            return dirs = [[2, 8], [1, 4]].shuffle().shift().shuffle();
+            return true;
+          default:
+            alert('unhandled 4');
         }
     }
-  };
-  $(function() {
-    var Module, Modules, SidebarModel, SidebarView;
+    $(function() {});
     Modules = {};
     Module = (function() {
       __extends(_Class, Backbone.Model);
@@ -970,7 +1157,7 @@
     return window.Sidebar = new SidebarView({
       model: new SidebarModel
     });
-  });
+  };
   $(function() {
     var ChatModel, ChatView, MessageCollection, MessageModel;
     MessageModel = (function() {
@@ -1077,10 +1264,28 @@
   });
   socket = null;
   Phon.Socket.on('wall', function(data) {
-    var xys;
-    log(data);
-    xys = data.points;
-    return vector.addWall(xys[0][0], xys[0][1], xys[1][0], xys[1][1]);
+    var line, xys;
+    switch (data.action) {
+      case 'del':
+        log(data.index);
+        line = wallList[data.index];
+        console.log(wallList);
+        switch (line.info.type) {
+          case "wall":
+            line.info.cells.forEach(function(cell) {
+              return cells["" + cell[0] + "_" + cell[1] + "_1"].walls -= cell[2];
+            });
+            break;
+          case "split":
+            cells["" + line.info.cell[0] + "_" + line.info.cell[1] + "_1"].split = 0;
+        }
+        line.remove();
+        wallList[data.index] = null;
+        return log('del nulling');
+      default:
+        xys = data.points;
+        return vector.addWall(xys[0][0], xys[0][1], xys[1][0], xys[1][1]);
+    }
   });
   server = {
     delWall: function(row1, col1, row2, col2) {
@@ -1114,7 +1319,10 @@
   };
   doLoop = function() {
     var o;
+    console.time('loop');
+    console.time('it');
     o = iterate();
+    console.timeEnd('it');
     o.last.forEach(function(index) {
       return cells[index].occupy(false);
     });

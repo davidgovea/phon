@@ -3,7 +3,7 @@
 
 class Particle
 	constructor: (@row, @col, @state, @direction, lifetime) ->
-		@lifetime = lifetime ? 200
+		@lifetime = lifetime ? -1
 	excited: 0
 	excite:	-> @excited	= 1
 	decay: -> @excited	= 0
@@ -47,23 +47,57 @@ class Particle
 			@direction = @direction << 4
 			if @direction > 64 then @direction = @direction >> 8
 
-	checkObstacles: (repeat=false)->
+	splitReverse: (splitMode) ->
+		results = {
+			1: 
+				1: 2
+				8: 4
+				4: 8
+				2: 1
+				excited:
+					1:1
+					16:16
+					64:4
+					4:64
+			2:
+				1: 8
+				2: 4
+				4: 2
+				8: 1
+				excited: 
+					4: 4
+					64: 64
+					16: 1
+					1: 16
+		}[splitMode]
+		@direction = if @excited then results.excited[@direction] else results[@direction]
+		if @excited then @direction = results.excited[@direction]
+		else
+		
+	checkObstacles: (repeat=false, split=0)->
 		unless @excited
 			if (@row is 1 and @direction is 8) or
 			(@row is NUM_ROWS and @direction is 2) or
 			(@col is 1 and @direction is 4) or
 			(@col is NUM_COLS and @direction is 1)
-				unless repeat then @reverse()			# Grid boundary detection, normal particles
+				unless repeat 
+					@reverse()
+					if split then @splitReverse split
+					@checkObstacles true		# Grid boundary detection, normal particles
 				else @lifetime = 0
 			else if cells["#{@row}_#{@col}_1"].walls & @direction
-				unless repeat then @reverse()
+				unless repeat 
+					@reverse()
+					if split then @splitReverse split
+					@checkObstacles true
 				else @lifetime = 0
 		else if @state is 1
 			if (@row is 1 and (@direction is 16 or @direction is 64)) or
 			(@row is NUM_ROWS and (@direction is 1 or @direction is 4)) or
 			(@col is 1 and (@direction is 4 or @direction is 16)) or
 			(@col is NUM_COLS and (@direction is 1 or @direction is 64))
-				@reverse()						# Grid boundary detection, excited particles	
+				@reverse()						# Grid boundary detection, excited particles
+				if split then @splitReverse split
 			
 
 class Cell
@@ -124,7 +158,23 @@ class StateHash
 			@h[index].particles	= []
 			@h[index].sums		= [0,0]
 			@thisBeat.push index
-		@h[index].sums[particle.excited] += particle.direction
+		if @h[index].split
+			dir = particle.direction
+			@h[index].sums = [0,0,0,0]
+			if @h[index].split is 1
+				if not(particle.excited is 1 and (dir is 1 or dir is 16))
+					if dir is 1 or dir is 8 or dir is 64
+						@h[index].sums[particle.excited] += dir
+					else
+						@h[index].sums[2+particle.excited] += dir
+			else
+				if not(particle.excited is 1 and (dir is 4 or dir is 64))
+					if dir is 1 or dir is 2
+						@h[index].sums[particle.excited] += dir
+					else
+						@h[index].sums[2+particle.excited] += dir
+		else
+			@h[index].sums[particle.excited] += particle.direction
 		@h[index].particles.push particle
 	reset: ->
 		@h			= {}
@@ -137,6 +187,7 @@ class StateHash
 
 #### Probability Tools ####
 Array::shuffle = -> @sort -> 0.5 - Math.random()
+
 decays = {
 	single: -> return Math.random()*100 < 50
 	pair: -> return Math.random()*100 < 50
@@ -172,33 +223,124 @@ iterate = ->
 	for cellIndex, cell of occupied.h
 		if cell.state is 1						# Normal cell
 			if cell.split
-				# TODO / process split cells
+				processSplit cell.split, cell.sums, cell.particles
+				cell.particles.forEach((p) ->
+					p.checkObstacles(false, cell.split)
+				)
 			else 
 				if cell.sums[1] or cell.particles.length > 1	# It's a collision! DUCK!!!!
 					#log cell.sums
 					collide(cell.sums, cell.particles)
-
 				cell.particles.forEach((p) ->
 					p.checkObstacles()		#just tack this on the end of collide()
 				)
 			
 			if cell.active
 				log "TODO / record note playback info"
-		
-		else	# Diamond, no processing
+		#else # Diamond, no processing
 			#log "I'm a diamond!"
 	return this:occupied.thisBeat, last:occupied.lastBeat
+
+
+processSplit = (split, sums, particles) ->
+	nSum1 = sums[0]
+	eSum1 = sums[1]
+	nSum2 = sums[2]
+	eSum2 = sums[3]
+	switch split
+		when 1
+			switch nSum1
+				when 1, 8
+					switch eSum1
+						when 0
+							particles.forEach((p) ->
+								if p.direction is 1 or p.direction is 8
+									p.splitReverse(split)
+							)
+						when 64 then
+						when 128 then
+				when 9 then
+			switch nSum2
+				when 2, 4
+					switch eSum2
+						when 0 
+							particles.forEach((p) ->
+								if p.direction is 2 or p.direction is 4
+									p.splitReverse(split)
+							)
+						when 4 then
+						when 8 then
+				when 6 then
+		when 2
+			switch nSum1
+				when 1, 2
+					switch eSum1
+						when 0
+							particles.forEach((p) ->
+								if p.direction is 1 or p.direction is 2
+									p.splitReverse(split)
+							)
+						when 1 then
+						when 2 then
+				when 3 then
+			switch nSum2
+				when 4, 8
+					switch eSum2
+						when 0
+							particles.forEach((p) ->
+								if p.direction is 4 or p.direction is 8
+									p.splitReverse(split)
+							)
+						when 16 then
+						when 64 then
+				when 12 then
 
 
 
 collide = (sums, particles) ->
 	nSum	= sums[0]
 	eSum	= sums[1]
+	console.time 'find'
 
 	switch nSum
+		when 0							# 0 Normal Particles
+			switch eSum
+				when 1, 4, 16, 64			# 1 Excited particle
+					if decays.single()
+						#log eSum
+						dirs = {
+							1:		[1,	2]
+							4:		[2,	4]
+							16:		[4,	8]
+							64:		[8,	1]
+						}[eSum].shuffle()
+						particles.forEach((p) ->
+							p.decay()
+							p.direction = dirs.shift()
+						)
+					return true
+				when 2, 8, 32, 128			# 2 Excited: Pair
+					if decays.pair()
+						dirs = {
+							2:		[1,	2]
+							8:		[2,	4]
+							32:		[4,	8]
+							128:	[8,	1]
+						}[eSum].shuffle()
+						particles.forEach((p) ->
+							p.decay()
+							p.direction = dirs.shift()
+						)
+					return true
+				when 17, 64					# 2 Excited: Head-On 
+					dirs = [[2, 8], [1, 4]].shuffle().shift().shuffle()
+					return true
+				else
+					alert 'unhandled 5'
+					return false
 		when 1, 4, 8, 16				# 1 Normal
 			switch eSum
-				when 1, 4, 16, 64 then		# 1 Excited particle
+				when 1, 4, 16, 64 		# 1 Excited particle
 					# result = {
 					# 	1: {
 					# 		4: 
@@ -208,12 +350,15 @@ collide = (sums, particles) ->
 							
 					# 	}
 					# }
-				when 2, 8, 32, 128 then			# 2 Excited: Pair
-					
+					return true
+				when 2, 8, 32, 128 			# 2 Excited: Pair
+					return true
 		when 5, 10						# 2 Normal, Head-On
 			switch eSum
 				when 0						# 0 Excited
 					particles.forEach((p) -> p.reverse())
+					return true
+				else alert 'unhandled 1'
 		when 3, 6, 9, 12				# 2 Normal, 90 degree
 			switch eSum
 				when 0						# 0 Excited
@@ -227,6 +372,8 @@ collide = (sums, particles) ->
 						p.excite()
 						p.direction	= dir
 					)
+					return true
+				else alert 'unhandled 2'
 		when 7, 11, 13, 14				# 3 Normal, T-collide
 			switch eSum
 				when 0						# 0 Excited
@@ -243,6 +390,8 @@ collide = (sums, particles) ->
 							p.kill()
 						else p.direction = result.dir[p.direction]
 					)
+					return true
+				else alert 'unhandled 3'
 		when 15							# 4 Normal, Plus-collide
 			switch eSum
 				when 0						# 0 Excited
@@ -251,34 +400,9 @@ collide = (sums, particles) ->
 						p.econsoxcite()
 						p.direction = dirs.shift()
 					)
+					return true
+				else alert 'unhandled 4'
+			
+		
 
-		when 0							# 0 Normal Particles
-			switch eSum
-				when 1, 4, 16, 64			# 1 Excited particle
-					if decays.single()
-						#log eSum
-						dirs = {
-							1:		[1,	2]
-							4:		[2,	4]
-							16:		[4,	8]
-							64:		[8,	1]
-						}[eSum].shuffle()
-						particles.forEach((p) ->
-							p.decay()
-							p.direction = dirs.shift()
-						)
-				when 2, 8, 32, 128			# 2 Excited: Pair
-					if decays.pair()
-						dirs = {
-							2:		[1,	2]
-							8:		[2,	4]
-							32:		[4,	8]
-							128:	[8,	1]
-						}[eSum].shuffle()
-						particles.forEach((p) ->
-							p.decay()
-							p.direction = dirs.shift()
-						)
-				when 17, 64					# 2 Excited: Head-On 
-					dirs = [[2, 8], [1, 4]].shuffle().shift().shuffle()
-
+	

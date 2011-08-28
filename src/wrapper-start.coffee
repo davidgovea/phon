@@ -11,7 +11,6 @@ Phon.Elements = {}
 $ ->
 	Phon.Elements.$paper = $ '#paper'
 
-console.log Phon.Properties
 Phon.Socket = io.connect(document.location.protocol + '//' + document.location.host)
 Phon.Socket.on('connection', ->
 	Phon.Socket.emit "room", Phon.Properties.roomId
@@ -29,7 +28,7 @@ NUM_ROWS	= 18
 NUM_COLS	= 24
 CELL_SIZE	= 28
 cells		= {}
-walls		= {}
+wallList	= {}
 particles	= []
 occupied	= null
 
