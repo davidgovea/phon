@@ -1145,7 +1145,7 @@
           case 0:
             dirs = [1, 4, 16, 64].shuffle();
             particles.forEach(function(p) {
-              p.econsoxcite();
+              p.excite();
               return p.direction = dirs.shift();
             });
             return true;
