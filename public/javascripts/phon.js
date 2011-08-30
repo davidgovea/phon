@@ -815,7 +815,7 @@
       log(notes);
       for (_i = 0, _len = notes.length; _i < _len; _i++) {
         note = notes[_i];
-        if (note.type = "Lead" && leadCount < 4) {
+        if (note.type === "Lead" && leadCount < 4) {
           leads[leadCount].frequency = Note.fromLatin(note.pitch.toUpperCase() + '4').frequency();
           log(note);
           leadCount++;
