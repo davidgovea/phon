@@ -531,7 +531,7 @@
       if (this.excited) {
         return this.direction = results.excited[this.direction];
       } else {
-        ;
+
       }
     };
     Particle.prototype.checkObstacles = function(repeat, split) {
@@ -815,7 +815,7 @@
       log(notes);
       for (_i = 0, _len = notes.length; _i < _len; _i++) {
         note = notes[_i];
-        if (note.type = "Lead" && leadCount < 4) {
+        if (note.type === "Lead" && leadCount < 4) {
           leads[leadCount].frequency = Note.fromLatin(note.pitch.toUpperCase() + '4').frequency();
           log(note);
           leadCount++;
@@ -829,10 +829,10 @@
     bCount = 0;
     enabled = setNotes();
     fillBuffer = function(buf, channelCount) {
-      var i, l, lead, n, smpl, _ref, _results, _step;
+      var i, l, lead, n, smpl, _ref, _results;
       l = buf.length;
       _results = [];
-      for (i = 0, _step = channelCount; 0 <= l ? i < l : i > l; i += _step) {
+      for (i = 0; 0 <= l ? i < l : i > l; i += channelCount) {
         bCount++;
         smpl = 0;
         if (bCount === noteLength) {
@@ -1145,7 +1145,7 @@
           case 0:
             dirs = [1, 4, 16, 64].shuffle();
             particles.forEach(function(p) {
-              p.econsoxcite();
+              p.excite();
               return p.direction = dirs.shift();
             });
             return true;

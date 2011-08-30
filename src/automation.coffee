@@ -279,7 +279,7 @@ init = ->
 		notes = doLoop()
 		log notes
 		for note in notes
-			if note.type = "Lead" && leadCount < 4
+			if note.type == "Lead" && leadCount < 4
 				leads[leadCount].frequency = Note.fromLatin(note.pitch.toUpperCase()+'4').frequency()
 				log note
 				leadCount++
@@ -542,7 +542,7 @@ collide = (sums, particles) ->
 				when 0						# 0 Excited
 					dirs = [1, 4, 16, 64].shuffle()
 					particles.forEach((p) ->
-						p.econsoxcite()
+						p.excite()
 						p.direction = dirs.shift()
 					)
 					return true
