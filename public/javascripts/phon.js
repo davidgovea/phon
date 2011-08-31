@@ -446,7 +446,7 @@
               this.row--;
               break;
             default:
-              throw new Error("Don't know where to go! Normal particle: [" + this.row + "," + this.col + "], direction " + this.direction);
+              this.lifetime = 0;
           }
         } else {
           switch (this.direction) {
@@ -463,7 +463,7 @@
               this.row--;
               break;
             default:
-              throw new Error("Don't know where to go! Energetic particle, normal space: [" + this.row + "," + this.col + "], direction " + this.direction);
+              this.lifetime = 0;
           }
           this.state = 2;
         }

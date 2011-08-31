@@ -16,7 +16,9 @@ class Particle
 					when 2 then @row++
 					when 4 then @col--
 					when 8 then @row--
-					else throw new Error "Don't know where to go! Normal particle: [#{@row},#{@col}], direction #{@direction}"
+					else 
+						@lifetime = 0
+						#throw new Error "Don't know where to go! Normal particle: [#{@row},#{@col}], direction #{@direction}"
 			else								# Energetic particle
 				switch @direction	
 					when 1 then
@@ -25,7 +27,9 @@ class Particle
 						@row--
 						@col--
 					when 64 then @row--
-					else throw new Error "Don't know where to go! Energetic particle, normal space: [#{@row},#{@col}], direction #{@direction}"
+					else 
+						@lifetime = 0
+						#throw new Error "Don't know where to go! Energetic particle, normal space: [#{@row},#{@col}], direction #{@direction}"
 				@state = 2						# Move into high-energy
 		else 									# On a high-energy cell
 			switch @direction
