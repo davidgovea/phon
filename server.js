@@ -1,11 +1,11 @@
 (function() {
-  var app, beatLength, coffee, express, getActiveCells, getWallIndex, getWalls, io, iterateEmitters, state, states;
+  var app, beatLength, coffee, express, getActiveCells, getWallIndex, getWalls, io, iterateEmitters, statemachine, states;
   beatLength = 200;
   express = require('express');
   coffee = require('coffee-script');
   app = module.exports = express.createServer();
   io = require('socket.io').listen(app);
-  state = require('./statemachine');
+  statemachine = require('./statemachine');
   app.configure(function() {
     app.set('views', __dirname + '/views');
     app.set('view engine', 'jade');
@@ -35,9 +35,9 @@
   });
   states = {
     main: {
-      cells: state.init(),
+      cells: statemachine.init(),
       walls: {},
-      emitters: state.emitters(),
+      emitters: statemachine.emitters(),
       effects: {
         'reverb': 0,
         'bitcrusher': 0
@@ -46,7 +46,7 @@
   };
   console.log(states.main.cells);
   getActiveCells = function(stateid) {
-    var active, cell, index, _ref;
+    var active, cell, index, state, _ref;
     active = [];
     state = states[stateid];
     _ref = state.cells;
@@ -86,7 +86,7 @@
     return "" + order[0] + "_" + order[1] + "_" + order[2] + "_" + order[3];
   };
   getWalls = function(stateid) {
-    var index, wall, walls, _ref;
+    var index, state, wall, walls, _ref;
     walls = [];
     state = states[stateid];
     _ref = state.walls;
@@ -113,7 +113,7 @@
   io.sockets.on('connection', function(socket) {
     socket.once('connect');
     socket.on('room', function(id, callback) {
-      var walls;
+      var state;
       if (id === "") {
         id = "main";
       }
@@ -121,19 +121,16 @@
       if (states[id] != null) {
         state = states[id];
       } else {
-        walls = {};
         state = {
-          cells: state.init(),
-          walls: walls({
-            emitters: state.emitters()
-          }),
+          cells: statemachine.init(),
+          walls: {},
+          emitters: statemachine.emitters(),
           effects: {
             'reverb': 0,
             'bitcrusher': 0
           }
         };
         states[id] = state;
-        console.log(state.cells);
       }
       socket.join(id);
       return socket.set('roomId', id, function() {
@@ -148,6 +145,7 @@
     socket.on('effect', function(params) {
       console.log(params);
       return socket.get('roomId', function(err, id) {
+        var state;
         state = states[id];
         state.effects[params.type] += params.amount;
         return io.sockets["in"](id).emit('effect', params);

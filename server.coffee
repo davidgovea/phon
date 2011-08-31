@@ -5,7 +5,7 @@ express	= require 'express'
 coffee	= require 'coffee-script'
 app		= module.exports = express.createServer()
 io		= require('socket.io').listen app
-state	= require './statemachine'
+statemachine	= require './statemachine'
 
 
 app.configure ->
@@ -33,9 +33,9 @@ app.get '/:id?', (req, res) ->
 
 states = {
  	main:
- 		cells: state.init()
+ 		cells: statemachine.init()
  		walls: {}
- 		emitters: state.emitters()
+ 		emitters: statemachine.emitters()
  		effects:
  			'reverb': 0
  			'bitcrusher': 0
@@ -96,17 +96,15 @@ io.sockets.on 'connection', (socket) ->
 		if states[id]?
 			state = states[id]
 		else
-			walls = {}
 			state = {
-				cells: state.init()
-				walls: walls
-		 		emitters: state.emitters()
+				cells: statemachine.init()
+				walls: {}
+				emitters: statemachine.emitters()
 				effects:
 					'reverb': 0
 					'bitcrusher': 0
 			} 
 			states[id] = state
-			console.log state.cells
 		socket.join(id)
 		socket.set('roomId', id, ->
 			socket.emit 'init', cells: getActiveCells(id), walls: getWalls(id), emitters: state.emitters, effects: state.effects
