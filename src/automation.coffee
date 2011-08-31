@@ -284,9 +284,14 @@ init = ->
 		log notes
 		for note in notes
 			if note.type is "Lead" && leadCount < 4
-				leads[leadCount].frequency = Note.fromLatin(note.pitch.toUpperCase()+'4').frequency()
+				leads[leadCount].frequency = Note.fromLatin(note.pitch).frequency()
 				log note
 				leadCount++
+			else if note.type is "Bass" && bassCount < 3
+				bass[bassCount].frequency = Note.fromLatin(note.pitch).frequency()
+				bassCount++
+			else if note.type is "Drum"
+				drum1.noteOn(440)
 		
 		return {
 			leads: leadCount
@@ -309,10 +314,18 @@ init = ->
 
 			for lead in [0...enabled.leads]
 				leads[lead].generate()
-				smpl += leads[lead].getMix()
+				smpl += leads[lead].getMix() / (enabled.leads+2)
+			
+			basmpl = 0
+			for b in [0...enabled.bass]
+				bass[b].generate()
+				basmpl += bass[b].getMix() / (enabled.bass+2)
 
+			drum1.generate()
 			for n in [0...channelCount]
-				buf[i+n] = smpl
+				smpl += drum1.getMix n
+				smpl += comb[n].pushSample basmpl
+				buf[i+n] = comp.pushSample smpl
 		
 		
 			
@@ -326,15 +339,19 @@ init = ->
 
 
 
-
+	sample = audioLib.PCMData.decode(atob(freeverb.sample));
 	dev	= audioLib.AudioDevice(fillBuffer, 2)
 	sampleRate = dev.sampleRate
 	noteLength = sampleRate * 0.001 * 200
-	reverb	= new audioLib.Reverb(sampleRate, 2)
+	comb	= [new audioLib.CombFilter(sampleRate, 500, 0.5, 0.6),new audioLib.CombFilter(sampleRate, 900, 0.6, 0.4)]
 	drum1	= new audioLib.Sampler(sampleRate)
+	drum1.load(sample, (if sampleRate is 44100 then false else true));
 	drum2	= new audioLib.Sampler(sampleRate)
 	leads	= [new audioLib.Oscillator(sampleRate, 440),new audioLib.Oscillator(sampleRate, 440),new audioLib.Oscillator(sampleRate, 440),new audioLib.Oscillator(sampleRate, 440)]
+	leads[0].waveShape = leads[1].waveShape = leads[2].waveShape = leads[3].waveShape = 'sawtooth'
 	bass	= [new audioLib.Oscillator(sampleRate, 440),new audioLib.Oscillator(sampleRate, 440),new audioLib.Oscillator(sampleRate, 440)]
+	#bass[0].waveShape = bass[1].waveShape = bass[2].waveShape = 'square'
+	comp	= new audioLib.Compressor sampleRate
 
 
 	

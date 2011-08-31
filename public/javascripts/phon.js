@@ -104,7 +104,7 @@
     }
     _Class.prototype.defaults = {
       type: 'Lead',
-      pitch: 'a',
+      pitch: 'C4',
       length: 0
     };
     return _Class;
@@ -116,7 +116,7 @@
     }
     _Class.prototype.defaults = {
       type: 'Bass',
-      pitch: 'a',
+      pitch: 'C4',
       length: 0
     };
     return _Class;
@@ -760,7 +760,7 @@
     }
   };
   init = function() {
-    var bCount, bass, col, dev, drum1, drum2, enabled, fillBuffer, leads, noteLength, period, reverb, row, sampleRate, setNotes;
+    var bCount, bass, col, comb, comp, dev, drum1, drum2, enabled, fillBuffer, leads, noteLength, period, row, sample, sampleRate, setNotes;
     occupied = new StateHash;
     for (row = 1; 1 <= NUM_ROWS ? row <= NUM_ROWS : row >= NUM_ROWS; 1 <= NUM_ROWS ? row++ : row--) {
       if (row === 1) {
@@ -817,9 +817,14 @@
       for (_i = 0, _len = notes.length; _i < _len; _i++) {
         note = notes[_i];
         if (note.type === "Lead" && leadCount < 4) {
-          leads[leadCount].frequency = Note.fromLatin(note.pitch.toUpperCase() + '4').frequency();
+          leads[leadCount].frequency = Note.fromLatin(note.pitch).frequency();
           log(note);
           leadCount++;
+        } else if (note.type === "Bass" && bassCount < 3) {
+          bass[bassCount].frequency = Note.fromLatin(note.pitch).frequency();
+          bassCount++;
+        } else if (note.type === "Drum") {
+          drum1.noteOn(440);
         }
       }
       return {
@@ -830,7 +835,7 @@
     bCount = 0;
     enabled = setNotes();
     fillBuffer = function(buf, channelCount) {
-      var i, l, lead, n, smpl, _ref, _results, _step;
+      var b, basmpl, i, l, lead, n, smpl, _ref, _ref2, _results, _step;
       l = buf.length;
       _results = [];
       for (i = 0, _step = channelCount; 0 <= l ? i < l : i > l; i += _step) {
@@ -842,27 +847,39 @@
         }
         for (lead = 0, _ref = enabled.leads; 0 <= _ref ? lead < _ref : lead > _ref; 0 <= _ref ? lead++ : lead--) {
           leads[lead].generate();
-          smpl += leads[lead].getMix();
+          smpl += leads[lead].getMix() / (enabled.leads + 2);
         }
+        basmpl = 0;
+        for (b = 0, _ref2 = enabled.bass; 0 <= _ref2 ? b < _ref2 : b > _ref2; 0 <= _ref2 ? b++ : b--) {
+          bass[b].generate();
+          basmpl += bass[b].getMix() / (enabled.bass + 2);
+        }
+        drum1.generate();
         _results.push((function() {
           var _results2;
           _results2 = [];
           for (n = 0; 0 <= channelCount ? n < channelCount : n > channelCount; 0 <= channelCount ? n++ : n--) {
-            _results2.push(buf[i + n] = smpl);
+            smpl += drum1.getMix(n);
+            smpl += comb[n].pushSample(basmpl);
+            _results2.push(buf[i + n] = comp.pushSample(smpl));
           }
           return _results2;
         })());
       }
       return _results;
     };
+    sample = audioLib.PCMData.decode(atob(freeverb.sample));
     dev = audioLib.AudioDevice(fillBuffer, 2);
     sampleRate = dev.sampleRate;
     noteLength = sampleRate * 0.001 * 200;
-    reverb = new audioLib.Reverb(sampleRate, 2);
+    comb = [new audioLib.CombFilter(sampleRate, 500, 0.5, 0.6), new audioLib.CombFilter(sampleRate, 900, 0.6, 0.4)];
     drum1 = new audioLib.Sampler(sampleRate);
+    drum1.load(sample, (sampleRate === 44100 ? false : true));
     drum2 = new audioLib.Sampler(sampleRate);
     leads = [new audioLib.Oscillator(sampleRate, 440), new audioLib.Oscillator(sampleRate, 440), new audioLib.Oscillator(sampleRate, 440), new audioLib.Oscillator(sampleRate, 440)];
-    return bass = [new audioLib.Oscillator(sampleRate, 440), new audioLib.Oscillator(sampleRate, 440), new audioLib.Oscillator(sampleRate, 440)];
+    leads[0].waveShape = leads[1].waveShape = leads[2].waveShape = leads[3].waveShape = 'sawtooth';
+    bass = [new audioLib.Oscillator(sampleRate, 440), new audioLib.Oscillator(sampleRate, 440), new audioLib.Oscillator(sampleRate, 440)];
+    return comp = new audioLib.Compressor(sampleRate);
   };
   iterate = function() {
     var cell, cellIndex, emit, emitIndex, particle, toKill, toPlay, _i, _len, _ref;
@@ -1179,7 +1196,7 @@
         var gui, sound;
         sound = this.get('sound');
         gui = new DAT.GUI;
-        gui.add(sound.attributes, 'pitch').options('a', 'a#', 'b', 'c', 'c#', 'd', 'd#', 'e', 'f', 'f#', 'g');
+        gui.add(sound.attributes, 'pitch').options("C3", "C#3", "D3", "D#3", "E3", "F3", "F#3", "G3", "A3", "A#3", "B3", "C4", "C#4", "D4", "D#4", "E4", "F4", "F#4", "G4", "A4", "A#4", "B4", "C5");
         gui.add(sound.attributes, 'length').min(0).max(100);
         return this.gui_elements = [gui.domElement];
       };
