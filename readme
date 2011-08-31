@@ -1,7 +1,0 @@
-to run locally
-
-$ git clone https://github.com/davidgovea/phon
-$ cd phon
-$ npm install
-$ make
-$ node server.js
