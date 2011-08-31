@@ -52,6 +52,7 @@
       cell = _ref2[_j];
       cells[cell.index].active = true;
       cells[cell.index].sound = cell.sound;
+      cells[cell.index].setActive(true);
     }
     return doLoop();
   });

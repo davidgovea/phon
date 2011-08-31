@@ -5,4 +5,5 @@ all:
 	cp src/phon.js public/javascripts/phon.js
 	rm src/phon.js
 	rm src/phon.coffee
+	coffee -c statemachine.coffee
 	coffee -c server.coffee

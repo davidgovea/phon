@@ -1,8 +1,7 @@
 (function() {
-  var app, beatLength, coffee, express, getActiveCells, getWallIndex, getWalls, io, iterateEmitters, nko, state, states;
+  var app, beatLength, coffee, express, getActiveCells, getWallIndex, getWalls, io, iterateEmitters, state, states;
   beatLength = 200;
   express = require('express');
-  nko = require('nko')('Z6+o2A6kn7+tCofT');
   coffee = require('coffee-script');
   app = module.exports = express.createServer();
   io = require('socket.io').listen(app);
@@ -45,6 +44,7 @@
       }
     }
   };
+  console.log(states.main.cells);
   getActiveCells = function(stateid) {
     var active, cell, index, _ref;
     active = [];
@@ -59,6 +59,8 @@
         });
       }
     }
+    console.log("--------------------");
+    console.log(active);
     return active;
   };
   getWallIndex = function(row1, col1, row2, col2) {
@@ -156,7 +158,7 @@
       return socket.get('roomId', function(err, id) {
         var cell, index;
         io.sockets["in"](id).emit('cell', cell_properties);
-        index = "" + cell_properties.row + "_" + cell_properties.col;
+        index = "" + cell_properties.row + "_" + cell_properties.col + "_1";
         cell = states[id].cells[index];
         if (cell_properties.sound !== null) {
           if (cell != null) {

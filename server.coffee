@@ -2,7 +2,6 @@ beatLength = 200
 
 
 express	= require 'express'
-nko		= require('nko')('Z6+o2A6kn7+tCofT')
 coffee	= require 'coffee-script'
 app		= module.exports = express.createServer()
 io		= require('socket.io').listen app
@@ -42,6 +41,7 @@ states = {
  			'bitcrusher': 0
 }
 
+console.log states.main.cells
 getActiveCells = (stateid) ->
 	active = []
 	state = states[stateid]
@@ -49,6 +49,8 @@ getActiveCells = (stateid) ->
 		if cell.active
 			active.push index: index, sound: cell.sound
 	
+	console.log "--------------------"
+	console.log active
 	return active
 
 getWallIndex = (row1, col1, row2, col2) ->
@@ -122,7 +124,7 @@ io.sockets.on 'connection', (socket) ->
 		console.log cell_properties
 		socket.get('roomId', (err, id) ->
 			io.sockets.in(id).emit 'cell', cell_properties
-			index = "#{cell_properties.row}_#{cell_properties.col}"
+			index = "#{cell_properties.row}_#{cell_properties.col}_1"
 			cell = states[id].cells[index]
 			if cell_properties.sound isnt null
 				cell?.active = true
