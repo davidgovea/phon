@@ -760,7 +760,7 @@
     }
   };
   init = function() {
-    var bCount, bass, col, comb, comp, dev, drum1, drum2, enabled, fillBuffer, leads, noteLength, period, row, sample, sampleRate, setNotes;
+    var bCount, bass, col, comb, comp, dev, drum1, drum2, enabled, fillBuffer, kick, leads, noteLength, period, row, sampleRate, setNotes, snare;
     occupied = new StateHash;
     for (row = 1; 1 <= NUM_ROWS ? row <= NUM_ROWS : row >= NUM_ROWS; 1 <= NUM_ROWS ? row++ : row--) {
       if (row === 1) {
@@ -824,7 +824,11 @@
           bass[bassCount].frequency = Note.fromLatin(note.pitch).frequency();
           bassCount++;
         } else if (note.type === "Drum") {
-          drum1.noteOn(440);
+          if (note.sample === 'kick') {
+            drum1.noteOn(440);
+          } else if (note.sample === 'snare') {
+            drum2.noteOn(440);
+          }
         }
       }
       return {
@@ -847,20 +851,19 @@
         }
         for (lead = 0, _ref = enabled.leads; 0 <= _ref ? lead < _ref : lead > _ref; 0 <= _ref ? lead++ : lead--) {
           leads[lead].generate();
-          smpl += leads[lead].getMix() / (enabled.leads + 2);
+          smpl += leads[lead].getMix() / (enabled.leads + 5);
         }
         basmpl = 0;
         for (b = 0, _ref2 = enabled.bass; 0 <= _ref2 ? b < _ref2 : b > _ref2; 0 <= _ref2 ? b++ : b--) {
           bass[b].generate();
-          basmpl += bass[b].getMix() / (enabled.bass + 2);
+          basmpl += bass[b].getMix() / (enabled.bass + 1);
         }
         drum1.generate();
         _results.push((function() {
           var _results2;
           _results2 = [];
           for (n = 0; 0 <= channelCount ? n < channelCount : n > channelCount; 0 <= channelCount ? n++ : n--) {
-            smpl += drum1.getMix(n);
-            smpl += comb[n].pushSample(basmpl);
+            smpl += drum1.getMix(n) + drum2.getMix(n) + comb[n].pushSample(basmpl);
             _results2.push(buf[i + n] = comp.pushSample(smpl));
           }
           return _results2;
@@ -868,14 +871,16 @@
       }
       return _results;
     };
-    sample = audioLib.PCMData.decode(atob(freeverb.sample));
+    kick = audioLib.PCMData.decode(atob(phonSamples.kick));
+    snare = audioLib.PCMData.decode(atob(phonSamples.snare));
     dev = audioLib.AudioDevice(fillBuffer, 2);
     sampleRate = dev.sampleRate;
     noteLength = sampleRate * 0.001 * 200;
     comb = [new audioLib.CombFilter(sampleRate, 500, 0.5, 0.6), new audioLib.CombFilter(sampleRate, 900, 0.6, 0.4)];
     drum1 = new audioLib.Sampler(sampleRate);
-    drum1.load(sample, (sampleRate === 44100 ? false : true));
+    drum1.load(kick, (sampleRate === 44100 ? false : true));
     drum2 = new audioLib.Sampler(sampleRate);
+    drum2.load(snare, (sampleRate === 44100 ? false : true));
     leads = [new audioLib.Oscillator(sampleRate, 440), new audioLib.Oscillator(sampleRate, 440), new audioLib.Oscillator(sampleRate, 440), new audioLib.Oscillator(sampleRate, 440)];
     leads[0].waveShape = leads[1].waveShape = leads[2].waveShape = leads[3].waveShape = 'sawtooth';
     bass = [new audioLib.Oscillator(sampleRate, 440), new audioLib.Oscillator(sampleRate, 440), new audioLib.Oscillator(sampleRate, 440)];
@@ -1215,7 +1220,7 @@
         sound = this.get('sound');
         gui = new DAT.GUI;
         gui.add(sound.attributes, 'sample').options('kick', 'snare');
-        gui.add(sound.attributes, 'pitch').min(0).max(440);
+        gui.add(sound.attributes, 'pitch').min(50).max(1300);
         gui.add(sound.attributes, 'offset').min(0).max(100);
         return this.gui_elements = [gui.domElement];
       };

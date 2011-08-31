@@ -36,7 +36,7 @@ $ ->
 			sound = @get 'sound'
 			gui = new DAT.GUI
 			gui.add(sound.attributes, 'sample').options('kick', 'snare')
-			gui.add(sound.attributes, 'pitch').min(0).max(440)
+			gui.add(sound.attributes, 'pitch').min(50).max(1300)
 			gui.add(sound.attributes, 'offset').min(0).max(100)
 			@gui_elements = [gui.domElement]
 	

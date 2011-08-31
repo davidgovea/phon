@@ -291,7 +291,10 @@ init = ->
 				bass[bassCount].frequency = Note.fromLatin(note.pitch).frequency()
 				bassCount++
 			else if note.type is "Drum"
-				drum1.noteOn(440)
+				if note.sample is 'kick'
+					drum1.noteOn(440)
+				else if note.sample is 'snare'
+					drum2.noteOn(440)
 		
 		return {
 			leads: leadCount
@@ -314,17 +317,16 @@ init = ->
 
 			for lead in [0...enabled.leads]
 				leads[lead].generate()
-				smpl += leads[lead].getMix() / (enabled.leads+2)
+				smpl += leads[lead].getMix() / (enabled.leads+5)
 			
 			basmpl = 0
 			for b in [0...enabled.bass]
 				bass[b].generate()
-				basmpl += bass[b].getMix() / (enabled.bass+2)
+				basmpl += bass[b].getMix() / (enabled.bass+1)
 
 			drum1.generate()
 			for n in [0...channelCount]
-				smpl += drum1.getMix n
-				smpl += comb[n].pushSample basmpl
+				smpl += drum1.getMix(n) + drum2.getMix(n) + comb[n].pushSample basmpl
 				buf[i+n] = comp.pushSample smpl
 		
 		
@@ -339,14 +341,18 @@ init = ->
 
 
 
-	sample = audioLib.PCMData.decode(atob(freeverb.sample));
+	kick = audioLib.PCMData.decode(atob(phonSamples.kick));
+	snare = audioLib.PCMData.decode(atob(phonSamples.snare));
+
 	dev	= audioLib.AudioDevice(fillBuffer, 2)
 	sampleRate = dev.sampleRate
 	noteLength = sampleRate * 0.001 * 200
 	comb	= [new audioLib.CombFilter(sampleRate, 500, 0.5, 0.6),new audioLib.CombFilter(sampleRate, 900, 0.6, 0.4)]
 	drum1	= new audioLib.Sampler(sampleRate)
-	drum1.load(sample, (if sampleRate is 44100 then false else true));
+	drum1.load(kick, (if sampleRate is 44100 then false else true));
 	drum2	= new audioLib.Sampler(sampleRate)
+	drum2.load(snare, (if sampleRate is 44100 then false else true));
+
 	leads	= [new audioLib.Oscillator(sampleRate, 440),new audioLib.Oscillator(sampleRate, 440),new audioLib.Oscillator(sampleRate, 440),new audioLib.Oscillator(sampleRate, 440)]
 	leads[0].waveShape = leads[1].waveShape = leads[2].waveShape = leads[3].waveShape = 'sawtooth'
 	bass	= [new audioLib.Oscillator(sampleRate, 440),new audioLib.Oscillator(sampleRate, 440),new audioLib.Oscillator(sampleRate, 440)]
