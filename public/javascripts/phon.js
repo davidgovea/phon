@@ -531,7 +531,7 @@
       if (this.excited) {
         return this.direction = results.excited[this.direction];
       } else {
-
+        ;
       }
     };
     Particle.prototype.checkObstacles = function(repeat, split) {
@@ -829,10 +829,10 @@
     bCount = 0;
     enabled = setNotes();
     fillBuffer = function(buf, channelCount) {
-      var i, l, lead, n, smpl, _ref, _results;
+      var i, l, lead, n, smpl, _ref, _results, _step;
       l = buf.length;
       _results = [];
-      for (i = 0; 0 <= l ? i < l : i > l; i += channelCount) {
+      for (i = 0, _step = channelCount; 0 <= l ? i < l : i > l; i += _step) {
         bCount++;
         smpl = 0;
         if (bCount === noteLength) {
