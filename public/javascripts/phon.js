@@ -1221,8 +1221,8 @@
           });
         };
         $titles = {};
-        $titles.reverb = $('<h3>Reverb</h3>');
-        $titles.bitcrusher = $('<h3>Bitcrusher</h3>');
+        $titles.reverb = $('<h3>Reverb (not working yet)</h3>');
+        $titles.bitcrusher = $('<h3>Bitcrusher (not working yet)</h3>');
         Phon.Socket.on('effect', function(params) {
           var $notify, amount, count;
           amount = params.amount;
