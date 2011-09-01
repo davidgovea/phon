@@ -249,6 +249,10 @@ $ ->
 				return false
 			
 			@$deactivate_btn.addClass 'disabled'
+			Phon.Socket.emit 'cell',
+				row: @current_cell.row
+				col: @current_cell.col
+				sound: null
 			@current_cell.removeSound()
 	
 	#####################

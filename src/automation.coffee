@@ -283,14 +283,14 @@ init = ->
 		notes = doLoop()
 		log notes
 		for note in notes
-			if note.type is "Lead" && leadCount < 4
+			if note?.type is "Lead" && leadCount < 4
 				leads[leadCount].frequency = Note.fromLatin(note.pitch).frequency()
 				log note
 				leadCount++
-			else if note.type is "Bass" && bassCount < 3
+			else if note?.type is "Bass" && bassCount < 3
 				bass[bassCount].frequency = Note.fromLatin(note.pitch).frequency()
 				bassCount++
-			else if note.type is "Drum"
+			else if note?.type is "Drum"
 				if note.sample is 'kick'
 					drum1.noteOn(440)
 				else if note.sample is 'snare'
@@ -326,7 +326,7 @@ init = ->
 
 			drum1.generate()
 			for n in [0...channelCount]
-				smpl += drum1.getMix(n) + drum2.getMix(n) + comb[n].pushSample basmpl
+				smpl += drum1.getMix(n) + comb[n].pushSample basmpl
 				buf[i+n] = comp.pushSample smpl
 		
 		
@@ -350,8 +350,8 @@ init = ->
 	comb	= [new audioLib.CombFilter(sampleRate, 500, 0.5, 0.6),new audioLib.CombFilter(sampleRate, 900, 0.6, 0.4)]
 	drum1	= new audioLib.Sampler(sampleRate)
 	drum1.load(kick, (if sampleRate is 44100 then false else true));
-	drum2	= new audioLib.Sampler(sampleRate)
-	drum2.load(snare, (if sampleRate is 44100 then false else true));
+	# drum2	= new audioLib.Sampler(sampleRate)
+	# drum2.load(snare, (if sampleRate is 44100 then false else true));
 
 	leads	= [new audioLib.Oscillator(sampleRate, 440),new audioLib.Oscillator(sampleRate, 440),new audioLib.Oscillator(sampleRate, 440),new audioLib.Oscillator(sampleRate, 440)]
 	leads[0].waveShape = leads[1].waveShape = leads[2].waveShape = leads[3].waveShape = 'sawtooth'

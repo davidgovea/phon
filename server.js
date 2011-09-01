@@ -159,12 +159,11 @@
         index = "" + cell_properties.row + "_" + cell_properties.col + "_1";
         cell = states[id].cells[index];
         if (cell_properties.sound !== null) {
-          if (cell != null) {
-            cell.active = true;
-          }
-          return cell != null ? cell.sound = cell_properties.sound : void 0;
+          cell.active = true;
+          return cell.sound = cell_properties.sound;
         } else {
-          return cell != null ? cell.active = false : void 0;
+          cell.active = false;
+          return cell.sound = null;
         }
       });
     });

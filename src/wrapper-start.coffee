@@ -48,11 +48,12 @@ Phon.Socket.on 'init', (data) ->
 
 
 Phon.Socket.on 'cell', (cell_properties) ->
-	console.log cell_properties
 	cell = cells["#{cell_properties.row}_#{cell_properties.col}_1"]
-	cell.setActive true
-	cell.addSound cell_properties.sound
-
+	if cell.sound isnt null
+		cell.setActive true
+		cell.addSound cell_properties.sound
+	else
+		cell.removeSound()
 
 #Constants
 NUM_ROWS	= 18

@@ -58,10 +58,13 @@
   });
   Phon.Socket.on('cell', function(cell_properties) {
     var cell;
-    console.log(cell_properties);
     cell = cells["" + cell_properties.row + "_" + cell_properties.col + "_1"];
-    cell.setActive(true);
-    return cell.addSound(cell_properties.sound);
+    if (cell.sound !== null) {
+      cell.setActive(true);
+      return cell.addSound(cell_properties.sound);
+    } else {
+      return cell.removeSound();
+    }
   });
   NUM_ROWS = 18;
   NUM_COLS = 24;
@@ -760,7 +763,7 @@
     }
   };
   init = function() {
-    var bCount, bass, col, comb, comp, dev, drum1, drum2, enabled, fillBuffer, kick, leads, noteLength, period, row, sampleRate, setNotes, snare;
+    var bCount, bass, col, comb, comp, dev, drum1, enabled, fillBuffer, kick, leads, noteLength, period, row, sampleRate, setNotes, snare;
     occupied = new StateHash;
     for (row = 1; 1 <= NUM_ROWS ? row <= NUM_ROWS : row >= NUM_ROWS; 1 <= NUM_ROWS ? row++ : row--) {
       if (row === 1) {
@@ -816,14 +819,14 @@
       log(notes);
       for (_i = 0, _len = notes.length; _i < _len; _i++) {
         note = notes[_i];
-        if (note.type === "Lead" && leadCount < 4) {
+        if ((note != null ? note.type : void 0) === "Lead" && leadCount < 4) {
           leads[leadCount].frequency = Note.fromLatin(note.pitch).frequency();
           log(note);
           leadCount++;
-        } else if (note.type === "Bass" && bassCount < 3) {
+        } else if ((note != null ? note.type : void 0) === "Bass" && bassCount < 3) {
           bass[bassCount].frequency = Note.fromLatin(note.pitch).frequency();
           bassCount++;
-        } else if (note.type === "Drum") {
+        } else if ((note != null ? note.type : void 0) === "Drum") {
           if (note.sample === 'kick') {
             drum1.noteOn(440);
           } else if (note.sample === 'snare') {
@@ -863,7 +866,7 @@
           var _results2;
           _results2 = [];
           for (n = 0; 0 <= channelCount ? n < channelCount : n > channelCount; 0 <= channelCount ? n++ : n--) {
-            smpl += drum1.getMix(n) + drum2.getMix(n) + comb[n].pushSample(basmpl);
+            smpl += drum1.getMix(n) + comb[n].pushSample(basmpl);
             _results2.push(buf[i + n] = comp.pushSample(smpl));
           }
           return _results2;
@@ -879,8 +882,6 @@
     comb = [new audioLib.CombFilter(sampleRate, 500, 0.5, 0.6), new audioLib.CombFilter(sampleRate, 900, 0.6, 0.4)];
     drum1 = new audioLib.Sampler(sampleRate);
     drum1.load(kick, (sampleRate === 44100 ? false : true));
-    drum2 = new audioLib.Sampler(sampleRate);
-    drum2.load(snare, (sampleRate === 44100 ? false : true));
     leads = [new audioLib.Oscillator(sampleRate, 440), new audioLib.Oscillator(sampleRate, 440), new audioLib.Oscillator(sampleRate, 440), new audioLib.Oscillator(sampleRate, 440)];
     leads[0].waveShape = leads[1].waveShape = leads[2].waveShape = leads[3].waveShape = 'sawtooth';
     bass = [new audioLib.Oscillator(sampleRate, 440), new audioLib.Oscillator(sampleRate, 440), new audioLib.Oscillator(sampleRate, 440)];
@@ -1436,6 +1437,11 @@
           return false;
         }
         this.$deactivate_btn.addClass('disabled');
+        Phon.Socket.emit('cell', {
+          row: this.current_cell.row,
+          col: this.current_cell.col,
+          sound: null
+        });
         return this.current_cell.removeSound();
       };
       return _Class;

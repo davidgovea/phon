@@ -125,10 +125,11 @@ io.sockets.on 'connection', (socket) ->
 			index = "#{cell_properties.row}_#{cell_properties.col}_1"
 			cell = states[id].cells[index]
 			if cell_properties.sound isnt null
-				cell?.active = true
-				cell?.sound = cell_properties.sound
+				cell.active = true
+				cell.sound = cell_properties.sound
 			else
-				cell?.active = false
+				cell.active = false
+				cell.sound = null
 
 			
 		)
