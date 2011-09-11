@@ -29,13 +29,13 @@ Phon.Sounds.Bass = class extends Sound
 Phon.Sounds.Drum = class extends Sound
 	defaults:
 		type: 'Drum'
-		pitch: 0
+		pitch: 440
 		offset: 0
 		sample: 'kick'
 	
 Phon.Sounds.Sample = class extends Sound
 	defaults:
 		type: 'Sample'
-		pitch: 0
+		pitch: 440
 		offset: 0
 		sample: 'snare'

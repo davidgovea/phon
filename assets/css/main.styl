@@ -1,0 +1,85 @@
+OCT_WIDTH = 42px
+DIA_SCALE = 1
+
+
+rad2 = 1.4142135623730951
+side = OCT_WIDTH / (1+rad2)
+side_over_rad2 = round(side / rad2)
+dia = round(side * DIA_SCALE)
+oct = OCT_WIDTH - 2*side_over_rad2
+
+DIA_XOFFSET = round(dia*-0.88)
+DIA_YOFFSET = round(dia*-0.15)
+
+
+
+
+border-radius()
+	-webkit-border-radius arguments  
+	-moz-border-radius arguments  
+	border-radius arguments  
+
+diamond(size=100px, color=purple)
+	width dia
+	height dia
+	background color
+	margin DIA_YOFFSET 0 0 DIA_XOFFSET
+	//margin (size*0.4/2.4142) 0 (size*0.1/2.4142) (size*0.5/2.4142)
+	-webkit-transform rotate(-45deg)
+	-moz-transform rotate(-45deg)
+	-ms-transform rotate(-45deg)
+	-o-transform rotate(-45deg)
+	transform rotate(-45deg)
+	-webkit-transform-origin 0 0
+	-moz-transform-origin 0 0
+	-ms-transform-origin 0 0
+	-o-transform-origin 0 0
+	transform-origin 0 0
+
+octagon(size=100px, color=red, bgColor=white)
+	margin 0 6px 6px 0
+	width OCT_WIDTH
+	height OCT_WIDTH
+	background color
+	position relative
+	&:before
+		content ""
+		position absolute
+		top 0
+		left 0
+		border-bottom side_over_rad2 solid color
+		border-left side_over_rad2 solid bgColor
+		border-right side_over_rad2 solid bgColor
+		width oct
+		height 0
+	&:after
+		content ""
+		position absolute
+		bottom 0
+		left 0
+		border-top side_over_rad2 solid color
+		border-left side_over_rad2 solid bgColor
+		border-right side_over_rad2 solid bgColor
+		width oct
+		height 0
+
+#grid
+	-webkit-transform scale(1,1)
+	-moz-transform scale(1,1)
+	-ms-transform scale(1,1)
+	-o-transform scale(1,1)
+	transform scale(1,1)
+
+.cellGroup
+	display inline-block
+
+.dia
+	z-index 3
+	display inline-block
+	diamond(100px)
+	position absolute
+
+.oct
+	z-index 1
+	display inline-block
+	octagon(100px)

@@ -2,15 +2,10 @@
 html
   head
     title= title
-    link(rel='stylesheet', href='/stylesheets/style.css')
-    script(src='/javascripts/lib/raphael-min.js')
-    script(src='/javascripts/lib/jquery.js')
-    script(src='/javascripts/lib/underscore.js')
-    script(src='/javascripts/lib/backbone.js')
-    script(src='/javascripts/lib/DAT.GUI.js')
-    script(src='/javascripts/lib/audiolib.js')
-    script(src='/javascripts/lib/music.js')
-    script(src='/socket.io/socket.io.js')
-    script(src='/javascripts/smpl.js')
-    script(src='/javascripts/phon.js')
+    != css('main')
+    script(src='/js/lib/jquery.js')
+    script(src='/js/lib/move.js')
+    script(src='/js/lib/underscore.js')
+    script(src='/js/lib/backbone.js')
+    != js('models.js')
   body!= body

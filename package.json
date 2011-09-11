@@ -2,10 +2,10 @@
   "author": "",
   "name": "phon",
   "description": "Social sound synthesis",
-  "version": "0.0.0",
+  "version": "0.0.2",
   "repository": {
     "type": "git",
-    "url": "git://github.com/nko2/orangutan-chimpanzee.git"
+    "url": "git://github.com/davidgovea/phon.git"
   },
   "engines": {
     "node": "~v0.4.11"
@@ -15,7 +15,9 @@
     "express": "~2.4.6",
     "jade": "~0.15.2",
     "coffee-script": "~1.1.2",
-    "socket.io": "~0.7.11"
+    "socket.io": "~0.7.11",
+    "stylus": "~0.15.2",
+    "connect-assets": "~2.0.0-rc1"
   },
   "devDependencies": {}
 }

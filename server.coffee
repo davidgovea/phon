@@ -14,7 +14,7 @@ app.configure ->
 	app.use express.bodyParser()
 	app.use express.methodOverride()
 	app.use app.router
-	app.use express.compiler(src: __dirname + '/src', dest: __dirname + '/public/javascripts' , enable: ['coffeescript'])
+	app.use require('connect-assets')()
 	app.use express.static __dirname + '/public' 
 app.configure 'development', ->
 	app.use express.errorHandler dumpExceptions: true, showStack: true
