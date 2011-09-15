@@ -38,30 +38,31 @@ diamond(size=100px, color=purple)
 
 octagon(size=100px, color=red, bgColor=white)
 	margin 0 6px 6px 0
+	padding: 1px;
 	width OCT_WIDTH
 	height OCT_WIDTH
-	background color
+	// background color
 	position relative
-	&:before
-		content ""
-		position absolute
-		top 0
-		left 0
-		border-bottom side_over_rad2 solid color
-		border-left side_over_rad2 solid bgColor
-		border-right side_over_rad2 solid bgColor
-		width oct
-		height 0
-	&:after
-		content ""
-		position absolute
-		bottom 0
-		left 0
-		border-top side_over_rad2 solid color
-		border-left side_over_rad2 solid bgColor
-		border-right side_over_rad2 solid bgColor
-		width oct
-		height 0
+	// &:before
+	// 	content ""
+	// 	position absolute
+	// 	top 0
+	// 	left 0
+	// 	border-bottom side_over_rad2 solid color
+	// 	border-left side_over_rad2 solid bgColor
+	// 	border-right side_over_rad2 solid bgColor
+	// 	width oct
+	// 	height 0
+	// &:after
+	// 	content ""
+	// 	position absolute
+	// 	bottom 0
+	// 	left 0
+	// 	border-top side_over_rad2 solid color
+	// 	border-left side_over_rad2 solid bgColor
+	// 	border-right side_over_rad2 solid bgColor
+	// 	width oct
+	// 	height 0
 
 #grid
 	-webkit-transform scale(1,1)

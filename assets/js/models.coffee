@@ -128,7 +128,9 @@ class CellView extends Backbone.View
 	events:
 		"click": "onClick"
 	initialize: ->
-		#@model.bind 'someevent', @somefunc
+		@svg = Raphael(@el, 42, 42);
+		@shape = @svg.octagon(0,0, 42 / (1+Math.SQRT2), 42 / (1+Math.SQRT2) / Math.SQRT2)
+		@shape.attr fill: '#0f0'
 	onClick: ->
 		move(@el).set('z-index', 1000).scale(3).set('opacity', 0).end(->
 			move(@el).scale(1).set('z-index', 0).duration(0).end(->
@@ -144,9 +146,13 @@ class DiamondView extends Backbone.View
 	events:
 		"click": "onClick"
 	initialize: ->
-		# $(@el).css 'left', @model.get('col')*45+"px"
-		# $(@el).css 'top', @model.get('row')*45+"px"
+
 	onClick: ->
+		move(@el).set('z-index', 1000).scale(3).set('opacity', 0).end(->
+			move(@el).scale(1).set('z-index', 0).duration(0).end(->
+				move(@el).set('opacity', 100).end()
+			)
+		)
 		console.log "Diamond! #{@model.get 'row'}, col #{@model.get 'col'}"
 
 
@@ -158,11 +164,11 @@ class Phon extends Backbone.Model
 		target = $("##{TARGET_ID}")
 
 		@grid = new Grid()
-
+		console.time 'render' 
 		for row in [1..NUM_ROWS]
 			for col in [1..NUM_COLS]
 				group = new CellGroup().render().el
-				console.log group
+				# console.log group
 				$(group).append @addCell row, col
 				unless row is 1 or col is NUM_COLS
 					$(group).append @addDiamond (row-1), (col-1)
@@ -172,6 +178,7 @@ class Phon extends Backbone.Model
 		# for row in [1...NUM_ROWS]
 		# 	for col in [1...NUM_COLS]
 		# 		target.append @addDiamond row, col
+		console.timeEnd 'render'
 	addCell: (row, col) ->
 		cell = new Cell row: row, col: col
 		@grid.add cell
@@ -182,9 +189,12 @@ class Phon extends Backbone.Model
 		return dia.view.render().el
 
 
+Raphael.fn.octagon = (x, y, side, side_rad) ->
+	p = this.path "M#{x+side_rad} #{y}l#{side} 0l#{side_rad} #{side_rad}l0 #{side}l#{-side_rad} #{side_rad}l#{-side} 0l#{-side_rad} #{-side_rad}l0 #{-side}l#{side_rad} #{-side_rad}z"
+	return p
+
 
 		
 
 $ ->
-	alert 'time'
 	window.Phon = new Phon()
